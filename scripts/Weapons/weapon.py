@@ -1,4 +1,4 @@
-from sprite_object import *
+from scripts.Util.sprite_object import *
 from config.weapon_config import get_weapon_config
 
 class Weapon(AnimatedSprite):

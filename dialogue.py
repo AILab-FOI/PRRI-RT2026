@@ -2,7 +2,7 @@ import pygame as pg
 from settings import *
 import json
 import os
-from font_manager import load_custom_font, resource_path
+from scripts.Util.font_manager import load_custom_font, resource_path
 
 
 class DialogueManager:

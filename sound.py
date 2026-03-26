@@ -27,10 +27,10 @@ class Sound:
         pg.mixer.init()
         self.path = 'resources/sound'
 
-        self.music_volume = 0.1
+        self.music_volume = 0.0
         self.sfx_volume = 0.7
 
-        self.normal_music_volume = 0.1
+        self.normal_music_volume = 0.0
         self.ducking_music_volume = 0.03
         self.is_ducking = False
 

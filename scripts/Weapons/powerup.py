@@ -1,6 +1,6 @@
 import math
 from settings import *
-from sprite_object import SpriteObject
+from scripts.Util.sprite_object import SpriteObject
 
 
 class PowerUp(SpriteObject):

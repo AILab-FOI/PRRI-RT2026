@@ -1,8 +1,8 @@
 import pygame as pg
 import os
 from settings import *
-from font_manager import load_custom_font, resource_path
-from menu import MetallicUIRenderer
+from scripts.Util.font_manager import load_custom_font, resource_path
+from scripts.UI.menu import MetallicUIRenderer
 
 
 class GameUI:

@@ -2,28 +2,28 @@ import pygame as pg
 import os
 import sys
 from settings import *
-from map import *
-from player import *
-from raycasting import *
-from object_renderer import *
-from sprite_object import *
-from object_handler import *
-from weapon import Pistol, SMG, PlasmaGun
+from Levels.map import *
+from scripts.Character.player import *
+from scripts.Util.raycasting import *
+from scripts.Util.object_renderer import *
+from scripts.Util.sprite_object import *
+from scripts.Util.object_handler import *
+from scripts.Weapons.weapon import Pistol, SMG, PlasmaGun
 from sound import *
-from pathfinding import *
-from interaction import Interaction
-from level_manager import LevelManager
+from scripts.Util.pathfinding import *
+from scripts.Character.interaction import Interaction
+from Levels.level_manager import LevelManager
 from dialogue import DialogueManager
-from menu import Menu
-from intro_sequence import IntroSequence
-from loading_screen import LoadingScreen
-from level_transition import LevelTransition
+from scripts.UI.menu import Menu
+from scripts.UI.intro_sequence import IntroSequence
+from scripts.UI.loading_screen import LoadingScreen
+from scripts.UI.level_transition import LevelTransition
 from game_events import GameEvents
-from death_screen import DeathScreen
-from victory_screen import VictoryScreen
-from ui import GameUI
-from visual_effects import DisorientingEffects
-from font_manager import resource_path
+from scripts.UI.death_screen import DeathScreen
+from scripts.UI.victory_screen import VictoryScreen
+from scripts.UI.ui import GameUI
+from scripts.Effects.visual_effects import DisorientingEffects
+from scripts.Util.font_manager import resource_path
 
 class Game:
     def __init__(self):
@@ -55,6 +55,7 @@ class Game:
 
     def new_game(self):
         if not hasattr(self, 'level_manager'):
+            print("create new level manager")
             self.level_manager = LevelManager(self)
 
         if not hasattr(self, 'map'):

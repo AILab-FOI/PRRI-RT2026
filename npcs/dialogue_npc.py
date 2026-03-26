@@ -5,7 +5,7 @@ Dialogue NPC class for the game.
 import pygame as pg
 from settings import *
 from npcs.base_npc import StaticNPC
-from font_manager import load_custom_font
+from scripts.Util.font_manager import load_custom_font
 
 
 class DialogueNPC(StaticNPC):

@@ -1,4 +1,4 @@
-from sprite_object import AnimatedSprite
+from scripts.Util.sprite_object import AnimatedSprite
 from random import randint, random
 import math
 from settings import *

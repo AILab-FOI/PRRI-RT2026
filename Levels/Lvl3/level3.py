@@ -2,7 +2,7 @@
 Level 3 configuration
 """
 from npcs.enemy_npcs import KlonoviNPC, JazavacNPC
-from levels.base_level import create_base_level_structure
+from ..base_level import create_base_level_structure
 
 def get_level_data():
     """Return the complete level 2 data"""

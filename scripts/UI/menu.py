@@ -1,7 +1,7 @@
 import pygame as pg
 import sys
 from settings import *
-from font_manager import load_custom_font, resource_path
+from scripts.Util.font_manager import load_custom_font, resource_path
 
 class MetallicUIRenderer:
     def __init__(self, screen):

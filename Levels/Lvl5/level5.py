@@ -2,7 +2,7 @@
 Level 5 configuration
 """
 from npcs.enemy_npcs import BossNPC
-from levels.base_level import create_base_level_structure
+from ..base_level import create_base_level_structure
 
 def get_level_data():
     """Return the complete level 5 data"""

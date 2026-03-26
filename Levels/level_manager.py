@@ -1,5 +1,5 @@
 import os
-from interaction import InteractiveObject
+from scripts.Character.interaction import InteractiveObject
 from npcs.enemy_npcs import KlonoviNPC, StakorNPC, TosterNPC, ParazitNPC, JazavacNPC
 from npcs.dialogue_npc import create_dialogue_npcs
 
@@ -17,10 +17,12 @@ class LevelManager:
             import importlib
             for level_num in range(1, self.max_level + 1):
                 try:
-                    level_module = importlib.import_module(f'levels.level{level_num}')
+                    print("importint level ",level_num)
+                    level_module = importlib.import_module(f'Levels.Lvl{level_num}.level{level_num}')
                     self.level_data[level_num] = level_module.get_level_data()
                 except ImportError:
-                    from levels.base_level import create_base_level_structure
+                    from Levels.base_level import create_base_level_structure
+                    print("import error  level ",level_num)
                     self.level_data[level_num] = create_base_level_structure()
         except Exception:
             self.level_data = {i: {} for i in range(1, self.max_level + 1)}

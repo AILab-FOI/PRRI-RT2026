@@ -1,7 +1,7 @@
 """
 Level 1 configuration
 """
-from levels.base_level import create_base_level_structure
+from Levels.base_level import create_base_level_structure
 
 def get_level_data():
     """Return the complete level 1 data"""

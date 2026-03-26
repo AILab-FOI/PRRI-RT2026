@@ -1,5 +1,5 @@
-from sprite_object import *
-from powerup import PowerUp
+from scripts.Util.sprite_object import *
+from scripts.Weapons.powerup import PowerUp
 from random import choices, shuffle
 
 class ObjectHandler:

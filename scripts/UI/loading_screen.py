@@ -5,8 +5,8 @@ import json
 import random
 import sys
 from settings import *
-from font_manager import load_custom_font, resource_path
-from menu import MetallicUIRenderer, Button
+from scripts.Util.font_manager import load_custom_font, resource_path
+from scripts.UI.menu import MetallicUIRenderer, Button
 
 class LoadingScreen:
     def __init__(self, game):

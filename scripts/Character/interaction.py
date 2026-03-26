@@ -1,9 +1,9 @@
 import pygame as pg
 import math
 from settings import *
-from sprite_object import SpriteObject
-from weapon import Pistol, SMG, PlasmaGun
-from font_manager import load_custom_font
+from scripts.Util.sprite_object import SpriteObject
+from scripts.Weapons.weapon import Pistol, SMG, PlasmaGun
+from scripts.Util.font_manager import load_custom_font
 
 class Interaction:
     def __init__(self, game):

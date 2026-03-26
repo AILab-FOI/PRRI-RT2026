@@ -4,7 +4,7 @@ from settings import *
 import math
 import os
 import sys
-from font_manager import resource_path
+from scripts.Util.font_manager import resource_path
 
 class IntroSequence:
 
@@ -12,8 +12,8 @@ class IntroSequence:
         self.game = game
         self.active = False
         self.start_time = 0
-        self.black_screen_duration = 9.5
-        self.blur_duration = 6.0
+        self.black_screen_duration = 2
+        self.blur_duration = 2.5
         self.total_duration = self.black_screen_duration + self.blur_duration
 
         self.high_pitch_delay = self.black_screen_duration

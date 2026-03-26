@@ -2,7 +2,7 @@ import pygame as pg
 from settings import *
 import os
 from collections import deque
-from font_manager import resource_path
+from scripts.Util.font_manager import resource_path
 
 
 class SpriteObject:
