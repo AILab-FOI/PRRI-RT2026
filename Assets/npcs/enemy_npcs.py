@@ -9,8 +9,8 @@ class KlonoviNPC(NPC):
         config = {
             'attack_dist': 4,
             'health': 70,
-            'attack_damage': 5,
-            'speed': 0.04,
+            'attack_damage': 3,
+            'speed': 0.02,
             'accuracy': 0.25,
             'death_height_shift': 0.7,
             'behavior': 'ranged',
@@ -30,7 +30,7 @@ class StakorNPC(NPC):
         config = {
             'attack_dist': 1.5,
             'health': 50,
-            'attack_damage': 6,
+            'attack_damage': 4,
             'speed': 0.035,
             'accuracy': 0.3,
             'death_height_shift': 0.8,
@@ -72,7 +72,7 @@ class ParazitNPC(NPC):
         config = {
             'attack_dist': 2.0,
             'health': 450,
-            'attack_damage': 15,
+            'attack_damage': 13,
             'speed': 0.05,
             'accuracy': 0.4,
             'death_height_shift': 0.8,
@@ -133,7 +133,7 @@ class BossNPC(NPC):
             'attack_dist': 3.5,
             'health': 800,
             'attack_damage': 20,
-            'speed': 0.06,
+            'speed': 0.03,
             'accuracy': 0.45,
             'death_height_shift': 0.3,
             'behavior': 'melee',
