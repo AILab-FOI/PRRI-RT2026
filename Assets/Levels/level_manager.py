@@ -6,7 +6,7 @@ from Assets.npcs.dialogue_npc import create_dialogue_npcs
 class LevelManager:
     def __init__(self, game):
         self.game = game
-        self.current_level = 1
+        self.current_level = 2
         self.level_data = {}
         self.max_level = 5
         self.current_weapon_type = 'pistol'

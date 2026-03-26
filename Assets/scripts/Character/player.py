@@ -11,7 +11,7 @@ class Player:
         self.shot = False
         self.health = PLAYER_MAX_HEALTH
         self.rel = 0
-        self.health_recovery_delay = 700
+        #self.health_recovery_delay = 700
         self.time_prev = pg.time.get_ticks()
 
         self.is_dashing = False
@@ -25,19 +25,24 @@ class Player:
         self.auto_fire_delay = 150
         self.last_auto_fire_time = 0
 
-        self.is_invulnerable = False
+        self.is_invulnerable = True
         self.invulnerability_start_time = 0
         self.invulnerability_time_left = 0
 
-    def recover_health(self):
-        if self.check_health_recovery_delay() and self.health < PLAYER_MAX_HEALTH:
-            self.health += 1
 
-    def check_health_recovery_delay(self):
+        self.last_heal_time = 0
+        self.heal_cooldown = 5000  # 1 sekunda
+        
+
+    """ def recover_health(self):
+        if self.check_health_recovery_delay() and self.health < PLAYER_MAX_HEALTH:
+            self.health += 1 """
+
+    """ def check_health_recovery_delay(self):
         time_now = pg.time.get_ticks()
         if time_now - self.time_prev > self.health_recovery_delay:
             self.time_prev = time_now
-            return True
+            return True """
 
     def check_game_over(self):
         if self.health < 1:
@@ -55,6 +60,14 @@ class Player:
     def single_fire_event(self, event):
         if self.dialogue_mode or (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active):
             return
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_x:
+                current_time = pg.time.get_ticks()
+                if self.health < PLAYER_MAX_HEALTH and current_time - self.last_heal_time > self.heal_cooldown:
+                    self.health = min(self.health + 5, PLAYER_MAX_HEALTH)
+                    self.last_heal_time = current_time
+
+            
 
         if not hasattr(self.game, 'weapon') or self.game.weapon is None:
             return
@@ -116,6 +129,12 @@ class Player:
         if keys[pg.K_d]:
             dx += -speed_sin
             dy += speed_cos
+
+
+        
+
+
+
 
         if dx != 0 or dy != 0:
             length = math.sqrt(dx * dx + dy * dy)
@@ -208,7 +227,7 @@ class Player:
         self.update_dash()
         self.update_invulnerability()
         self.mouse_control()
-        self.recover_health()
+        #self.recover_health()
         self.update_auto_fire()
 
     def update_auto_fire(self):
