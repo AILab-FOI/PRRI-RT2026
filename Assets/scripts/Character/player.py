@@ -25,13 +25,13 @@ class Player:
         self.auto_fire_delay = 150
         self.last_auto_fire_time = 0
 
-        self.is_invulnerable = True
+        self.is_invulnerable = False
         self.invulnerability_start_time = 0
         self.invulnerability_time_left = 0
 
 
         self.last_heal_time = 0
-        self.heal_cooldown = 5000  # 1 sekunda
+        self.heal_cooldown = 5000  # 5 sekundi
         
 
     """ def recover_health(self):
