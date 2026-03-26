@@ -1,29 +1,29 @@
 import pygame as pg
 import os
 import sys
-from settings import *
-from Levels.map import *
-from scripts.Character.player import *
-from scripts.Util.raycasting import *
-from scripts.Util.object_renderer import *
-from scripts.Util.sprite_object import *
-from scripts.Util.object_handler import *
-from scripts.Weapons.weapon import Pistol, SMG, PlasmaGun
-from sound import *
-from scripts.Util.pathfinding import *
-from scripts.Character.interaction import Interaction
-from Levels.level_manager import LevelManager
-from dialogue import DialogueManager
-from scripts.UI.menu import Menu
-from scripts.UI.intro_sequence import IntroSequence
-from scripts.UI.loading_screen import LoadingScreen
-from scripts.UI.level_transition import LevelTransition
-from game_events import GameEvents
-from scripts.UI.death_screen import DeathScreen
-from scripts.UI.victory_screen import VictoryScreen
-from scripts.UI.ui import GameUI
-from scripts.Effects.visual_effects import DisorientingEffects
-from scripts.Util.font_manager import resource_path
+from Assets.settings import *
+from Assets.Levels.map import *
+from Assets.scripts.Character.player import *
+from Assets.scripts.Util.raycasting import *
+from Assets.scripts.Util.object_renderer import *
+from Assets.scripts.Util.sprite_object import *
+from Assets.scripts.Util.object_handler import *
+from Assets.scripts.Weapons.weapon import Pistol, SMG, PlasmaGun
+from Assets.sound import *
+from Assets.scripts.Util.pathfinding import *
+from Assets.scripts.Character.interaction import Interaction
+from Assets.Levels.level_manager import LevelManager
+from Assets.dialogue import DialogueManager
+from Assets.scripts.UI.menu import Menu
+from Assets.scripts.UI.intro_sequence import IntroSequence
+from Assets.scripts.UI.loading_screen import LoadingScreen
+from Assets.scripts.UI.level_transition import LevelTransition
+from Assets.game_events import GameEvents
+from Assets.scripts.UI.death_screen import DeathScreen
+from Assets.scripts.UI.victory_screen import VictoryScreen
+from Assets.scripts.UI.ui import GameUI
+from Assets.scripts.Effects.visual_effects import DisorientingEffects
+from Assets.scripts.Util.font_manager import resource_path
 
 class Game:
     def __init__(self):
