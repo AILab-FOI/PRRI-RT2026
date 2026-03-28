@@ -28,11 +28,17 @@ class GameEvents:
             elif event.type == pg.USEREVENT:
                 self.game.intro_sequence.start_music_with_fade()
 
-            elif event.type == pg.KEYDOWN and event.key == pg.K_e:
-                self._handle_e_key_press()
+
+            if event.type == pg.KEYDOWN:
+                self.handle_keydown(event.key)
+
+            #elif event.type == pg.KEYDOWN and event.key == pg.K_e:
+            #    self._handle_e_key_press()
 
             self.game.player.single_fire_event(event)
             self.game.interaction.handle_key_event(event)
+
+            
 
         return False
 
@@ -46,3 +52,20 @@ class GameEvents:
                     if npc.interaction_indicator_visible:
                         npc.start_dialogue()
                         break
+    
+    def handle_keydown(self,key):
+         match key:
+            case pg.K_r:
+                self.game.player.reload_weapon()
+            case pg.K_e:
+                self._handle_e_key_press()
+            case pg.K_q:
+                self.game.player.heal_player()
+            #case pg.K_ESCAPE:
+            #    self.pause_game()
+            #case pg.K_e:
+            #    self.interact()
+        
+            case _:
+                pass
+
