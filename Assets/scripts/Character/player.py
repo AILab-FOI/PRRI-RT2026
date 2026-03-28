@@ -90,7 +90,10 @@ class Player:
             return
 
         weapon_config = get_weapon_config(self.game.weapon.name)
-
+        print(self.game.weapon.currentMagAmmount)
+        if(self.game.weapon.currentMagAmmount <= 0):
+            return
+        
         if weapon_config and 'sound' in weapon_config:
             sound_name = weapon_config['sound']
             if hasattr(self.game.sound, sound_name):
@@ -103,7 +106,23 @@ class Player:
 
         self.shot = True
         self.game.weapon.reloading = True
+        self.game.weapon.currentMagAmmount -= 1
         self.last_auto_fire_time = pg.time.get_ticks()
+
+    def reload_weapon(self):
+        if not hasattr(self.game, 'weapon') or self.game.weapon is None:
+            return
+
+        weapon_config = get_weapon_config(self.game.weapon.name)
+        if self.game.weapon.bagAmount <= 0 or self.game.weapon.currentMagAmmount == self.game.weapon.maxMagAmount:
+            return False
+        
+        missing_ammo = self.game.weapon.maxMagAmount - self.game.weapon.currentMagAmmount
+        ammo_to_reload = min(missing_ammo, self.game.weapon.bagAmount)
+
+        self.game.weapon.currentMagAmmount += ammo_to_reload
+        self.game.weapon.bagAmount -= ammo_to_reload
+        print(self.game.weapon.currentMagAmmount , " " , self.game.weapon.bagAmount)
 
     def movement(self):
         if self.dialogue_mode or (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active):
