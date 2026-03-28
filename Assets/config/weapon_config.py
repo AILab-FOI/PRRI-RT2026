@@ -18,8 +18,8 @@ SMG_CONFIG = {
     'scale': 1.2,
     'animation_time': 70,
     'damage': 15,
-    'magSize': 7, #ammo in weapon
-    'bagSize': 21, #ammon in the reload pool
+    'magSize': 30, #ammo in weapon
+    'bagSize': 300, #ammon in the reload pool
     'accuracy': 0.75,
     'auto_fire': True,
     'auto_fire_delay': 70,
