@@ -59,8 +59,8 @@ class GameEvents:
                 self.game.player.reload_weapon()
             case pg.K_e:
                 self._handle_e_key_press()
-            #case pg.K_2:
-            #    self.switch_weapon(1)
+            case pg.K_q:
+                self.game.player.heal_player()
             #case pg.K_ESCAPE:
             #    self.pause_game()
             #case pg.K_e:
