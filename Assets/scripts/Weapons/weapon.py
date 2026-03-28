@@ -2,7 +2,7 @@ from Assets.scripts.Util.sprite_object import *
 from Assets.config.weapon_config import get_weapon_config
 
 class Weapon(AnimatedSprite):
-    def __init__(self, game, path='resources/sprites/weapon/pistol/0.png', scale=0.4, animation_time=90, damage=50, name='pistol'):
+    def __init__(self, game, path='resources/sprites/weapon/pistol/0.png', scale=0.4, animation_time=90, damage=50,magAmount = 1,bagAmount = 10, name='pistol'):
         super().__init__(game=game, path=path, scale=scale, animation_time=animation_time)
         self.images = deque(
             [pg.transform.smoothscale(img, (self.image.get_width() * scale, self.image.get_height() * scale))
@@ -15,6 +15,9 @@ class Weapon(AnimatedSprite):
         self.name = name
         self.accuracy = 1.0
         self.auto_fire = False
+        self.maxMagAmount = magAmount
+        self.bagAmount = bagAmount
+        self.currentMagAmmount = magAmount
 
     def animate_shot(self):
         if self.reloading:
@@ -53,10 +56,11 @@ class SMG(Weapon):
                          scale=config['scale'],
                          animation_time=config['animation_time'],
                          damage=config['damage'],
-                         name=config['name'])
+                         magAmount=config['magSize'],
+                         bagAmount=config['bagSize'],
+                         name=config['name'],)
         self.accuracy = config['accuracy']
         self.auto_fire = config['auto_fire']
-
         right_offset = config.get('right_offset', 230)
         self.weapon_pos = (HALF_WIDTH - self.images[0].get_width() // 2 + right_offset,
                           HEIGHT - self.images[0].get_height())
@@ -70,6 +74,8 @@ class Pistol(Weapon):
                          scale=config['scale'],
                          animation_time=config['animation_time'],
                          damage=config['damage'],
+                         magAmount=config['magSize'],
+                         bagAmount=config['bagSize'],
                          name=config['name'])
 
         self.accuracy = config['accuracy']
@@ -87,6 +93,8 @@ class PlasmaGun(Weapon):
                          scale=config['scale'],
                          animation_time=config['animation_time'],
                          damage=config['damage'],
+                         magAmount=config['magSize'],
+                         bagAmount=config['bagSize'],
                          name=config['name'])
 
         self.accuracy = config['accuracy']
