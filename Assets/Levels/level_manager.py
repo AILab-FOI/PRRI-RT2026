@@ -1,4 +1,8 @@
 import os
+import importlib
+import pkgutil
+import re
+
 from Assets.scripts.Character.interaction import InteractiveObject
 from Assets.npcs.enemy_npcs import KlonoviNPC, StakorNPC, TosterNPC, ParazitNPC, JazavacNPC
 from Assets.npcs.dialogue_npc import create_dialogue_npcs
@@ -8,13 +12,45 @@ class LevelManager:
         self.game = game
         self.current_level = 1
         self.level_data = {}
-        self.max_level = 5
+        self.max_level = 0 #deprecated trebalo bi biti automatic
         self.current_weapon_type = 'pistol'
         self.initialize_levels()
 
     def initialize_levels(self):
         try:
-            import importlib
+            import Assets.Levels as levels_pkg
+        
+            levels_paths = list(levels_pkg.__path__)
+            if not levels_paths:
+                raise RuntimeError("Assets.Levels package path not found")
+
+            levels_path = levels_paths[0]
+
+            level_folders = sorted(
+                name for name in os.listdir(levels_path)
+                if os.path.isdir(os.path.join(levels_path, name))
+                and re.match(r'^Lvl(\d+)$', name)
+            )
+
+            for folder in level_folders:
+                match = re.match(r'^Lvl(\d+)$',folder)
+                level_num = int(match.group(1))
+                module_path = f'Assets.Levels.Lvl{level_num}.level{level_num}'
+                try:
+                    print(f"Importing level {level_num} from {module_path}")
+                    level_module = importlib.import_module(module_path)
+                    self.level_data[level_num] = level_module.get_level_data()
+                except ImportError as e:
+                    from Assets.Levels.base_level import create_base_level_structure
+                    print(f"Import error for level {level_num}: {e}")
+                    self.level_data[level_num] = create_base_level_structure()
+
+            self.max_level = max(self.level_data.keys(), default=0)
+            print(f"Loaded {len(self.level_data)} levels. Max level: {self.max_level}")
+
+
+            """
+            Old #Ostvaviti za svaku slucaj 
             for level_num in range(1, self.max_level + 1):
                 try:
                     print("importint level ",level_num)
@@ -24,9 +60,11 @@ class LevelManager:
                     from Levels.base_level import create_base_level_structure
                     print("import error  level ",level_num)
                     self.level_data[level_num] = create_base_level_structure()
+            """
         except Exception:
-            print("Exceptions")
-            self.level_data = {i: {} for i in range(1, self.max_level + 1)}
+            print(f"Critical error during level initialization: {e}")
+            self.level_data = {}
+            self.max_level = 0
 
     def load_level(self, level_number):
         if level_number in self.level_data:
