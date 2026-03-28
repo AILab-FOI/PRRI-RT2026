@@ -4,6 +4,8 @@ PISTOL_CONFIG = {
     'scale': 0.22,
     'animation_time': 210,
     'damage': 25,
+    'magSize': 7, #ammo in weapon
+    'bagSize': 21, #ammon in the reload pool
     'accuracy': 0.95,
     'auto_fire': False,
     'sound': 'pistolj',
@@ -16,6 +18,8 @@ SMG_CONFIG = {
     'scale': 1.2,
     'animation_time': 70,
     'damage': 15,
+    'magSize': 7, #ammo in weapon
+    'bagSize': 21, #ammon in the reload pool
     'accuracy': 0.75,
     'auto_fire': True,
     'auto_fire_delay': 70,
@@ -30,6 +34,8 @@ PLASMA_GUN_CONFIG = {
     'scale': 0.5,
     'animation_time': 500,
     'damage': 50,
+    'magSize': 7, #ammo in weapon
+    'bagSize': 21, #ammon in the reload pool
     'accuracy': 0.9,
     'auto_fire': False,
     'sound': 'plasmagun',
