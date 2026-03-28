@@ -28,10 +28,13 @@ class Player:
         self.is_invulnerable = False
         self.invulnerability_start_time = 0
         self.invulnerability_time_left = 0
-
+        
 
         self.last_heal_time = 0
         self.heal_cooldown = 5000  # 5 sekundi
+
+        self.last_step_time = 0 #timeri za hodanje za zvukove
+        self.step_delay = 350
         
 
     """ def recover_health(self):
@@ -131,9 +134,12 @@ class Player:
             dy += speed_cos
 
 
-        
-
-
+        current_time = pg.time.get_ticks() #hodanje i zvukovi
+        if (dx != 0 or dy != 0) and not self.is_dashing:
+            if current_time - self.last_step_time >= self.step_delay:
+                if self.game.sound.footstep:
+                    self.game.sound.footstep.play()
+                self.last_step_time = current_time
 
 
         if dx != 0 or dy != 0:

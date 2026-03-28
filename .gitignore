@@ -133,3 +133,5 @@ dmypy.json
 
 # Game specific files
 screenshots/
+
+.vs/

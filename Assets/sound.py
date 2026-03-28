@@ -92,7 +92,10 @@ class Sound:
             'menu_click': 0.4,
 
             # Dialogue sounds
-            'dialogue_line': 0.4
+            'dialogue_line': 0.4,
+
+            #hodanje
+            'footstep': 0.25,
         }
 
         self.pistolj = self.load_sound('Pistolj.wav', self.volume_factors['pistolj'])
@@ -142,6 +145,10 @@ class Sound:
 
         self.victory = self.load_sound('pobjeda.mp3', self.volume_factors['victory'])
         self.defeat = self.load_sound('poraz.mp3', self.volume_factors['defeat'])
+
+        self.footstep=self.load_sound('walking_v2.mp3', self.volume_factors['footstep'])#hodanje
+
+
 
         self.dialogue_sounds = {}
 
@@ -249,7 +256,8 @@ class Sound:
             'menu_hover': self.menu_hover,
             'menu_click': self.menu_click,
             'victory': self.victory,
-            'defeat': self.defeat
+            'defeat': self.defeat,
+            'footstep': self.footstep
         }
 
         for sound_name, sound in sounds.items():
