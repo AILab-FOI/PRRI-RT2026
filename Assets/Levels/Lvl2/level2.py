@@ -116,4 +116,8 @@ def get_level_data():
         }
     ]
 
+    level_data['heal_item']=[#pozicija za heal item
+        {'position': (5.5, 5.5)},
+        ]
+
     return level_data

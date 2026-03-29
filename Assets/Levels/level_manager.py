@@ -10,7 +10,7 @@ from Assets.npcs.dialogue_npc import create_dialogue_npcs
 class LevelManager:
     def __init__(self, game):
         self.game = game
-        self.current_level = 1
+        self.current_level = 2
         self.level_data = {}
         self.max_level = 0 #deprecated trebalo bi biti automatic
         self.current_weapon_type = 'pistol'
@@ -156,6 +156,15 @@ class LevelManager:
                     pos=powerup_data['position'],
                     powerup_type=powerup_data['powerup_type']
                 )
+
+        if 'heal_item' in level_data:#heal_item
+            for heal_item_data in level_data['heal_item']:
+                self.game.object_handler.add_heal_item(
+                    pos=heal_item_data['position']
+                )
+                    
+                #self.game.object_handler.add_sprite(heal_item)
+               #self.game.interaction.add_object(heal_item)
 
         exit_positions = {
             1: (5, 24),

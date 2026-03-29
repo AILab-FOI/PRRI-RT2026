@@ -1,6 +1,7 @@
 from Assets.scripts.Util.sprite_object import *
 from Assets.scripts.Weapons.powerup import PowerUp
 from random import choices, shuffle
+from Assets.scripts.Util.heal_item import Heal_item
 
 class ObjectHandler:
     def __init__(self, game):
@@ -165,3 +166,9 @@ class ObjectHandler:
 
         self.spawn_npc()
         self.load_decorative_sprites()
+
+
+    def add_heal_item(self,pos):#heal_item
+        heal_item = Heal_item(self.game, pos=pos)
+        self.add_sprite(heal_item)
+        return heal_item

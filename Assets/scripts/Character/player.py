@@ -32,9 +32,13 @@ class Player:
 
         self.last_heal_time = 0
         self.heal_cooldown = 5000  # 5 sekundi
+        self.heal_item_count = 0
 
         self.last_step_time = 0 #timeri za hodanje za zvukove
         self.step_delay = 350
+        
+        
+        
         
 
     """ def recover_health(self):
@@ -80,6 +84,16 @@ class Player:
             if event.button == 1:
                 self.auto_fire = False
 
+
+        if event.type == pg.KEYDOWN: #heal_item
+            if event.key == pg.K_q:
+                current_time = pg.time.get_ticks()
+                if (self.heal_item_count > 0 and self.health < PLAYER_MAX_HEALTH and
+                    current_time - self.last_heal_time >= self.heal_cooldown):
+                    self.health = min(self.health + 20, PLAYER_MAX_HEALTH)
+                    self.heal_item_count -= 1
+                    self.last_heal_time = current_time
+
     def fire_weapon(self):
         if not hasattr(self.game, 'weapon') or self.game.weapon is None:
             return
@@ -119,8 +133,9 @@ class Player:
         self.game.weapon.bagAmount -= ammo_to_reload
         print(self.game.weapon.currentMagAmmount , " " , self.game.weapon.bagAmount)
 
+
+    """
     def heal_player(self):
-        
         current_time = pg.time.get_ticks()
 
         if self.health >= PLAYER_MAX_HEALTH:
@@ -132,7 +147,7 @@ class Player:
         self.health = min(self.health + PLAYER_BASE_HEAL, PLAYER_MAX_HEALTH)
         self.last_heal_time = current_time
         return True
-
+        """
     def movement(self):
         if self.dialogue_mode or (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active):
             return
