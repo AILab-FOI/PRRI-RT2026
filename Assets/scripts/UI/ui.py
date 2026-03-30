@@ -1,6 +1,7 @@
 import pygame as pg
 import os
 from Assets.settings import *
+from Assets.scripts.UI.ui_level_colors import *
 from Assets.scripts.Util.font_manager import load_custom_font, resource_path
 from Assets.scripts.UI.menu import MetallicUIRenderer
 
@@ -15,6 +16,8 @@ class GameUI:
         self.orange_color = (255, 100, 0)
         self.blue_color = (0, 180, 255)
         self.dark_gray = (50, 50, 50)
+
+        self.tint_color_map = UI_TINT_COLORS
 
         self.dash_font = load_custom_font(18)
         self.enemy_counter_font = load_custom_font(20)
@@ -31,6 +34,7 @@ class GameUI:
         self.digit_size = 90
         self.current_level = 1
         self.digit_images = self.load_digit_images()
+        self.tinted_digits = {} 
 
         self.powerup_icon = self.load_texture('resources/teksture/level1/powerup.png', (100, 100))
 
@@ -42,14 +46,24 @@ class GameUI:
             HALF_HEIGHT - self.crosshair_size // 2 + self.crosshair_y_offset
         )
 
+
     def load_texture(self, path, res):
         texture_path = resource_path(path)
         texture = pg.image.load(texture_path).convert_alpha()
         return pg.transform.scale(texture, res)
 
     def load_digit_images(self):
-        """Load digit images for the current level with fallback to level1 digits"""
+        """Load base digit images"""  # deprecated for the current level with fallback to level1 digits
         digits = {}
+        base_path = resource_path('resources/teksture/numbers')
+
+        for i in range(12):
+            digit_file = f'{base_path}/{i}.png'
+            img = self.load_texture(digit_file, [self.digit_size] * 2)
+            digits[str(i)] = img
+        
+        return digits
+        """
         level_digit_path = f'resources/teksture/level{self.current_level}/brojevi'
         fallback_digit_path = 'resources/teksture/level1/brojevi'
         level_digit_path_abs = resource_path(level_digit_path)
@@ -72,6 +86,22 @@ class GameUI:
                 digits[str(i)] = img
 
         return digits
+        """
+
+    def get_tinted_digit(self, digit_key, color):
+        """Get cached tinted version of digit"""
+        cache_key = f"{digit_key}_{color}"
+        if cache_key not in self.tinted_digits:
+            base_img = self.digit_images[digit_key]
+            tinted = self.tint_surface(base_img, color)
+            self.tinted_digits[cache_key] = tinted
+        return self.tinted_digits[cache_key]
+
+    def tint_surface(self, surf, color):
+        """Tint a surface with an RGB color."""
+        result = surf.copy()
+        result.fill(color, special_flags=pg.BLEND_RGB_ADD)
+        return result
 
     def draw(self):
         self.draw_player_health()
@@ -122,13 +152,19 @@ class GameUI:
 
     def draw_player_health(self):
         health = str(self.game.player.health)
+        tint_color = self.get_level_tint_color()
 
         for i, char in enumerate(health):
-            self.screen.blit(self.digit_images[char], (self.margin_x + i * self.digit_size, self.margin_y))
+            digit = self.get_tinted_digit(char, tint_color)
+            self.screen.blit(digit, (self.margin_x + i * self.digit_size, self.margin_y))
 
-        self.screen.blit(self.digit_images['10'], (self.margin_x + len(health) * self.digit_size, self.margin_y))
+        slash = self.get_tinted_digit('10', tint_color)
+        self.screen.blit(slash, (self.margin_x + len(health) * self.digit_size, self.margin_y))
 
     def draw_weapon_ammo(self):
+        if not self.game.weapon:
+            return
+        
         weapon = self.game.weapon
         current = str(weapon.currentMagAmmount)
         bag = str(weapon.bagAmount)
@@ -138,8 +174,11 @@ class GameUI:
         x = self.screen.get_width() - self.margin_x - total_width
         y = self.screen.get_height() - self.margin_y - self.digit_size
     
+        tint_color = self.get_level_tint_color()
+
         for i, char in enumerate(ammo_text):
-            self.screen.blit(self.digit_images[char], (x + i * self.digit_size, y))
+            digit = self.get_tinted_digit(char, tint_color)
+            self.screen.blit(digit, (x + i * self.digit_size, y))
 
 
     def draw_invulnerability_indicator(self):
@@ -158,9 +197,22 @@ class GameUI:
         icon_rect = self.powerup_icon.get_rect(center=(center_x, indicator_y + 80))
         self.screen.blit(self.powerup_icon, icon_rect)
 
-        timer_surface = self.invulnerability_timer_font.render(f"{seconds_left}s", True, self.blue_color)
-        timer_rect = timer_surface.get_rect(center=(center_x, indicator_y + 140))
-        self.screen.blit(timer_surface, timer_rect)
+        # Draw timer with tinted digits instead of text
+        number_text = str(seconds_left)
+        total_width = len(number_text) * self.digit_size
+        x = center_x - total_width // 2
+        y = indicator_y + 120  # visually centered, adjust as needed
+
+        tint_color = self.get_level_tint_color()
+
+        for i, digit_char in enumerate(number_text):
+            digit = self.get_tinted_digit(digit_char, tint_color)
+            self.screen.blit(digit, (x + i * self.digit_size, y))
+
+        # Optional: small "s" text below or next to the digits
+        sec_text = self.invulnerability_timer_font.render("s", True, self.blue_color)
+        sec_rect = sec_text.get_rect(center=(center_x, indicator_y + 160))
+        self.screen.blit(sec_text, sec_rect)
 
     def draw_enemy_counter(self):
         npc_list = self.game.object_handler.npc_list
@@ -185,7 +237,7 @@ class GameUI:
             counter_color = self.orange_color
 
         counter_text = f"ENEMIES: {alive_enemies}/{total_enemies}"
-        text_surface = self.enemy_counter_font.render(counter_text, True, counter_color)
+        text_surface = self.enemy_counter_font.render(counter_text, True, self.get_level_tint_color())
         text_rect = text_surface.get_rect(bottomleft=(self.margin_x, HEIGHT - self.margin_y))
         self.screen.blit(text_surface, text_rect)
 
@@ -194,3 +246,6 @@ class GameUI:
         if self.current_level != level_number:
             self.current_level = level_number
             self.digit_images = self.load_digit_images()
+    
+    def get_level_tint_color(self):
+        return self.tint_color_map.get(self.current_level, self.tint_color_map["default"])
