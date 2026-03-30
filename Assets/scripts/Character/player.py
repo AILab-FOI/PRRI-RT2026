@@ -83,16 +83,7 @@ class Player:
         elif event.type == pg.MOUSEBUTTONUP:
             if event.button == 1:
                 self.auto_fire = False
-
-
-        if event.type == pg.KEYDOWN: #heal_item
-            if event.key == pg.K_q:
-                current_time = pg.time.get_ticks()
-                if (self.heal_item_count > 0 and self.health < PLAYER_MAX_HEALTH and
-                    current_time - self.last_heal_time >= self.heal_cooldown):
-                    self.health = min(self.health + 20, PLAYER_MAX_HEALTH)
-                    self.heal_item_count -= 1
-                    self.last_heal_time = current_time
+                
 
     def fire_weapon(self):
         if not hasattr(self.game, 'weapon') or self.game.weapon is None:
@@ -133,6 +124,15 @@ class Player:
         self.game.weapon.bagAmount -= ammo_to_reload
         print(self.game.weapon.currentMagAmmount , " " , self.game.weapon.bagAmount)
 
+
+
+    def try_heal(self):
+        current_time = pg.time.get_ticks()
+        if (self.heal_item_count > 0 and self.health < PLAYER_MAX_HEALTH and
+            current_time - self.last_heal_time >= self.heal_cooldown):
+                self.health = min(self.health + 20, PLAYER_MAX_HEALTH)
+                self.heal_item_count -= 1
+                self.last_heal_time = current_time
 
     """
     def heal_player(self):
