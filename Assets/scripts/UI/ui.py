@@ -55,7 +55,7 @@ class GameUI:
         level_digit_path_abs = resource_path(level_digit_path)
 
         if os.path.exists(level_digit_path_abs) and os.path.isdir(level_digit_path_abs):
-            for i in range(11):
+            for i in range(12):
                 digit_file = f'{level_digit_path}/{i}.png'
                 digit_file_abs = resource_path(digit_file)
 
@@ -67,7 +67,7 @@ class GameUI:
                     img = self.load_texture(fallback_digit, [self.digit_size] * 2)
                     digits[str(i)] = img
         else:
-            for i in range(11):
+            for i in range(12):
                 img = self.load_texture(f'{fallback_digit_path}/{i}.png', [self.digit_size] * 2)
                 digits[str(i)] = img
 
@@ -79,6 +79,7 @@ class GameUI:
         self.draw_enemy_counter()
         self.draw_invulnerability_indicator()
         self.draw_crosshair()
+        self.draw_weapon_ammo()
 
     def draw_crosshair(self):
         """Draw the crosshair in the center of the screen"""
@@ -127,6 +128,20 @@ class GameUI:
 
         self.screen.blit(self.digit_images['10'], (self.margin_x + len(health) * self.digit_size, self.margin_y))
 
+    def draw_weapon_ammo(self):
+        weapon = self.game.weapon
+        current = str(weapon.currentMagAmmount)
+        bag = str(weapon.bagAmount)
+        ammo_text = list(current) + ['11'] + list(bag)  # e.g. "12 10 45" but '10' is slash!
+
+        total_width = len(ammo_text) * self.digit_size
+        x = self.screen.get_width() - self.margin_x - total_width
+        y = self.screen.get_height() - self.margin_y - self.digit_size
+    
+        for i, char in enumerate(ammo_text):
+            self.screen.blit(self.digit_images[char], (x + i * self.digit_size, y))
+
+
     def draw_invulnerability_indicator(self):
         if not self.game.player.is_invulnerable:
             return
@@ -171,7 +186,7 @@ class GameUI:
 
         counter_text = f"ENEMIES: {alive_enemies}/{total_enemies}"
         text_surface = self.enemy_counter_font.render(counter_text, True, counter_color)
-        text_rect = text_surface.get_rect(bottomright=(WIDTH - self.margin_x, HEIGHT - self.margin_y))
+        text_rect = text_surface.get_rect(bottomleft=(self.margin_x, HEIGHT - self.margin_y))
         self.screen.blit(text_surface, text_rect)
 
     def update_level(self, level_number):
