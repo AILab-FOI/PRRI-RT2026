@@ -53,15 +53,30 @@ class GameUI:
         return pg.transform.scale(texture, res)
 
     def load_digit_images(self):
-        """Load base digit images"""  # deprecated for the current level with fallback to level1 digits
+        """Load base digit images (number of digits determined by files in base_path)"""
         digits = {}
         base_path = resource_path('resources/teksture/numbers')
 
-        for i in range(12):
-            digit_file = f'{base_path}/{i}.png'
+        # List all files in base_path and filter PNGs
+        try:
+            file_list = os.listdir(base_path)
+        # Keep only *.png files that look like digit names: 0.png, 1.png, ...
+            digit_files = [
+                f for f in file_list
+                if f.endswith('.png') and f[:-4].isdigit()
+            ]
+        # Sort by parsed number (0, 1, 2, ...)
+            digit_files.sort(key=lambda x: int(x[:-4]))
+        except (OSError, FileNotFoundError):
+            digit_files = []
+
+    # Load each digit file, indexed by its number
+        for i, filename in enumerate(digit_files):
+            digit_key = os.path.splitext(filename)[0]  # "0", "1", etc.
+            digit_file = os.path.join(base_path, filename)
             img = self.load_texture(digit_file, [self.digit_size] * 2)
-            digits[str(i)] = img
-        
+            digits[digit_key] = img
+
         return digits
         """
         level_digit_path = f'resources/teksture/level{self.current_level}/brojevi'
