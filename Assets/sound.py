@@ -28,7 +28,7 @@ class Sound:
         self.path = 'resources/sound'
 
         self.music_volume = 0.0
-        self.sfx_volume = 0.7
+        self.sfx_volume = 0.15
 
         self.normal_music_volume = 0.0
         self.ducking_music_volume = 0.03

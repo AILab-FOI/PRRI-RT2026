@@ -4,7 +4,7 @@ from Assets.scripts.Util.sprite_object import SpriteObject
 
 class Heal_item(SpriteObject):
     def __init__(self, game, pos=(1.5, 1.5), path='resources/teksture/heal_item.png',
-                 scale=0.4, shift=0.1, pickup_distance=0.1):
+                 scale=0.4, shift=0.1, pickup_distance=0.5):
         super().__init__(game, path=path, pos=pos, scale=scale, shift=shift)
         self.pickup_distance = pickup_distance
         self.picked = False
