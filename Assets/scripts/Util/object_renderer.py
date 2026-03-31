@@ -36,6 +36,8 @@ class ObjectRenderer:
         self.sky_offset = 0
 
         self.blood_screen = self.get_texture('resources/teksture/blood_screen.png', RES)
+        self.damage_alpha = 0
+        self.damage_timer = 0
         self.game_over_image = self.get_texture('resources/teksture/theEnd.png', RES)
         self.win_image = self.get_texture('resources/teksture/win.png', RES)
         self.message_font = load_custom_font(30)
@@ -48,6 +50,13 @@ class ObjectRenderer:
         self.render_game_objects()
         self.draw_message()
 
+        if self.damage_timer > 0:
+            overlay = self.blood_screen.copy()
+            overlay.set_alpha(self.damage_alpha)
+            self.screen.blit(overlay, (0, 0))
+            self.damage_alpha -= 12
+            self.damage_timer -= 1
+
     def win(self):
         self.screen.blit(self.win_image, (0, 0))
 
@@ -55,7 +64,8 @@ class ObjectRenderer:
         self.screen.blit(self.game_over_image, (0, 0))
 
     def player_damage(self):
-        self.screen.blit(self.blood_screen, (0, 0))
+        self.damage_alpha = 224   # transparentnost slike
+        self.damage_timer = 30    # koliko frameova je na ekranu
 
     def show_message(self, text):
         self.message = text
