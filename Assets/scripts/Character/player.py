@@ -208,12 +208,19 @@ class Player:
         if self.dialogue_mode or (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active):
             return
 
-        mx, _ = pg.mouse.get_pos()
+        """mx, _ = pg.mouse.get_pos()
         if mx < MOUSE_BORDER_LEFT or mx > MOUSE_BORDER_RIGHT:
-            pg.mouse.set_pos([HALF_WIDTH, HALF_HEIGHT])
-        self.rel = pg.mouse.get_rel()[0]
+            pg.mouse.set_pos([HALF_WIDTH, HALF_HEIGHT])"""
+
+        if not pg.event.get_grab():
+            return
+
+        """self.rel = pg.mouse.get_rel()[0]
         self.rel = max(-MOUSE_MAX_REL, min(MOUSE_MAX_REL, self.rel))
-        self.angle += self.rel * MOUSE_SENSITIVITY * self.game.delta_time
+        self.angle += self.rel * MOUSE_SENSITIVITY * self.game.delta_time"""
+        rel_x = pg.mouse.get_rel()[0]
+        rel_x= max(-MOUSE_MAX_REL, min(MOUSE_MAX_REL, rel_x))
+        self.angle += rel_x * MOUSE_SENSITIVITY * self.game.delta_time
 
     def dash(self):
         if hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active:

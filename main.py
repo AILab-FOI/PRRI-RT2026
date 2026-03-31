@@ -35,6 +35,8 @@ class Game:
         pg.display.set_icon(icon)
 
         pg.mouse.set_visible(False)
+        pg.event.set_grab(True)#zaključava miš unutar prozora igre
+        pg.mouse.get_rel() #resetira kursor na centar prozora
         self.screen = pg.display.set_mode(RES)
         self.clock = pg.time.Clock()
         self.delta_time = 1
@@ -183,6 +185,8 @@ class Game:
         pg.mouse.set_visible(False)
 
     def show_menu(self):
+        pg.mouse.set_pos([HALF_WIDTH, HALF_HEIGHT]) #postavlja miš na centar prozora])
+        pg.event.set_grab(False)#oslobađa miš
         pg.mouse.set_visible(True)
         self.menu.state = 'main'
         self.menu.run()
@@ -190,8 +194,10 @@ class Game:
         if not self.game_initialized:
             self.new_game()
             self.game_initialized = True
-
+        
+        pg.event.set_grab(True)#zaključava miš unutar prozora igre
         pg.mouse.set_visible(False)
+        pg.mouse.get_rel() #resetira kursor na centar prozora
         self.game_loop()
 
     def game_loop(self):
