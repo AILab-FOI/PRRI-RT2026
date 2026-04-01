@@ -122,4 +122,8 @@ def get_level_data():
         {'position': (8.5, 3.5)},
         ]
 
+    level_data['ammo_pickup'] = [
+        {'position':(5.5,2.5)}
+    ]
+
     return level_data

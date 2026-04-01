@@ -148,6 +148,18 @@ class Player:
         self.last_heal_time = current_time
         return True
         """
+    
+    def try_addAmmo(self,amount):
+        if not hasattr(self.game, 'weapon') or self.game.weapon is None:
+            return False
+
+        if self.game.weapon.bagAmount + amount >= 999:
+            return False
+        
+        self.game.weapon.bagAmount = min(999, self.game.weapon.bagAmount + amount)
+        return True
+
+
     def movement(self):
         if self.dialogue_mode or (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active):
             return

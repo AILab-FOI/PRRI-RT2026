@@ -166,6 +166,12 @@ class LevelManager:
                 #self.game.object_handler.add_sprite(heal_item)
                #self.game.interaction.add_object(heal_item)
 
+        if 'ammo_pickup' in level_data:
+            for ammo_item in level_data['ammo_pickup']:
+                    self.game.object_handler.add_ammo_item(
+                        pos = ammo_item['position']
+                    )
+
         exit_positions = {
             1: (5, 24),
             2: (12, 34),

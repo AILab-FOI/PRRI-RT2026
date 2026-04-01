@@ -2,6 +2,7 @@ from Assets.scripts.Util.sprite_object import *
 from Assets.scripts.Weapons.powerup import PowerUp
 from random import choices, shuffle
 from Assets.scripts.Util.heal_item import Heal_item
+from Assets.scripts.Weapons.ammo import Ammo_item
 
 class ObjectHandler:
     def __init__(self, game):
@@ -172,3 +173,8 @@ class ObjectHandler:
         heal_item = Heal_item(self.game, pos=pos)
         self.add_sprite(heal_item)
         return heal_item
+    
+    def add_ammo_item(self,pos):
+        ammo_item = Ammo_item(self.game,pos=pos)
+        self.add_sprite(ammo_item)
+        return ammo_item
