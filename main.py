@@ -28,7 +28,7 @@ from Assets.scripts.Util.font_manager import resource_path
 class Game:
     def __init__(self):
         pg.init()
-        pg.display.set_caption("Galaxy's Doom")
+        pg.display.set_caption("*INSERT NEW GAME NAME HERE*")
 
         icon_path = resource_path('resources/icons/game_icon.ico')
         icon = pg.image.load(icon_path)
@@ -37,6 +37,8 @@ class Game:
         pg.mouse.set_visible(False)
         pg.event.set_grab(True)#zaključava miš unutar prozora igre
         pg.mouse.get_rel() #resetira kursor na centar prozora
+        self.is_fullscreen= False
+        self.update_display_mode()
         self.screen = pg.display.set_mode(RES)
         self.clock = pg.time.Clock()
         self.delta_time = 1
@@ -54,6 +56,19 @@ class Game:
         self.disorienting_effects = DisorientingEffects(self)
         self.game_initialized = False
         self.show_menu()
+
+
+
+    def update_display_mode(self):
+        if self.is_fullscreen:
+               self.screen=pg.display.set_mode(RES, pg.FULLSCREEN)
+        else:
+            self.screen=pg.display.set_mode(RES)
+
+        if hasattr(self, 'menu'):
+            self.menu.screen = self.screen
+
+
 
     def new_game(self):
         if not hasattr(self, 'level_manager'):

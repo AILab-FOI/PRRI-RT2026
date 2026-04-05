@@ -265,7 +265,10 @@ class Menu:
         self.main_buttons = []
 
         self.settings_buttons = [
+            Button(center_x, HALF_HEIGHT + 40, max_button_width, button_height, "Windowed"),
+            Button(center_x, HALF_HEIGHT + 120, max_button_width, button_height, "Fullscreen"),
             Button(center_x, HALF_HEIGHT + 200, max_button_width, button_height, "Back")
+
         ]
 
         slider_width = max_button_width
@@ -279,7 +282,8 @@ class Menu:
 
         bg_image_path = resource_path('resources/teksture/pocetna.png')
         self.bg_image = pg.image.load(bg_image_path)
-        self.bg_image = pg.transform.scale(self.bg_image, RES)
+        #self.bg_image = pg.transform.scale(self.bg_image, RES)
+        self.bg_image = pg.transform.scale(self.bg_image, self.screen.get_size())
 
         self.title_font = load_custom_font(72)
         self.version = "v0.1"
@@ -344,6 +348,16 @@ class Menu:
                         if button.text == "Back":
                             self.state = 'main'
                             self.apply_settings()
+                        elif button.text == "Windowed":
+                                self.game.is_fullscreen = False
+                                self.game.update_display_mode()
+                                self.screen = self.game.screen
+                                self.by_image=pg.transform.scale(self.bg_image, self.screen.get_size())
+                        elif button.text == "Fullscreen":
+                                self.game.is_fullscreen = True
+                                self.game.update_display_mode()
+                                self.screen = self.game.screen
+                                self.by_image=pg.transform.scale(self.bg_image, self.screen.get_size())
 
         if self.state == 'settings':
             for slider in self.sliders:
