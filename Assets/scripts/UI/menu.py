@@ -382,7 +382,7 @@ class Menu:
         self.screen.blit(self.bg_image, (0, 0))
 
         if self.state == 'main':
-            self.draw_title("Galaxy's Doom", 120)
+            self.draw_title("INSERT NAME HERE", 120)
 
             for button in self.main_buttons:
                 button.draw(self.screen)
