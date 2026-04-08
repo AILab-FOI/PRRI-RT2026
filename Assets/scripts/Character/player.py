@@ -36,6 +36,11 @@ class Player:
 
         self.last_step_time = 0 #timeri za hodanje za zvukove
         self.step_delay = 350
+
+        self.vel_x = 0
+        self.vel_y = 0
+        self.friction = 0.8
+        self.acceleration = 0.9
         
         
         
@@ -167,59 +172,69 @@ class Player:
 
 
     def movement(self):
-        
+        if self.game.interaction.input_active:
+            self.vel_x *= 0.5 
+            self.vel_y *= 0.5
+            return
 
         sin_a = math.sin(self.angle)
         cos_a = math.cos(self.angle)
-        dx, dy = 0, 0
-        speed = PLAYER_SPEED * self.game.delta_time
-        speed_sin = speed * sin_a
-        speed_cos = speed * cos_a
+        dt = self.game.delta_time / 1000 if self.game.delta_time > 1 else self.game.delta_time
+        acc = self.acceleration * dt
+        self.vel_x *= self.friction
+        self.vel_y *= self.friction
 
         keys = pg.key.get_pressed()
         if keys[pg.K_w]:
-            dx += speed_cos
-            dy += speed_sin
+            self.vel_x += acc * cos_a
+            self.vel_y += acc * sin_a
         if keys[pg.K_s]:
-            dx += -speed_cos
-            dy += -speed_sin
+            self.vel_x -= acc * cos_a
+            self.vel_y -= acc * sin_a
         if keys[pg.K_a]:
-            dx += speed_sin
-            dy += -speed_cos
+            self.vel_x += acc * sin_a
+            self.vel_y -= acc * cos_a
         if keys[pg.K_d]:
-            dx += -speed_sin
-            dy += speed_cos
+            self.vel_x -= acc * sin_a
+            self.vel_y += acc * cos_a
 
 
         current_time = pg.time.get_ticks() #hodanje i zvukovi
-        if (dx != 0 or dy != 0) and not self.is_dashing:
+        if (abs(self.vel_x) > 0.1 or abs(self.vel_y) > 0.1) and not self.is_dashing:
             if current_time - self.last_step_time >= self.step_delay:
                 if self.game.sound.footstep:
                     self.game.sound.footstep.play()
                 self.last_step_time = current_time
 
 
-        if dx != 0 or dy != 0:
-            length = math.sqrt(dx * dx + dy * dy)
-            self.dash_direction = (dx / length, dy / length)
+        if abs(self.vel_x) > 0.1 or abs(self.vel_y) > 0.1:
+            length = math.sqrt(self.vel_x * self.vel_x + self.vel_y * self.vel_y)
+            self.dash_direction = (self.vel_x / length, self.vel_y / length)
         else:
             self.dash_direction = (cos_a, sin_a)
 
         if keys[pg.K_SPACE] and not self.is_dashing:
             self.dash()
 
-        self.check_wall_collision(dx, dy)
+        self.check_wall_collision(self.vel_x, self.vel_y)
         self.angle %= math.tau
 
     def check_wall(self, x, y):
         return (x, y) not in self.game.map.world_map
 
     def check_wall_collision(self, dx, dy):
-        scale = PLAYER_SIZE_SCALE / self.game.delta_time
-        if self.check_wall(int(self.x + dx * scale), int(self.y)):
+        offset = 0.15 if dx > 0 else -0.15
+    
+        if self.check_wall(int(self.x + dx + offset), int(self.y)):
             self.x += dx
-        if self.check_wall(int(self.x), int(self.y + dy * scale)):
+        else:
+            self.vel_x = 0
+
+        offset = 0.2 if dy > 0 else -0.2
+        if self.check_wall(int(self.x), int(self.y + dy + offset)):
             self.y += dy
+        else:
+            self.vel_y = 0
 
     def mouse_control(self):
         if self.dialogue_mode or (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active):
