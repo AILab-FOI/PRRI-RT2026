@@ -122,7 +122,7 @@ class GameUI:
 
     def draw(self):
         self.draw_player_health()
-        self.draw_health_icon(False)
+        self.draw_health_icon(self.game.player.heal_item_count > 0)
         self.draw_dash_indicator()
         self.draw_enemy_counter()
         self.draw_invulnerability_indicator()
