@@ -72,7 +72,7 @@ class Player:
             return
 
         if event.type == pg.MOUSEBUTTONDOWN:
-            if event.button == 1 and not self.shot and not self.game.weapon.reloading:
+            if event.button == 1 and not self.shot and not self.game.weapon.is_reloading:
                 if hasattr(self.game.weapon, 'auto_fire') and self.game.weapon.auto_fire:
                     self.auto_fire = True
                     weapon_config = get_weapon_config(self.game.weapon.name)
@@ -90,7 +90,10 @@ class Player:
             return
 
         weapon_config = get_weapon_config(self.game.weapon.name)
-        print(self.game.weapon.currentMagAmmount)
+
+        if self.game.weapon.is_reloading:
+            return
+    
         if(self.game.weapon.currentMagAmmount <= 0):
             return
         
@@ -105,7 +108,7 @@ class Player:
                 self.game.sound.pistolj.play()
 
         self.shot = True
-        self.game.weapon.reloading = True
+        self.game.weapon.is_firing = True
         self.game.weapon.currentMagAmmount -= 1
         self.last_auto_fire_time = pg.time.get_ticks()
 
@@ -120,9 +123,11 @@ class Player:
         missing_ammo = self.game.weapon.maxMagAmount - self.game.weapon.currentMagAmmount
         ammo_to_reload = min(missing_ammo, self.game.weapon.bagAmount)
 
+        self.game.weapon.is_reloading = True
+        self.game.weapon.reload_start_time = pg.time.get_ticks()
+
         self.game.weapon.currentMagAmmount += ammo_to_reload
         self.game.weapon.bagAmount -= ammo_to_reload
-        print(self.game.weapon.currentMagAmmount , " " , self.game.weapon.bagAmount)
 
 
 
@@ -303,7 +308,7 @@ class Player:
 
         if self.auto_fire and hasattr(self.game.weapon, 'auto_fire') and self.game.weapon.auto_fire:
             current_time = pg.time.get_ticks()
-            if not self.game.weapon.reloading and current_time - self.last_auto_fire_time >= self.auto_fire_delay:
+            if not self.game.weapon.is_reloading and current_time - self.last_auto_fire_time >= self.auto_fire_delay:
                 self.fire_weapon()
 
 

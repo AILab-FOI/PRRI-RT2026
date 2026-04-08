@@ -8,7 +8,11 @@ class Weapon(AnimatedSprite):
             [pg.transform.smoothscale(img, (self.image.get_width() * scale, self.image.get_height() * scale))
              for img in self.images])
         self.weapon_pos = (HALF_WIDTH - self.images[0].get_width() // 2, HEIGHT - self.images[0].get_height())
-        self.reloading = False
+        self.is_firing = False
+        self.is_reloading = False
+        self.reload_start_time = 0
+        self.reload_duration = 400
+
         self.num_images = len(self.images)
         self.frame_counter = 0
         self.damage = damage
@@ -20,27 +24,48 @@ class Weapon(AnimatedSprite):
         self.currentMagAmmount = magAmount
 
     def animate_shot(self):
-        if self.reloading:
+        if self.is_firing:
             self.game.player.shot = False
             if self.animation_trigger:
                 self.images.rotate(-1)
                 self.image = self.images[0]
-                if hasattr(self, '_current_image_id'):
-                    self._current_image_id += 1
-                else:
-                    self._current_image_id = 0
-                if hasattr(self, '_scaled_image_cache'):
-                    self._scaled_image_cache = {}
                 self.frame_counter += 1
                 if self.frame_counter == self.num_images:
-                    self.reloading = False
+                    self.is_firing = False
                     self.frame_counter = 0
 
     def draw(self):
         if hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active:
             return
 
-        self.game.screen.blit(self.images[0], self.weapon_pos)
+        image = self.images[0]
+
+        if self.is_reloading:
+            elapsed = pg.time.get_ticks() - self.reload_start_time
+            progress = min(1.0, elapsed / self.reload_duration)
+
+            angle = -35 * math.sin(progress * math.pi)
+            scale_x = 1.0 - 0.25 * math.sin(progress * math.pi)
+            offset_y = 60 * math.sin(progress * math.pi)
+
+            w, h = image.get_size()
+            transformed = pg.transform.smoothscale(image, (int(w * scale_x), h))
+            transformed = pg.transform.rotate(transformed, angle)
+            rect = transformed.get_rect(midbottom=(self.weapon_pos[0] + w // 2,
+                                               self.weapon_pos[1] + h + offset_y))
+            self.game.screen.blit(transformed, rect)
+
+            if progress >= 1.0:
+                self.is_reloading = False
+        else:
+            self.game.screen.blit(image, self.weapon_pos)
+
+    def draw_transformed(self, image, pos, angle=0, scale_x=1.0, scale_y=1.0):
+        w, h = image.get_size()
+        transformed = pg.transform.smoothscale(image, (int(w * scale_x), int(h * scale_y)))
+        transformed = pg.transform.rotate(transformed, angle)
+        rect = transformed.get_rect(midbottom=(pos[0] + w // 2, pos[1] + h))
+        self.game.screen.blit(transformed, rect)
 
     def update(self):
         self.check_animation_time()
