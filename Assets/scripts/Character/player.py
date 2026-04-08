@@ -132,7 +132,7 @@ class Player:
             current_time - self.last_heal_time >= self.heal_cooldown):
                 self.health = min(self.health + 20, PLAYER_MAX_HEALTH)
                 self.heal_item_count -= 1
-                
+
                 self.last_heal_time = current_time
 
     """
@@ -162,8 +162,7 @@ class Player:
 
 
     def movement(self):
-        if self.dialogue_mode or (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active):
-            return
+        
 
         sin_a = math.sin(self.angle)
         cos_a = math.cos(self.angle)
@@ -288,6 +287,8 @@ class Player:
             self.game.sound.powerup_end.play()
 
     def update(self):
+        if self.dialogue_mode or (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active)or (hasattr(self.game, 'interaction') and self.game.interaction.input_active):
+            return
         if not self.is_dashing:
             self.movement()
         self.update_dash()
