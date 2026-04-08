@@ -37,6 +37,8 @@ class GameUI:
         self.tinted_digits = {} 
 
         self.powerup_icon = self.load_texture('resources/teksture/level1/powerup.png', (100, 100))
+        self.item_icon = self.load_texture('resources/teksture/heal_item.png',(128,128))
+        self.item_icon_gray = self.make_gray_icon(self.item_icon)
 
         self.crosshair_size = 48
         self.crosshair = self.load_texture('resources/teksture/Blue-crosshair.png', (self.crosshair_size, self.crosshair_size))
@@ -120,6 +122,7 @@ class GameUI:
 
     def draw(self):
         self.draw_player_health()
+        self.draw_health_icon(False)
         self.draw_dash_indicator()
         self.draw_enemy_counter()
         self.draw_invulnerability_indicator()
@@ -264,3 +267,16 @@ class GameUI:
     
     def get_level_tint_color(self):
         return self.tint_color_map.get(self.current_level, self.tint_color_map["default"])
+    
+    def draw_health_icon(self, has_item):
+        icon = self.item_icon if has_item else self.item_icon_gray
+        dash_x = WIDTH - self.dash_indicator_width - self.margin_x
+        dash_y = self.margin_y + 30
+
+        spacing = 20  # gap below dash bar
+        rect = icon.get_rect()
+        rect.topright = (dash_x + self.dash_indicator_width, dash_y + self.dash_indicator_height + spacing)
+        self.screen.blit(icon, rect)
+
+    def make_gray_icon(self, surface):
+        return pg.transform.grayscale(surface.convert_alpha())

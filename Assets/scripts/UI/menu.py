@@ -257,7 +257,8 @@ class Menu:
             button_widths.append(button_width)
 
         max_button_width = max(button_widths)
-        center_x = HALF_WIDTH - max_button_width // 2
+        #center_x = HALF_WIDTH - max_button_width // 2
+        center_x = 80
         self.max_button_width = max_button_width
         self.button_height = button_height
         self.center_x = center_x
