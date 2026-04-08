@@ -1,7 +1,7 @@
 from Assets.scripts.Util.sprite_object import *
 from Assets.scripts.Weapons.powerup import PowerUp
 from random import choices, shuffle
-from Assets.scripts.Util.heal_item import Heal_item
+from Assets.scripts.Weapons.heal_item import Heal_item
 from Assets.scripts.Weapons.ammo import Ammo_item
 
 class ObjectHandler:

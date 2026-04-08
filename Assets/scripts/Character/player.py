@@ -132,6 +132,7 @@ class Player:
             current_time - self.last_heal_time >= self.heal_cooldown):
                 self.health = min(self.health + 20, PLAYER_MAX_HEALTH)
                 self.heal_item_count -= 1
+                
                 self.last_heal_time = current_time
 
     """
@@ -303,6 +304,7 @@ class Player:
             current_time = pg.time.get_ticks()
             if not self.game.weapon.reloading and current_time - self.last_auto_fire_time >= self.auto_fire_delay:
                 self.fire_weapon()
+
 
     @property
     def pos(self):
