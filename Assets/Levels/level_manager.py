@@ -25,19 +25,20 @@ class LevelManager:
 
             levels_path = levels_paths[0]
 
-            level_folders = sorted(
+            level_files = sorted(
                 name for name in os.listdir(levels_path)
-                if os.path.isdir(os.path.join(levels_path, name))
-                and re.match(r'^Lvl(\d+)$', name)
+                if os.path.isfile(os.path.join(levels_path, name))
+                and re.match(r'^level(\d+)\.py$', name)
             )
 
-            for folder in level_folders:
-                match = re.match(r'^Lvl(\d+)$',folder)
+            for file_name in level_files:
+                match = re.match(r'^level(\d+)\.py$', file_name)
                 level_num = int(match.group(1))
                 module_path = f'Assets.Levels.level{level_num}'
+
                 try:
                     print(f"Importing level {level_num} from {module_path}")
-                    level_module =importlib.import_module(module_path)
+                    level_module = importlib.import_module(module_path)
                     self.level_data[level_num] = level_module.get_level_data()
                 except ImportError as e:
                     from Assets.Levels.base_level import create_base_level_structure
@@ -64,7 +65,7 @@ class LevelManager:
             print(f"Critical error during level initialization: {e}")
             self.level_data = {}
             self.max_level = 0
-        
+           
 
     def load_level(self, level_number):
         if level_number in self.level_data:
