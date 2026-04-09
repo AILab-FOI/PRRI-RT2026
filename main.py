@@ -54,8 +54,14 @@ class Game:
         self.victory_screen = VictoryScreen(self)
         self.game_events = GameEvents(self)
         self.disorienting_effects = DisorientingEffects(self)
+
+        self.weapon_classes = [Pistol, SMG, PlasmaGun]
+        self.weapon_slot_count = len(self.weapon_classes)
+
         self.game_initialized = False
         self.show_menu()
+
+        
 
 
 
@@ -80,7 +86,12 @@ class Game:
         else:
             self.map.load_level(self.level_manager.current_level)
 
-        self.player = Player(self)
+        if not hasattr(self, 'player'):
+            self.player = Player(self)
+        
+        if not hasattr(self, 'weapon'):
+            self.weapon = None
+        
         self.object_renderer = ObjectRenderer(self)
         self.raycasting = RayCasting(self)
 
@@ -89,6 +100,8 @@ class Game:
         else:
             self.object_handler.reset()
 
+        
+        '''
         if self.level_manager.current_level == 1:
             self.weapon = None
         elif hasattr(self, 'level_manager'):
@@ -100,7 +113,7 @@ class Game:
                 self.weapon = Pistol(self)
         else:
             self.weapon = Pistol(self)
-
+        '''
         self.pathfinding = PathFinding(self)
         self.interaction = Interaction(self)
 

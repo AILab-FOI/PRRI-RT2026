@@ -3,6 +3,7 @@ Level 1 configuration
 """
 from Assets.Levels.base_level import create_base_level_structure
 
+
 def get_level_data():
     """Return the complete level 1 data"""
     level_data = create_base_level_structure()
@@ -10,7 +11,7 @@ def get_level_data():
     level_data['weapons'] = [
         {
             'position': (5, 13),
-            'weapon_type': 'pistol',
+            'weapon_index': 0,
             'path': 'resources/sprites/weapon/pistol_stand.png'
         }
     ]

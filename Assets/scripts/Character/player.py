@@ -2,6 +2,7 @@ from Assets.settings import *
 import pygame as pg
 import math
 from Assets.config.weapon_config import get_weapon_config
+from Assets.scripts.Weapons.weapon import Pistol, SMG, PlasmaGun
 
 class Player:
     def __init__(self, game):
@@ -42,7 +43,9 @@ class Player:
         self.friction = 0.8
         self.acceleration = 0.9
         
-        
+        self.weapon_inventory = [None] * self.game.weapon_slot_count
+        self.weapon_unlocked = [False] * self.game.weapon_slot_count
+        self.current_weapon_index = -1
         
         
 
@@ -326,7 +329,92 @@ class Player:
             if not self.game.weapon.is_reloading and current_time - self.last_auto_fire_time >= self.auto_fire_delay:
                 self.fire_weapon()
 
+    def give_weapon(self, index, auto_equip=True):
+        if index < 0 or index >= len(self.weapon_inventory):
+            return False
 
+        already_owned = self.weapon_inventory[index] is not None
+
+        if not already_owned:
+            weapon_class = self.game.weapon_classes[index]
+            new_weapon = weapon_class(self.game)
+            self.weapon_inventory[index] = new_weapon
+            print(f"Created new weapon instance in slot {index}: {new_weapon.name}")
+
+        self.weapon_unlocked[index] = True
+
+        if auto_equip:
+            self.equip_weapon_by_index(index)
+
+        return not already_owned
+
+    def equip_weapon_by_index(self, index, auto_equip=True):
+        if index < 0 or index >= len(self.weapon_inventory):
+            return False
+
+        if not self.weapon_unlocked[index]:
+            return False
+    
+        if self.weapon_inventory[index] is None:
+            return False
+
+        self.current_weapon_index = index
+        self.game.weapon = self.weapon_inventory[index]
+        self.auto_fire = False
+        return True
+
+    def next_weapon(self):
+        if not any(weapon is not None for weapon in self.weapon_inventory):
+            return
+
+        start = self.current_weapon_index
+
+        if start == -1:
+            for i, weapon in enumerate(self.weapon_inventory):
+                if weapon is not None and self.weapon_unlocked[i]:
+                    self.equip_weapon_by_index(i)
+                    self.print_weapon_inventory()
+                    return
+
+        for i in range(1, len(self.weapon_inventory) + 1):
+            index = (start + i) % len(self.weapon_inventory)
+            if self.weapon_unlocked[index] and self.weapon_inventory[index] is not None:
+                self.equip_weapon_by_index(index)
+                return
+
+    def prev_weapon(self):
+        if not any(weapon is not None for weapon in self.weapon_inventory):
+            return
+
+        start = self.current_weapon_index
+
+        if start == -1:
+            for i in range(len(self.weapon_inventory) - 1, -1, -1):
+                if self.weapon_inventory[i] is not None and self.weapon_unlocked[i]:
+                    self.equip_weapon_by_index(i)
+                    self.print_weapon_inventory()
+                    return
+
+        for i in range(1, len(self.weapon_inventory) + 1):
+            index = (start - i) % len(self.weapon_inventory)
+            if self.weapon_unlocked[index] and self.weapon_inventory[index] is not None:
+                self.equip_weapon_by_index(index)
+                self.print_weapon_inventory()
+                return
+
+    def print_weapon_inventory(self):
+        print("=== PLAYER WEAPON INVENTORY ===")
+        for i, weapon in enumerate(self.weapon_inventory):
+            unlocked = self.weapon_unlocked[i]
+            selected = (i == self.current_weapon_index)
+
+            if weapon is None:
+                weapon_name = "EMPTY"
+            else:
+                weapon_name = weapon.name
+
+            print(f"Slot {i}: {weapon_name}, unlocked={unlocked}, selected={selected}")
+    
     @property
     def pos(self):
         return self.x, self.y

@@ -137,16 +137,17 @@ class LevelManager:
 
         if 'weapons' in level_data:
             for weapon_data in level_data['weapons']:
-                if hasattr(self.game, 'weapon') and self.game.weapon and \
-                   self.game.weapon.name == weapon_data['weapon_type']:
-                    continue
+                weapon_index = weapon_data['weapon_index']
 
+                if self.game.player.weapon_unlocked[weapon_index]:
+                    continue
+            
                 weapon_pickup = InteractiveObject(
                     self.game,
                     path=weapon_data['path'],
                     pos=weapon_data['position'],
                     interaction_type="weapon",
-                    weapon_type=weapon_data['weapon_type']
+                    weapon_index=weapon_index
                 )
                 self.game.object_handler.add_sprite(weapon_pickup)
                 self.game.interaction.add_object(weapon_pickup)

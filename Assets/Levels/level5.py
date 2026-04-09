@@ -16,7 +16,7 @@ def get_level_data():
 
             'position': (16.5, 3.5),
 
-            'weapon_type': 'plasmagun',
+            'weapon_index': 2,
             'path': 'resources/sprites/weapon/plasma_stand.png'
         }
     ]

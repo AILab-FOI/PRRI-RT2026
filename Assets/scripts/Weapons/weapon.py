@@ -10,6 +10,7 @@ class Weapon(AnimatedSprite):
         self.weapon_pos = (HALF_WIDTH - self.images[0].get_width() // 2, HEIGHT - self.images[0].get_height())
         self.is_firing = False
         self.is_reloading = False
+        
         self.reload_start_time = 0
         self.reload_duration = 400
 

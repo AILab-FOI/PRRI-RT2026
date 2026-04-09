@@ -32,6 +32,9 @@ class GameEvents:
             if event.type == pg.KEYDOWN:
                 self.handle_keydown(event.key)
 
+            if event.type == pg.MOUSEWHEEL:
+                self.handle_weapon_switch(event)
+            
             #elif event.type == pg.KEYDOWN and event.key == pg.K_e:
             #    self._handle_e_key_press()
 
@@ -68,4 +71,10 @@ class GameEvents:
         
             case _:
                 pass
+    
+    def handle_weapon_switch(self, event):
+        if event.y > 0:
+            self.game.player.prev_weapon()   # scroll up
+        elif event.y < 0:
+            self.game.player.next_weapon()   # scroll down
 

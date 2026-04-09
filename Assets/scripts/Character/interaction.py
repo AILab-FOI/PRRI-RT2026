@@ -83,7 +83,7 @@ class Interaction:
             elif self.active_object.interaction_type == "terminal":
                 prompt_text = "Press 'E' to access terminal"
             elif self.active_object.interaction_type == "weapon":
-                prompt_text = f"Press 'E' to pick up {self.active_object.weapon_type}"
+                prompt_text = f"Press 'E' to pick up {self.active_object.weapon_index}"
             else:
                 prompt_text = f"Press 'E' to {self.active_object.interaction_type}"
 
@@ -218,7 +218,7 @@ class Interaction:
 
             self.active_object = None
             self.show_interaction_prompt = False
-
+    '''
     def pickup_weapon(self):
         weapon_type = self.active_object.weapon_type
 
@@ -245,12 +245,36 @@ class Interaction:
 
         self.active_object = None
         self.show_interaction_prompt = False
+    '''
+    def pickup_weapon(self):
+        weapon_index = self.active_object.weapon_index
 
+        is_new = self.game.player.give_weapon(weapon_index, auto_equip=True)
+
+        weapon = self.game.player.weapon_inventory[weapon_index]
+
+        if is_new:
+            self.message = f"Picked up {weapon.name}!"
+        else:
+            self.message = f"Already have {weapon.name}!"
+            # or give ammo here instead
+
+        self.game.sound.weapon_pickup.play()
+        self.message_time = pg.time.get_ticks()
+
+        if self.active_object in self.game.object_handler.sprite_list:
+            self.game.object_handler.sprite_list.remove(self.active_object)
+
+        if self.active_object in self.interaction_objects:
+            self.interaction_objects.remove(self.active_object)
+
+        self.active_object = None
+        self.show_interaction_prompt = False
 
 class InteractiveObject(SpriteObject):
     def __init__(self, game, path, pos, interaction_type, door_id=None, code=None,
                  unlocks_door_id=None, requires_code=False, requires_door_id=None,
-                 is_level_exit=False, weapon_type=None):
+                 is_level_exit=False, weapon_index=None):
         adjusted_pos = (pos[0] + 0.5, pos[1] + 0.5) if isinstance(pos, tuple) else pos
         super().__init__(game, path, adjusted_pos)
         self.interaction_type = interaction_type
@@ -263,7 +287,7 @@ class InteractiveObject(SpriteObject):
         self.is_unlocked = False
         self.is_level_exit = is_level_exit
         self.is_enabled = False
-        self.weapon_type = weapon_type
+        self.weapon_index = weapon_index
 
     @property
     def map_pos(self):
