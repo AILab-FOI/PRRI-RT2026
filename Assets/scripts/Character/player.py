@@ -142,6 +142,8 @@ class Player:
             current_time - self.last_heal_time >= self.heal_cooldown):
                 self.health = min(self.health + 20, PLAYER_MAX_HEALTH)
                 self.heal_item_count -= 1
+                self.game.sound.heal.play()
+                self.game.object_renderer.player_heal()
 
                 self.last_heal_time = current_time
 
@@ -200,7 +202,7 @@ class Player:
 
 
         current_time = pg.time.get_ticks() #hodanje i zvukovi
-        if (abs(self.vel_x) > 0.1 or abs(self.vel_y) > 0.1) and not self.is_dashing:
+        if (abs(self.vel_x) > 0.01 or abs(self.vel_y) > 0.01) and not self.is_dashing:
             if current_time - self.last_step_time >= self.step_delay:
                 if self.game.sound.footstep:
                     self.game.sound.footstep.play()

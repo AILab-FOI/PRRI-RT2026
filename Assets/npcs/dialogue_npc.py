@@ -80,7 +80,7 @@ def create_dialogue_npcs(game, npc_data):
             scale=data.get('scale', 0.6),
             shift=data.get('shift', 0.38),
             animation_time=data.get('animation_time', 180),
-            interaction_radius=data.get('interaction_radius', 1.5)
+            interaction_radius=data.get('interaction_radius', 1)
         )
         npcs.append(npc)
         game.object_handler.add_npc(npc)

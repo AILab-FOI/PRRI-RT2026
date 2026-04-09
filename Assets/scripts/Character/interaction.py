@@ -9,7 +9,7 @@ class Interaction:
     def __init__(self, game):
         self.game = game
         self.interaction_objects = []
-        self.interaction_distance = 1.5
+        self.interaction_distance = 1.2
         self.active_object = None
         self.show_interaction_prompt = False
         self.font = load_custom_font(30)
