@@ -145,6 +145,8 @@ class Player:
             current_time - self.last_heal_time >= self.heal_cooldown):
                 self.health = min(self.health + 20, PLAYER_MAX_HEALTH)
                 self.heal_item_count -= 1
+                self.game.sound.heal.play()
+                self.game.object_renderer.player_heal()
 
                 self.last_heal_time = current_time
 
@@ -203,18 +205,18 @@ class Player:
 
 
         current_time = pg.time.get_ticks() #hodanje i zvukovi
-        if (abs(self.vel_x) > 0.1 or abs(self.vel_y) > 0.1) and not self.is_dashing:
+        if (abs(self.vel_x) > 0.01 or abs(self.vel_y) > 0.01) and not self.is_dashing:
             if current_time - self.last_step_time >= self.step_delay:
                 if self.game.sound.footstep:
                     self.game.sound.footstep.play()
                 self.last_step_time = current_time
 
 
-        if abs(self.vel_x) > 0.1 or abs(self.vel_y) > 0.1:
+        """if abs(self.vel_x) > 0.1 or abs(self.vel_y) > 0.1:
             length = math.sqrt(self.vel_x * self.vel_x + self.vel_y * self.vel_y)
             self.dash_direction = (self.vel_x / length, self.vel_y / length)
         else:
-            self.dash_direction = (cos_a, sin_a)
+            self.dash_direction = (cos_a, sin_a)"""
 
         if keys[pg.K_SPACE] and not self.is_dashing:
             self.dash()
@@ -257,7 +259,33 @@ class Player:
         rel_x= max(-MOUSE_MAX_REL, min(MOUSE_MAX_REL, rel_x))
         self.angle += rel_x * MOUSE_SENSITIVITY * self.game.delta_time
 
-    def dash(self):
+    def get_dash_direction(self):
+        keys = pg.key.get_pressed()
+
+        sin_a = math.sin(self.angle)
+        cos_a = math.cos(self.angle)
+
+        dx, dy = 0, 0
+
+        if keys[pg.K_w]:
+            dx += cos_a
+            dy += sin_a
+        if keys[pg.K_s]:
+            dx -= cos_a
+            dy -= sin_a
+        if keys[pg.K_a]:
+            dx += sin_a
+            dy -= cos_a
+        if keys[pg.K_d]:
+            dx -= sin_a
+            dy += cos_a
+
+        length = math.sqrt(dx * dx + dy * dy)
+        if length == 0:
+            return 0, 0
+        return dx / length, dy / length
+
+    """def dash(self):
         if hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active:
             return False
 
@@ -265,9 +293,30 @@ class Player:
         if current_time - self.last_dash_time < PLAYER_DASH_COOLDOWN:
             return False
 
-        if self.dash_direction == (0, 0):
+        dash_dx, dash_dy = self.get_dash_direction()
+        if dash_dx==0 and dash_dy==0:
+               return 0;
+
+        self.is_dashing = True
+        self.dash_start_time = current_time
+        self.last_dash_time = current_time
+
+        self.game.sound.player_dash.play()
+        return True"""
+
+    def dash(self):
+        if hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active:
+         return False
+
+        current_time = pg.time.get_ticks()
+        if current_time - self.last_dash_time < PLAYER_DASH_COOLDOWN:
             return False
 
+        dash_dx, dash_dy = self.get_dash_direction()
+        if dash_dx == 0 and dash_dy == 0:
+            return False
+
+        self.dash_direction = (dash_dx, dash_dy)
         self.is_dashing = True
         self.dash_start_time = current_time
         self.last_dash_time = current_time

@@ -96,6 +96,7 @@ class Sound:
 
             #hodanje
             'footstep': 0.25,
+            'heal': 0.7,
         }
 
         self.pistolj = self.load_sound('Pistolj.wav', self.volume_factors['pistolj'])
@@ -147,6 +148,7 @@ class Sound:
         self.defeat = self.load_sound('poraz.mp3', self.volume_factors['defeat'])
 
         self.footstep=self.load_sound('walking_v2.mp3', self.volume_factors['footstep'])#hodanje
+        self.heal=self.load_sound('healcan1.mp3', self.volume_factors['heal'])#heal item
 
 
 
@@ -257,7 +259,8 @@ class Sound:
             'menu_click': self.menu_click,
             'victory': self.victory,
             'defeat': self.defeat,
-            'footstep': self.footstep
+            'footstep': self.footstep,
+            'heal': self.heal
         }
 
         for sound_name, sound in sounds.items():
