@@ -40,6 +40,17 @@ class GameUI:
         self.item_icon = self.load_texture('resources/teksture/heal_item.png',(128,128))
         self.item_icon_gray = self.make_gray_icon(self.item_icon)
 
+        self.weapon_icon_size = (96, 96)
+
+        self.weapon_icons = [
+        self.load_texture('resources/sprites/weapon/pistol_stand.png', self.weapon_icon_size),
+        self.load_texture('resources/sprites/weapon/puska_stand.png', self.weapon_icon_size),
+        self.load_texture('resources/sprites/weapon/plasma_stand.png', self.weapon_icon_size),
+        
+        ]
+        self.weapon_icons_gray = [self.make_gray_icon(icon) for icon in self.weapon_icons]
+
+
         self.crosshair_size = 48
         self.crosshair = self.load_texture('resources/teksture/Blue-crosshair.png', (self.crosshair_size, self.crosshair_size))
         self.crosshair_y_offset = 40
@@ -123,6 +134,7 @@ class GameUI:
     def draw(self):
         self.draw_player_health()
         self.draw_health_icon(self.game.player.heal_item_count > 0)
+        self.draw_weapon_icons()
         self.draw_dash_indicator()
         self.draw_enemy_counter()
         self.draw_invulnerability_indicator()
@@ -280,3 +292,21 @@ class GameUI:
 
     def make_gray_icon(self, surface):
         return pg.transform.grayscale(surface.convert_alpha())
+    
+    def draw_weapon_icons(self):
+        start_x = self.margin_x
+        start_y = HEIGHT - self.margin_y - 140
+        spacing = 20
+
+        for i, weapon_class in enumerate(self.game.weapon_classes):
+            unlocked = self.game.player.weapon_unlocked[i]
+
+            icon = self.weapon_icons[i] if unlocked else self.weapon_icons_gray[i]
+
+            x = start_x + i * (self.weapon_icon_size[0] + spacing)
+            y = start_y
+            self.screen.blit(icon, (x, y))
+
+            if i == self.game.player.current_weapon_index:
+                rect = pg.Rect(x, y, self.weapon_icon_size[0], self.weapon_icon_size[1])
+                pg.draw.rect(self.screen, (255, 255, 255), rect, 3)
