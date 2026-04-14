@@ -49,13 +49,32 @@ FLOOR_COLORS = {
     4: (30, 30, 30),  # Level 3: Dark gray (same as default)
     5: (30, 30, 30),  # Level 3: Dark gray (same as default)
 }
+CEILING_COLORS = {
+    1: (20, 20, 20),
+    2: (40, 40, 45),
+    3: (30, 35, 40),
+    4: (25, 25, 30),
+    5: (18, 18, 22),
+    6: (18, 18, 22),
+}
 
-FOV = math.pi / 2.5 #promijenjeno s 3 na 2
+LEVEL_ROTATION = {
+    1: 0.0,
+    2: 0.0,
+    3: 0.0,
+    4: 0.0,
+    5: 0.0,
+    6: 0.0,
+}
+
+FOV = math.radians(75) #promijenjeno s 3 na 2
 HALF_FOV = FOV / 2
 NUM_RAYS = WIDTH // 2
 HALF_NUM_RAYS = NUM_RAYS // 2
 DELTA_ANGLE = FOV / NUM_RAYS
 MAX_DEPTH = 20
+
+
 
 SCREEN_DIST = HALF_WIDTH / math.tan(HALF_FOV)
 SCALE = WIDTH // NUM_RAYS
