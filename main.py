@@ -139,10 +139,12 @@ class Game:
             self.player.x, self.player.y = PLAYER_POS_LEVEL4
         elif self.level_manager.current_level == 5:
             self.player.x, self.player.y = PLAYER_POS_LEVEL5
+        elif self.level_manager.current_level == 6:
+            self.player.x, self.player.y = PLAYER_POS
 
         self.object_renderer.update_sky_image()
         self.sound.change_music_for_level(self.level_manager.current_level)
-
+        
         if self.level_manager.current_level == 1:
             self.intro_sequence.start()
 
