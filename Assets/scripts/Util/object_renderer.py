@@ -26,14 +26,14 @@ class ObjectRenderer:
         self.wall_textures = self.load_wall_textures()
 
         self.sky_images = {
-            1: self.get_texture('resources/teksture/level2/sky2.png', (WIDTH, HALF_HEIGHT)),
-            2: self.get_texture('resources/teksture/level1/sky1.png', (WIDTH, HALF_HEIGHT)),
-            3: self.get_texture('resources/teksture/level2/sky2.png', (WIDTH, HALF_HEIGHT)),
-            4: self.get_texture('resources/teksture/level3/sky.png', (WIDTH, HALF_HEIGHT)),
-            5: self.get_texture('resources/teksture/level4/sky1.png', (WIDTH, HALF_HEIGHT))
+            1: self.get_sky_texture('resources/teksture/level2/sky2.png'),
+            2: self.get_sky_texture('resources/teksture/level1/sky1.png'),
+            3: self.get_sky_texture('resources/teksture/level2/sky2.png'),
+            4: self.get_sky_texture('resources/teksture/level3/sky.png',),
+            5: self.get_sky_texture('resources/teksture/level4/sky1.png')
         }
         self.sky_image = self.sky_images[1]
-        self.sky_offset = 0
+
 
         self.blood_screen = self.get_texture('resources/teksture/blood_screen.png', RES)
         self.damage_alpha = 0
@@ -107,11 +107,7 @@ class ObjectRenderer:
                 self.sky_image = self.sky_images[3]
 
     def draw_background(self):
-        self.update_sky_image()
-
-        self.sky_offset = (self.sky_offset + 4.5 * self.game.player.rel) % WIDTH
-        self.screen.blit(self.sky_image, (-self.sky_offset, 0))
-        self.screen.blit(self.sky_image, (-self.sky_offset + WIDTH, 0))
+        self.draw_sky()
 
         floor_color = FLOOR_COLOR
         if hasattr(self.game, 'level_manager'):
@@ -119,7 +115,41 @@ class ObjectRenderer:
             if current_level in FLOOR_COLORS:
                 floor_color = FLOOR_COLORS[current_level]
 
-        pg.draw.rect(self.screen, floor_color, (0, HALF_HEIGHT, WIDTH, HEIGHT))
+        pg.draw.rect(self.screen, floor_color, (0, HALF_HEIGHT, WIDTH, HALF_HEIGHT))
+
+    def draw_sky(self):
+        self.update_sky_image()
+
+        sky = self.sky_image
+        sky_w = sky.get_width()
+        sky_h = sky.get_height()
+
+        current_level = 1
+        if hasattr(self.game, 'level_manager'):
+            current_level = self.game.level_manager.current_level
+
+            level_rotation = LEVEL_ROTATION.get(current_level, 0.0)
+
+            left_angle = (self.game.player.angle - HALF_FOV + level_rotation) % math.tau
+            visible_angle = FOV
+
+            sample_width = int((visible_angle / math.tau) * sky_w)
+            sample_width = max(1, sample_width)
+
+            start_x = int((left_angle / math.tau) * sky_w) % sky_w
+
+            if start_x + sample_width <= sky_w:
+                sky_strip = sky.subsurface((start_x, 0, sample_width, sky_h))
+            else:
+                part1_w = sky_w - start_x
+                part2_w = sample_width - part1_w
+
+                sky_strip = pg.Surface((sample_width, sky_h), pg.SRCALPHA)
+                sky_strip.blit(sky, (0, 0), (start_x, 0, part1_w, sky_h))
+                sky_strip.blit(sky, (part1_w, 0), (0, 0, part2_w, sky_h))
+
+            sky_strip = pg.transform.scale(sky_strip, (WIDTH, HALF_HEIGHT))
+            self.screen.blit(sky_strip, (0, 0))
 
     def render_game_objects(self):
         list_objects = sorted(self.game.raycasting.objects_to_render, key=lambda t: t[0], reverse=True)
@@ -131,7 +161,14 @@ class ObjectRenderer:
         texture_path = resource_path(path)
         texture = pg.image.load(texture_path).convert_alpha()
         return pg.transform.scale(texture, res)
-
+    
+    def get_sky_texture(self, path):
+        texture_path = resource_path(path)
+        image = pg.image.load(texture_path).convert_alpha()
+        w, h = image.get_size()
+        new_w = int(w * (HALF_HEIGHT / h))
+        return pg.transform.scale(image, (new_w, HALF_HEIGHT))
+    
     def load_wall_textures(self):
         return {
             #1. level

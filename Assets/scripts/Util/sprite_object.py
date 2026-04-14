@@ -1,6 +1,7 @@
 import pygame as pg
 from Assets.settings import *
 import os
+import math
 from collections import deque
 from Assets.scripts.Util.font_manager import resource_path
 
@@ -57,6 +58,7 @@ class SpriteObject:
 
         self.game.raycasting.objects_to_render.append((self.norm_dist, image, pos))
 
+    '''
     def get_sprite(self):
         dx = self.x - self.player.x
         dy = self.y - self.player.y
@@ -73,6 +75,31 @@ class SpriteObject:
         self.dist = math.hypot(dx, dy)
         self.norm_dist = self.dist * math.cos(delta)
         if -self.IMAGE_HALF_WIDTH < self.screen_x < (WIDTH + self.IMAGE_HALF_WIDTH) and self.norm_dist > 0.5:
+            self.get_sprite_projection()
+    '''
+
+    def get_sprite(self):
+        dx = self.x - self.player.x
+        dy = self.y - self.player.y
+        self.dx, self.dy = dx, dy
+
+        self.theta = math.atan2(dy, dx)
+        delta = self.theta - self.player.angle
+
+        while delta > math.pi:
+            delta -= math.tau
+        while delta < -math.pi:
+            delta += math.tau
+
+        self.dist = math.hypot(dx, dy)
+        self.norm_dist = self.dist * math.cos(delta)
+
+        if self.norm_dist <= 0.1:
+            return
+
+        self.screen_x = HALF_WIDTH + math.tan(delta) * SCREEN_DIST
+
+        if -self.IMAGE_HALF_WIDTH < self.screen_x < (WIDTH + self.IMAGE_HALF_WIDTH):
             self.get_sprite_projection()
 
     def update(self):
