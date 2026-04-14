@@ -8,7 +8,7 @@ class DisorientingEffects:
         self.game = game
         self.active = False
         self.start_time = 0
-        self.duration = 60.0
+        self.duration = 10.0
 
         # Distortion effect parameters
         self.distortion_intensity = 0
