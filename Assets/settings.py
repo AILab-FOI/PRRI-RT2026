@@ -50,7 +50,7 @@ FLOOR_COLORS = {
     5: (30, 30, 30),  # Level 3: Dark gray (same as default)
 }
 
-FOV = math.pi / 2.5 #promijenjeno s 3 na 2
+FOV = math.radians(100) #promijenjeno s 3 na 2
 HALF_FOV = FOV / 2
 NUM_RAYS = WIDTH // 2
 HALF_NUM_RAYS = NUM_RAYS // 2
