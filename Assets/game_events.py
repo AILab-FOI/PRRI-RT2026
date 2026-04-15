@@ -64,6 +64,12 @@ class GameEvents:
                 self._handle_e_key_press()
             case pg.K_q:
                 self.game.player.try_heal()
+            case pg.K_1:
+                self.game.player.equip_weapon_by_index(0)
+            case pg.K_2:
+                self.game.player.equip_weapon_by_index(1)
+            case pg.K_3:
+                self.game.player.equip_weapon_by_index(2)
             #case pg.K_ESCAPE:
             #    self.pause_game()
             #case pg.K_e:
