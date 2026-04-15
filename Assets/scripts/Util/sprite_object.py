@@ -33,30 +33,49 @@ class SpriteObject:
         self._scaled_image_cache = {}
 
     def get_sprite_projection(self):
-        proj = SCREEN_DIST / self.norm_dist * self.SPRITE_SCALE
-        proj_width, proj_height = proj * self.IMAGE_RATIO, proj
+        MIN_SPRITE_DEPTH = 0.3
+        MAX_SPRITE_HEIGHT = HEIGHT * 2
+        MAX_SPRITE_WIDTH = WIDTH * 2
+        MAX_CACHE_DIMENSION = 1024
 
-        proj_width = round(proj_width)
-        proj_height = round(proj_height)
+        depth = max(self.norm_dist, MIN_SPRITE_DEPTH)
+
+        proj = SCREEN_DIST / depth * self.SPRITE_SCALE
+        proj_width = round(proj * self.IMAGE_RATIO)
+        proj_height = round(proj)
+
+        if proj_width <= 0 or proj_height <= 0:
+            return
+
+        proj_width = min(proj_width, MAX_SPRITE_WIDTH)
+        proj_height = min(proj_height, MAX_SPRITE_HEIGHT)
 
         cache_key = (proj_width, proj_height, self._current_image_id)
 
-        if cache_key not in self._scaled_image_cache:
-            scaled_image = pg.transform.scale(self.image, (proj_width, proj_height))
-            self._scaled_image_cache[cache_key] = scaled_image
+        use_cache = proj_width <= MAX_CACHE_DIMENSION and proj_height <= MAX_CACHE_DIMENSION
 
-            # Limit cache size to prevent memory issues
+        if use_cache:
+            if cache_key not in self._scaled_image_cache:
+                scaled_image = pg.transform.scale(self.image, (proj_width, proj_height))
+                self._scaled_image_cache[cache_key] = scaled_image
+
             if len(self._scaled_image_cache) > 10:
                 oldest_key = next(iter(self._scaled_image_cache))
                 del self._scaled_image_cache[oldest_key]
 
-        image = self._scaled_image_cache[cache_key]
+            image = self._scaled_image_cache[cache_key]
+        else:
+            image = pg.transform.scale(self.image, (proj_width, proj_height))
 
         self.sprite_half_width = proj_width // 2
         height_shift = proj_height * self.SPRITE_HEIGHT_SHIFT
-        pos = self.screen_x - self.sprite_half_width, HALF_HEIGHT - proj_height // 2 + height_shift
+        pos = (
+            self.screen_x - self.sprite_half_width,
+            HALF_HEIGHT - proj_height // 2 + height_shift
+        )
 
-        self.game.raycasting.objects_to_render.append((self.norm_dist, image, pos))
+        self.game.raycasting.objects_to_render.append((depth, image, pos))
+
 
     '''
     def get_sprite(self):
@@ -94,7 +113,7 @@ class SpriteObject:
         self.dist = math.hypot(dx, dy)
         self.norm_dist = self.dist * math.cos(delta)
 
-        if self.norm_dist <= 0.1:
+        if self.norm_dist <= 0.3:
             return
 
         self.screen_x = HALF_WIDTH + math.tan(delta) * SCREEN_DIST
