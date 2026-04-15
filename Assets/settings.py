@@ -67,7 +67,7 @@ LEVEL_ROTATION = {
     6: 0.0,
 }
 
-FOV = math.radians(75) #promijenjeno s 3 na 2
+FOV = math.radians(75) #75 fov default
 HALF_FOV = FOV / 2
 NUM_RAYS = WIDTH // 2
 HALF_NUM_RAYS = NUM_RAYS // 2
