@@ -49,6 +49,17 @@ class Player:
         
         
 
+    def reset(self):
+        self.health = PLAYER_MAX_HEALTH
+        self.vel_x = 0
+        self.vel_y = 0
+        self.is_dashing = False
+        self.is_invulnerable = False
+        self.invulnerability_time_left = 0
+        self.shot = False
+        self.auto_fire = False
+        self.heal_item_count = 0
+
     """ def recover_health(self):
         if self.check_health_recovery_delay() and self.health < PLAYER_MAX_HEALTH:
             self.health += 1 """

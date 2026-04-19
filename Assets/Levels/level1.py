@@ -10,7 +10,7 @@ def get_level_data():
 
     level_data['weapons'] = [
         {
-            'position': (5, 13),
+            'position': (10, 10),
             'weapon_index': 0,
             'path': 'resources/sprites/weapon/pistol_stand.png'
         }

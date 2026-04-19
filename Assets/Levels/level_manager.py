@@ -175,11 +175,11 @@ class LevelManager:
                     )
 
         exit_positions = {
-            1: (5, 24),
-            2: (12, 34),
-            3: (31, 33),
-            4: (17, 34),
-            5: (13, 34)
+            1: (10, 20),
+            2: (11, 24),
+            3: (12, 24),
+            4: (12, 24),
+            5: (13, 24)
         }
 
         if self.current_level in exit_positions:
@@ -210,11 +210,11 @@ class LevelManager:
                     terminal_positions.append((x, y))
                 elif value == 11:
                     exit_positions = {
-                        1: (5, 24),
-                        2: (12, 34),
-                        3: (31, 33),
-                        4: (17, 34),
-                        5: (13, 34)
+                        1: (10, 20),
+                        2: (11, 24),
+                        3: (12, 24),
+                        4: (12, 24),
+                        5: (13, 24)
                     }
 
                     current_pos = (x, y)

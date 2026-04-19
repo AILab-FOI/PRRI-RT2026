@@ -181,7 +181,7 @@ class GameUI:
         self.screen.blit(text_surface, text_rect)
 
     def draw_player_health(self):
-        health = str(self.game.player.health)
+        health = str(max(0, self.game.player.health))
         tint_color = self.get_level_tint_color()
 
         for i, char in enumerate(health):
