@@ -30,6 +30,10 @@ class Player:
         self.invulnerability_start_time = 0
         self.invulnerability_time_left = 0
         
+        self.is_damage_invulnerable = False
+        self.damage_invulnerability_start_time = 0
+        self.damage_invulnerability_duration = 200
+        
 
         self.last_heal_time = 0
         self.heal_cooldown = 5000  # 5 sekundi
@@ -56,6 +60,7 @@ class Player:
         self.is_dashing = False
         self.is_invulnerable = False
         self.invulnerability_time_left = 0
+        self.is_damage_invulnerable = False
         self.shot = False
         self.auto_fire = False
         self.heal_item_count = 0
@@ -75,10 +80,13 @@ class Player:
             self.game.death_screen.start()
 
     def get_damage(self, damage):
-        if self.is_invulnerable:
+        if self.is_invulnerable or self.is_damage_invulnerable:
             return
 
         self.health -= damage
+        self.is_damage_invulnerable = True
+        self.damage_invulnerability_start_time = pg.time.get_ticks()
+
         self.game.object_renderer.player_damage()
         self.game.sound.igrac_damage.play()
         self.check_game_over()
@@ -369,6 +377,13 @@ class Player:
             self.game.sound.powerup_active.stop()
             self.game.sound.powerup_end.play()
 
+    def update_damage_invulnerability(self):
+        if not self.is_damage_invulnerable:
+            return
+            
+        if pg.time.get_ticks() - self.damage_invulnerability_start_time > self.damage_invulnerability_duration:
+            self.is_damage_invulnerable = False
+
     def update(self):
         if self.dialogue_mode or (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active)or (hasattr(self.game, 'interaction') and self.game.interaction.input_active):
             return
@@ -376,6 +391,7 @@ class Player:
             self.movement()
         self.update_dash()
         self.update_invulnerability()
+        self.update_damage_invulnerability()
         self.mouse_control()
         #self.recover_health()
         self.update_auto_fire()
