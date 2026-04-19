@@ -1,7 +1,7 @@
 """
 Level 2 configuration
 """
-from Assets.npcs.enemy_npcs import StakorNPC
+from Assets.npcs.enemy_npcs import StakorNPC, TosterNPC, KlonoviNPC, ParazitNPC, JazavacNPC
 from Assets.Levels.base_level import create_base_level_structure
 
 def get_level_data():
@@ -108,11 +108,30 @@ def get_level_data():
     ]
 
     level_data['enemies'] = {
-        'count': 20,
-        'types': [StakorNPC],
-        'weights': [100],
-        'restricted_area': {(i, j) for i in range(10) for j in range(10)},
-        'fixed_positions': []
+        'waves': [
+            {
+                # Wave 1
+                'count': 5,
+                'types': [StakorNPC],
+                'weights': [100],
+                'fixed_positions': []
+            },
+            {
+                # Wave 2
+                'count': 10,
+                'types': [TosterNPC, KlonoviNPC],
+                'weights': [50, 50],
+                'fixed_positions': []
+            },
+            {
+                # Wave 3
+                'count': 20,
+                'types': [ParazitNPC, JazavacNPC],
+                'weights': [70, 30],
+                'fixed_positions': []
+            }
+        ],
+        'restricted_area': {(i, j) for i in range(10) for j in range(10)}
     }
 
     level_data['dialogue_npcs'] = [
