@@ -152,6 +152,10 @@ class NPC(AnimatedSprite):
                 self.game.player.shot = False
                 self.pain = True
                 self.health -= self.game.weapon.damage
+                
+                if hasattr(self.game, 'game_ui'):
+                    self.game.game_ui.show_hit_marker()
+                    
                 self.check_health()
 
     def check_health(self):

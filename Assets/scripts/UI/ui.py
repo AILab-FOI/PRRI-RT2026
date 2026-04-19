@@ -58,6 +58,9 @@ class GameUI:
             HALF_WIDTH - self.crosshair_size // 2,
             HALF_HEIGHT - self.crosshair_size // 2 + self.crosshair_y_offset
         )
+        
+        self.hit_marker_time = 0
+        self.hit_marker_duration = 150
 
 
     def load_texture(self, path, res):
@@ -145,6 +148,22 @@ class GameUI:
         """Draw the crosshair in the center of the screen"""
         if not hasattr(self.game, 'interaction') or not self.game.interaction.is_showing_indicator:
             self.screen.blit(self.crosshair, self.crosshair_pos)
+            
+            if pg.time.get_ticks() - self.hit_marker_time < self.hit_marker_duration:
+                cx = HALF_WIDTH
+                cy = HALF_HEIGHT + self.crosshair_y_offset
+                color = (255, 255, 255)
+                length = 12
+                offset = 8
+                thickness = 2
+                
+                pg.draw.line(self.screen, color, (cx - offset, cy - offset), (cx - offset - length, cy - offset - length), thickness)
+                pg.draw.line(self.screen, color, (cx + offset, cy - offset), (cx + offset + length, cy - offset - length), thickness)
+                pg.draw.line(self.screen, color, (cx - offset, cy + offset), (cx - offset - length, cy + offset + length), thickness)
+                pg.draw.line(self.screen, color, (cx + offset, cy + offset), (cx + offset + length, cy + offset + length), thickness)
+
+    def show_hit_marker(self):
+        self.hit_marker_time = pg.time.get_ticks()
 
     def draw_dash_indicator(self):
         current_time = pg.time.get_ticks()
