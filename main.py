@@ -166,6 +166,7 @@ class Game:
             return
 
         self.player.update()
+        self.pathfinding.update()
         self.raycasting.update()
         self.object_handler.update()
         if self.weapon:

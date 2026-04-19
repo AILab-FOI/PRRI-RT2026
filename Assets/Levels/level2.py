@@ -125,9 +125,9 @@ def get_level_data():
             },
             {
                 # Wave 3
-                'count': 20,
+                'count': 10,
                 'types': [ParazitNPC, JazavacNPC],
-                'weights': [70, 30],
+                'weights': [20, 80],
                 'fixed_positions': []
             }
         ],

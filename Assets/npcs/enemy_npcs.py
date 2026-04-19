@@ -71,7 +71,7 @@ class ParazitNPC(NPC):
                  scale=0.8, shift=0.4, animation_time=200):
         config = {
             'attack_dist': 2.0,
-            'health': 200,
+            'health': 150,
             'attack_damage': 13,
             'speed': 0.05,
             'accuracy': 0.4,

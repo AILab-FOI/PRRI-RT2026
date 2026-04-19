@@ -63,7 +63,13 @@ class Player:
         self.is_damage_invulnerable = False
         self.shot = False
         self.auto_fire = False
-        self.heal_item_count = 0
+        
+        # Give 1 heal and full ammo for all weapons
+        self.heal_item_count = 1
+        for weapon in self.weapon_inventory:
+            if weapon is not None:
+                weapon.bagAmount = 999
+                weapon.currentMagAmmount = weapon.maxMagAmount
 
     """ def recover_health(self):
         if self.check_health_recovery_delay() and self.health < PLAYER_MAX_HEALTH:

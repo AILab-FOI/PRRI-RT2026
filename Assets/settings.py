@@ -4,7 +4,7 @@ import math
 RES = WIDTH, HEIGHT = 1600, 900
 HALF_WIDTH = WIDTH // 2
 HALF_HEIGHT = HEIGHT // 2
-FPS = 0
+FPS = 144
 
 # Default player positions for each level
 PLAYER_POS = 10.5, 2.5          #uvodni level
@@ -69,7 +69,7 @@ LEVEL_ROTATION = {
 
 FOV = math.radians(75) #75 fov default
 HALF_FOV = FOV / 2
-NUM_RAYS = WIDTH // 2
+NUM_RAYS = WIDTH // 5
 HALF_NUM_RAYS = NUM_RAYS // 2
 DELTA_ANGLE = FOV / NUM_RAYS
 MAX_DEPTH = 20

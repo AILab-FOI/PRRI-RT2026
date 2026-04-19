@@ -143,6 +143,12 @@ class GameUI:
         self.draw_invulnerability_indicator()
         self.draw_crosshair()
         self.draw_weapon_ammo()
+        self.draw_fps()
+
+    def draw_fps(self):
+        fps = str(int(self.game.clock.get_fps()))
+        fps_surface = self.enemy_counter_font.render(f"FPS: {fps}", True, (0, 255, 0))
+        self.screen.blit(fps_surface, (10, 10))
 
     def draw_crosshair(self):
         """Draw the crosshair in the center of the screen"""
