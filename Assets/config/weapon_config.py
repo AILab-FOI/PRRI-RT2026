@@ -3,6 +3,7 @@ PISTOL_CONFIG = {
     'path': 'resources/sprites/weapon/pistol/0.png',
     'scale': 0.22,
     'animation_time': 210,
+    'fire_cooldown': 420,
     'damage': 25,
     'magSize': 7, #ammo in weapon
     'bagSize': 21, #ammon in the reload pool
@@ -17,6 +18,7 @@ SMG_CONFIG = {
     'path': 'resources/sprites/weapon/smg/0.png',
     'scale': 1.2,
     'animation_time': 70,
+    'fire_cooldown': 120,
     'damage': 15,
     'magSize': 30, #ammo in weapon
     'bagSize': 300, #ammon in the reload pool
@@ -33,6 +35,7 @@ PLASMA_GUN_CONFIG = {
     'path': 'resources/sprites/weapon/plasmagun/0.png',
     'scale': 0.5,
     'animation_time': 500,
+    'fire_cooldown': 650,
     'damage': 50,
     'magSize': 7, #ammo in weapon
     'bagSize': 21, #ammon in the reload pool
