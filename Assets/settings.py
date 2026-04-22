@@ -43,7 +43,7 @@ FLOOR_COLOR = (30, 30, 30)
 
 # Floor colors for different levels
 FLOOR_COLORS = {
-    1: (216, 217, 217), #level 1 white
+    1: (30, 30, 30), #level 1 dark space match
     2: (30, 30, 30),  # Level 1: Dark gray
     3: (216, 217, 217),  # Level 2: White
     4: (30, 30, 30),  # Level 3: Dark gray (same as default)
@@ -69,7 +69,7 @@ LEVEL_ROTATION = {
 
 FOV = math.radians(75) #75 fov default
 HALF_FOV = FOV / 2
-NUM_RAYS = WIDTH // 5
+NUM_RAYS = WIDTH // 2
 HALF_NUM_RAYS = NUM_RAYS // 2
 DELTA_ANGLE = FOV / NUM_RAYS
 MAX_DEPTH = 20
