@@ -126,6 +126,9 @@ class Player:
 
         if self.game.weapon.is_reloading:
             return
+        
+        if not self.game.weapon.can_fire():
+            return
     
         if(self.game.weapon.currentMagAmmount <= 0):
             return
@@ -141,8 +144,8 @@ class Player:
                 self.game.sound.pistolj.play()
 
         self.shot = True
-        self.game.weapon.is_firing = True
         self.game.weapon.currentMagAmmount -= 1
+        self.game.weapon.register_fire()
         self.last_auto_fire_time = pg.time.get_ticks()
 
     def reload_weapon(self):
