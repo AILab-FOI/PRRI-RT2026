@@ -1,6 +1,7 @@
 import os
 import importlib
 import re
+import pygame as pg
 
 from Assets.scripts.Character.interaction import InteractiveObject
 from Assets.npcs.enemy_npcs import KlonoviNPC, StakorNPC, TosterNPC, ParazitNPC, JazavacNPC
@@ -14,6 +15,7 @@ class LevelManager:
         self.max_level = 0 #deprecated trebalo bi biti automatic
         self.current_weapon_type = 'pistol'
         self.initialize_levels()
+        
 
     def initialize_levels(self):
         try:
@@ -264,8 +266,18 @@ class LevelManager:
 
     def setup_dialogue_npcs(self):
         level_data = self.get_current_level_data()
+        print(f"[DEBUG] setup_dialogue_npcs called, level: {self.current_level}")
+        print(f"[DEBUG] level_data keys: {list(level_data.keys()) if level_data else 'None'}")
+
         if level_data and 'dialogue_npcs' in level_data:
             create_dialogue_npcs(self.game, level_data['dialogue_npcs'])
+
+        # Auto-dijalog pri ulasku na razinu
+        if level_data and 'intro_dialogue' in level_data:
+            dialogue_id = level_data['intro_dialogue']
+            pg.time.set_timer(pg.USEREVENT + 10, 6500, loops=1)
+            self.game._pending_intro_dialogue = dialogue_id
+        
 
     def prepare_next_level(self):
         next_level = self.current_level + 1

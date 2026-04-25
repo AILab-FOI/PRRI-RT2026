@@ -25,8 +25,8 @@ class DialogueManager:
         self.line_spacing = 30
 
         self.speaker_colors = {
-            'Marvin': (100, 100, 255),
-            'Arthur': (255, 180, 50),
+            'E.D.D.I.E': (100, 100, 255),
+            'Player': (255, 180, 50),
             'Officer': (50, 230, 50)
         }
         self.default_speaker_color = (200, 200, 200)
@@ -49,6 +49,8 @@ class DialogueManager:
             pass
 
     def start_dialogue(self, dialogue_id, npc):
+        print(f"[DEBUG] start_auto_dialogue called with: {dialogue_id}")
+        print(f"[DEBUG] Available dialogues: {list(self.dialogues.keys())}")
         if dialogue_id in self.dialogues:
             self.game.player.dialogue_mode = True
             pg.mouse.set_pos([HALF_WIDTH, HALF_HEIGHT])
@@ -135,6 +137,39 @@ class DialogueManager:
         if self.dialogue_active and self.sound_playing and self.current_sound:
             if not pg.mixer.get_busy():
                 self.sound_playing = False
+
+    def start_auto_dialogue(self, dialogue_id):
+        """Pokreće dijalog bez NPC-a (za cutscene/intro)"""
+        if dialogue_id in self.dialogues:
+            self.current_dialogue = self.dialogues[dialogue_id]
+            self.current_npc = None
+            self.current_line_index = 0
+            self.dialogue_active = True
+            self.game.player.dialogue_mode = True
+
+            pg.mouse.set_pos([HALF_WIDTH, HALF_HEIGHT])
+            pg.mouse.get_rel()
+
+            self.game.sound.duck_music()
+            self.play_dialogue_sound()
+            return True
+        return False
+
+    def start_auto_dialogue(self, dialogue_id):
+        if dialogue_id in self.dialogues:
+            self.current_dialogue = self.dialogues[dialogue_id]
+            self.current_npc = None
+            self.current_line_index = 0
+            self.dialogue_active = True
+            self.game.player.dialogue_mode = True
+
+            pg.mouse.set_pos([HALF_WIDTH, HALF_HEIGHT])
+            pg.mouse.get_rel()
+
+            self.game.sound.duck_music()
+            self.play_dialogue_sound()
+            return True
+        return False
 
     def draw(self):
         if (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active or

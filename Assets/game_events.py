@@ -38,6 +38,13 @@ class GameEvents:
             #elif event.type == pg.KEYDOWN and event.key == pg.K_e:
             #    self._handle_e_key_press()
 
+            elif event.type == pg.USEREVENT + 10:
+                if hasattr(self.game, '_pending_intro_dialogue'):
+                    self.game.dialogue_manager.start_auto_dialogue(
+                        self.game._pending_intro_dialogue
+                    )
+                    del self.game._pending_intro_dialogue
+
             self.game.player.single_fire_event(event)
             self.game.interaction.handle_key_event(event)
 
