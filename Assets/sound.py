@@ -167,15 +167,30 @@ class Sound:
         pg.mixer.music.load(music_path)
         pg.mixer.music.set_volume(self.music_volume)
 
-
-
     def get_dialogue_sound(self, dialogue_id, line_index, speaker=None):
-        sound_key = f"{dialogue_id}_{line_index}"
+            sound_key = f"{dialogue_id}_{line_index}"
+    
+            # Vrati iz cachea ako već učitan
+            if sound_key in self.dialogue_sounds:
+                return self.dialogue_sounds[sound_key]
+    
+            # Pokušaj učitati po konvenciji: resources/sound/dialogues/level1_intro/0.mp3
+            for ext in ['mp3', 'wav', 'ogg']:
+                sound_path = f"dialogues/{dialogue_id}/{line_index}.{ext}"
+                sound = self.load_sound(sound_path, self.volume_factors['dialogue_line'])
+                if sound:
+                    self.dialogue_sounds[sound_key] = sound
+                    return sound
+    
+            return None
 
-        if sound_key in self.dialogue_sounds:
+    """def get_dialogue_sound(self, dialogue_id, line_index, speaker=None):
+            sound_key = f"{dialogue_id}_{line_index}"
+
+            if sound_key in self.dialogue_sounds:
             return self.dialogue_sounds[sound_key]
 
-        if (dialogue_id == "marvin_intro" or dialogue_id == "level2_puzzle" or dialogue_id == "marvin_ending") and speaker:
+         if (dialogue_id == "marvin_intro" or dialogue_id == "level2_puzzle" or dialogue_id == "marvin_ending") and speaker:
             try:
                 speaker_count = 0
 
@@ -213,14 +228,14 @@ class Sound:
             except Exception:
                 return None
 
-        try:
+            try:
             sound_path = f"dialogues/{dialogue_id}/{line_index}.wav"
             sound = self.load_sound(sound_path, self.volume_factors['dialogue_line'])
             if sound:
                 self.dialogue_sounds[sound_key] = sound
             return sound
-        except Exception:
-            return None
+            except Exception:
+            return None"""
 
     def update_sfx_volume(self):
         sounds = {

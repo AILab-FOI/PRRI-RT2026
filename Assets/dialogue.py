@@ -78,13 +78,35 @@ class DialogueManager:
         if "speakers" in self.current_dialogue and self.current_line_index < len(self.current_dialogue["speakers"]):
             current_speaker = self.current_dialogue["speakers"][self.current_line_index]
 
-        self.current_sound = self.game.sound.get_dialogue_sound(dialogue_id, self.current_line_index, current_speaker)
+        self.current_sound = self.game.sound.get_dialogue_sound(
+            dialogue_id, self.current_line_index, current_speaker)
 
         if self.current_sound:
             self.current_sound.play()
             self.sound_playing = True
         else:
             self.sound_playing = False
+
+    def handle_key_press(self):
+        """Poziva se kada igrač pritisne E"""
+        if not self.dialogue_active:
+            return    
+
+        current_time = pg.time.get_ticks()
+        if current_time - self.last_key_press_time > 300:
+           self.last_key_press_time = current_time
+
+           # Zaustavi trenutni zvuk pri pritisku E
+           if self.current_sound and self.sound_playing:
+              self.current_sound.stop()
+              self.sound_playing = False
+
+           if self.current_line_index == len(self.current_dialogue["lines"]) - 1:
+               self.end_dialogue()
+           else:
+                self.next_line()
+
+
 
     def get_current_dialogue_id(self):
         for dialogue_id, dialogue in self.dialogues.items():
