@@ -22,15 +22,15 @@ class Sound:
         self.path = 'resources/sound'
 
         # Slider state: keep UI-friendly percentages here.
-        self.sfx_slider_percent = 35
-        self.music_slider_percent = 35
+        self.sfx_slider_percent = 20
+        self.music_slider_percent = 20
 
         # Master caps so 100% is still sane.
-        self.sfx_master_max = 0.18
-        self.music_master_max = 0.28
+        self.sfx_master_max = 0.22
+        self.music_master_max = 0.70
 
         # Curves so low slider values are more usable.
-        self.sfx_curve_power = 2.2
+        self.sfx_curve_power = 1.5
         self.music_curve_power = 2.0
 
         self.sfx_volume = self._slider_to_sfx_volume(self.sfx_slider_percent)
@@ -94,19 +94,20 @@ class Sound:
             'powerup_end': 0.25,
 
             # Menu sounds
-            'menu_hover': 0.12,
-            'menu_click': 0.18,
+            'menu_hover': 0.30,
+            'menu_click': 0.36,
 
-            # Dialogue sounds
-            'dialogue_line': 0.22,
+            # Dialogue
+            'dialogue_line': 0.26,
+
 
             # Misc
-            'footstep': 0.10,
-            'heal': 0.25,
+            'footstep': 0.30,
+            'heal': 0.35,
 
             # Intro sequence sounds
             'intro_crash': 0.30,
-            'intro_high_pitch': 0.18,
+            'intro_high_pitch': 0.28,
         }
 
         self.sound_files = {
@@ -204,12 +205,23 @@ class Sound:
 
     def _slider_to_sfx_volume(self, slider_percent):
         x = max(0.0, min(1.0, slider_percent / 100.0))
-        return (x ** self.sfx_curve_power) * self.sfx_master_max
+
+        if x == 0.0:
+            return 0.0
+
+        min_floor = 0.16
+        curve_power = 1.35
+        curved = x ** curve_power
+
+        return (min_floor + (1.0 - min_floor) * curved) * self.sfx_master_max
 
     def _slider_to_music_volume(self, slider_percent):
-        x = max(0.0, min(1.0, slider_percent / 100.0))
-        return (x ** self.music_curve_power) * self.music_master_max
+        x = max(0.0, min(1.0, float(slider_percent) / 100.0))
+        if x == 0.0:
+            return 0.0
 
+        return (x ** 2) * self.music_master_max
+    
     def _load_sound_file(self, filename):
         try:
             return pg.mixer.Sound(self._full_sound_path(filename))
@@ -242,17 +254,18 @@ class Sound:
     
     # PUBLIC FUNCTIONS TO CALL
     
-    def set_sfx_slider(self, percent):
-        self.sfx_slider_percent = max(0, min(100, int(percent)))
+    def set_sfx_slider(self, slider_percent):
+        self.sfx_slider_percent = max(0, min(100, slider_percent))
         self.sfx_volume = self._slider_to_sfx_volume(self.sfx_slider_percent)
         self._apply_all_sfx_volumes()
 
-    def set_music_slider(self, percent):
-        self.music_slider_percent = max(0, min(100, int(percent)))
+
+    def set_music_slider(self, slider_percent):
+        self.music_slider_percent = max(0, min(100, slider_percent))
         self.music_volume = self._slider_to_music_volume(self.music_slider_percent)
         self.normal_music_volume = self.music_volume
         pg.mixer.music.set_volume(self._get_current_music_volume())
-
+    
     # Optional compatibility with code that still directly sets float values.
     def set_sfx_volume(self, value):
         value = max(0.0, min(1.0, float(value)))
@@ -312,23 +325,39 @@ class Sound:
             music_path = self._full_sound_path(self.background_music[level])
             pg.mixer.music.load(music_path)
             self.current_music_level = level
-
-            # Pygame resets volume when new music is loaded, so reapply it.
             pg.mixer.music.set_volume(self._get_current_music_volume())
             return True
-        except Exception:
+        except Exception as e:
+            print(f"Error loading music for level {level}: {e}")
             return False
 
-    def play_music(self, level=None, loops=-1, start=0.0, fade_ms=0):
-        if level is not None:
-            loaded = self.load_music_for_level(level)
-            if not loaded:
-                return False
+    def play_music(self, level, loops=-1, start=0.0, fade_ms=0):
+        if level not in self.background_music:
+            return False
 
-        pg.mixer.music.set_volume(self._get_current_music_volume())
-        pg.mixer.music.play(loops=loops, start=start, fade_ms=fade_ms)
+        try:
+            if self.current_music_level != level:
+                music_path = self._full_sound_path(self.background_music[level])
+                pg.mixer.music.load(music_path)
+                self.current_music_level = level
+
+            pg.mixer.music.set_volume(self._get_current_music_volume())
+            pg.mixer.music.play(loops=loops, start=start, fade_ms=fade_ms)
+            return True
+        except Exception as e:
+            print(f"Error playing music for level {level}: {e}")
+            return False
+
+    def play_music_from_zero_and_fade(self, level, duration, loops=-1):
+        started = self.play_music(level=level, loops=loops)
+        if not started:
+            return False
+
+        pg.mixer.music.set_volume(0.0)
+        self.fade_music_to_current_target(duration)
         return True
-
+    
+    
     def stop_music(self):
         pg.mixer.music.stop()
         self.music_fade_active = False
