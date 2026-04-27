@@ -139,7 +139,7 @@ class Button:
         self.hovered = self.rect.collidepoint(mouse_pos)
 
         if game and self.hovered and not self.was_hovered:
-            game.sound.menu_hover.play()
+            game.sound.play_sfx('menu_hover')
 
         if self.hovered:
             self.glow_size = min(self.glow_size + 0.5, 8)
@@ -162,7 +162,7 @@ class Button:
     def is_clicked(self, event, game=None):
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1 and self.hovered:
             if game:
-                game.sound.menu_click.play()
+                game.sound.play_sfx('menu_click')
             return True
         return False
 
@@ -183,13 +183,13 @@ class Slider:
         self.renderer = None
 
     def update_text(self):
-        self.text_surface = self.font.render(f"{self.text}: {int(self.value * 100)}%", True, (220, 220, 255))
+        self.text_surface = self.font.render(f"{self.text}: {int(self.value)}%", True, (220, 220, 255))
         self.text_rect = self.text_surface.get_rect(center=(self.rect.centerx, self.rect.y - 15))
 
     def update_handle_position(self):
         normalized_value = (self.value - self.min_val) / (self.max_val - self.min_val)
         handle_x = self.rect.x + (self.rect.width - self.handle_rect.width) * normalized_value
-        self.handle_rect.x = handle_x
+        self.handle_rect.x = int(handle_x)
         self.handle_rect.y = self.rect.y - 7
 
     def update(self, mouse_pos, mouse_pressed):
@@ -275,10 +275,10 @@ class Menu:
         slider_width = max_button_width
         slider_center_x = HALF_WIDTH - slider_width // 2
         self.sliders = [
-            Slider(slider_center_x, HALF_HEIGHT - 100, slider_width, 10, 0, 1,
-                   self.game.sound.music_volume, "Music Volume"),
-            Slider(slider_center_x, HALF_HEIGHT, slider_width, 10, 0, 1,
-                   self.game.sound.sfx_volume, "SFX Volume")
+            Slider(slider_center_x, HALF_HEIGHT - 100, slider_width, 10, 0, 100,
+                self.game.sound.music_slider_percent, "Music Volume"),
+            Slider(slider_center_x, HALF_HEIGHT, slider_width, 10, 0, 100,
+                self.game.sound.sfx_slider_percent, "SFX Volume")
         ]
 
         bg_image_path = resource_path('resources/teksture/pocetna.png')
@@ -361,16 +361,17 @@ class Menu:
                                 self.by_image=pg.transform.scale(self.bg_image, self.screen.get_size())
 
         if self.state == 'settings':
-            for slider in self.sliders:
-                slider.update(mouse_pos, mouse_pressed)
+            self.sliders[0].update(mouse_pos, mouse_pressed)
+            self.sliders[1].update(mouse_pos, mouse_pressed)
+
+            self.game.sound.set_music_slider(self.sliders[0].value)
+            self.game.sound.set_sfx_slider(self.sliders[1].value)
 
         return False
 
     def apply_settings(self):
-        self.game.sound.music_volume = self.sliders[0].value
-        pg.mixer.music.set_volume(self.sliders[0].value)
-        self.game.sound.sfx_volume = self.sliders[1].value
-        self.game.sound.update_sfx_volume()
+        self.game.sound.set_music_slider(self.sliders[0].value)
+        self.game.sound.set_sfx_slider(self.sliders[1].value)
 
     def draw_title(self, title_text, y_pos=100):
         if not hasattr(self, 'ui_renderer'):
