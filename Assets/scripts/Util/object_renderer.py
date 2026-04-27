@@ -54,16 +54,18 @@ class ObjectRenderer:
         self.draw_message()
 
         if self.damage_timer > 0:
-            overlay = self.blood_screen.copy()
-            overlay.set_alpha(self.damage_alpha)
-            self.screen.blit(overlay, (0, 0))
+            #overlay = self.blood_screen.copy()
+            #overlay.set_alpha(self.damage_alpha)
+            self.blood_screen.set_alpha(self.damage_alpha)
+            self.screen.blit(self.blood_screen, (0, 0))
             self.damage_alpha -= 12
             self.damage_timer -= 1
 
         if self.heal_timer > 0:
-            overlay = self.heal_screen.copy()
-            overlay.set_alpha(self.heal_alpha)
-            self.screen.blit(overlay, (0, 0))
+            #overlay = self.heal_screen.copy()
+            #overlay.set_alpha(self.heal_alpha)
+            self.heal_screen.set_alpha(self.heal_alpha)
+            self.screen.blit(self.blood_screen, (0, 0))
             self.heal_alpha -= 4
             self.heal_timer -= 1
 
