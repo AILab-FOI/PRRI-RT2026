@@ -6,6 +6,8 @@ from collections import deque
 from Assets.scripts.Util.font_manager import resource_path
 
 
+_GLOBAL_IMAGE_CACHE = {}
+
 class SpriteObject:
     def __init__(self, game, path=None,
                  pos=(10.5, 3.5), scale=0.7, shift=0.27):
@@ -17,7 +19,9 @@ class SpriteObject:
 
         try:
             sprite_path = resource_path(path)
-            self.image = pg.image.load(sprite_path).convert_alpha()
+            if sprite_path not in _GLOBAL_IMAGE_CACHE:
+                _GLOBAL_IMAGE_CACHE[sprite_path] = pg.image.load(sprite_path).convert_alpha()
+            self.image = _GLOBAL_IMAGE_CACHE[sprite_path]
         except Exception:
             self.image = pg.Surface((32, 32), pg.SRCALPHA)
             self.image.fill((0, 0, 0, 0))
@@ -155,24 +159,30 @@ class AnimatedSprite(SpriteObject):
             self.animation_trigger = True
 
     def get_images(self, path):
-        images = deque()
+        real_path = resource_path(path)
+        if real_path in _GLOBAL_IMAGE_CACHE:
+            return deque(_GLOBAL_IMAGE_CACHE[real_path])
+            
+        images_list = []
         try:
-            real_path = resource_path(path)
             if os.path.isdir(real_path):
                 for file_name in sorted(os.listdir(real_path)):
                     file_path = os.path.join(real_path, file_name)
                     if os.path.isfile(file_path):
                         try:
-                            img = pg.image.load(file_path).convert_alpha()
-                            images.append(img)
+                            if file_path not in _GLOBAL_IMAGE_CACHE:
+                                _GLOBAL_IMAGE_CACHE[file_path] = pg.image.load(file_path).convert_alpha()
+                            images_list.append(_GLOBAL_IMAGE_CACHE[file_path])
                         except Exception:
                             continue
         except Exception:
             pass
 
-        if not images:
+        if not images_list:
             blank_img = pg.Surface((32, 32), pg.SRCALPHA)
             blank_img.fill((0, 0, 0, 0))
-            images.append(blank_img)
+            images_list.append(blank_img)
+            
+        _GLOBAL_IMAGE_CACHE[real_path] = images_list
 
-        return images
+        return deque(images_list)

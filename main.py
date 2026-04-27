@@ -88,12 +88,17 @@ class Game:
 
         if not hasattr(self, 'player'):
             self.player = Player(self)
+        else:
+            self.player.reset()
         
         if not hasattr(self, 'weapon'):
             self.weapon = None
         
-        self.object_renderer = ObjectRenderer(self)
-        self.raycasting = RayCasting(self)
+        if not hasattr(self, 'object_renderer'):
+            self.object_renderer = ObjectRenderer(self)
+        
+        if not hasattr(self, 'raycasting'):
+            self.raycasting = RayCasting(self)
 
         if not hasattr(self, 'object_handler'):
             self.object_handler = ObjectHandler(self)
@@ -114,8 +119,11 @@ class Game:
         else:
             self.weapon = Pistol(self)
         '''
-        self.pathfinding = PathFinding(self)
-        self.interaction = Interaction(self)
+        if not hasattr(self, 'pathfinding'):
+            self.pathfinding = PathFinding(self)
+            
+        if not hasattr(self, 'interaction'):
+            self.interaction = Interaction(self)
 
         if not hasattr(self, 'dialogue_manager'):
             self.dialogue_manager = DialogueManager(self)
@@ -158,6 +166,7 @@ class Game:
             return
 
         self.player.update()
+        self.pathfinding.update()
         self.raycasting.update()
         self.object_handler.update()
         if self.weapon:

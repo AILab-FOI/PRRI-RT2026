@@ -83,7 +83,8 @@ class Interaction:
             elif self.active_object.interaction_type == "terminal":
                 prompt_text = "Press 'E' to access terminal"
             elif self.active_object.interaction_type == "weapon":
-                prompt_text = f"Press 'E' to pick up {self.active_object.weapon_index}"
+                weapon_name = self.game.weapon_classes[self.active_object.weapon_index].__name__
+                prompt_text = f"Press 'E' to pick up {weapon_name}"
             else:
                 prompt_text = f"Press 'E' to {self.active_object.interaction_type}"
 

@@ -4,10 +4,10 @@ import math
 RES = WIDTH, HEIGHT = 1600, 900
 HALF_WIDTH = WIDTH // 2
 HALF_HEIGHT = HEIGHT // 2
-FPS = 0
+FPS = 144
 
 # Default player positions for each level
-PLAYER_POS = 5.5, 1.5           #uvodni level
+PLAYER_POS = 10.5, 2.5          #uvodni level
 PLAYER_POS_LEVEL2 = 1.5, 2.5    #lvl 1
 PLAYER_POS_LEVEL3 = 1.5, 2.5    #lvl 2
 PLAYER_POS_LEVEL4 = 17.5, 1.5   #lvl 3
@@ -43,7 +43,7 @@ FLOOR_COLOR = (30, 30, 30)
 
 # Floor colors for different levels
 FLOOR_COLORS = {
-    1: (216, 217, 217), #level 1 white
+    1: (30, 30, 30), #level 1 dark space match
     2: (30, 30, 30),  # Level 1: Dark gray
     3: (216, 217, 217),  # Level 2: White
     4: (30, 30, 30),  # Level 3: Dark gray (same as default)
@@ -59,9 +59,9 @@ CEILING_COLORS = {
 }
 
 LEVEL_ROTATION = {
-    1: 0.0,
-    2: 0.0,
-    3: 0.0,
+    1: math.radians(90),
+    2: math.radians(90),
+    3: math.radians(90),
     4: 0.0,
     5: 0.0,
     6: 0.0,

@@ -58,6 +58,9 @@ class GameUI:
             HALF_WIDTH - self.crosshair_size // 2,
             HALF_HEIGHT - self.crosshair_size // 2 + self.crosshair_y_offset
         )
+        
+        self.hit_marker_time = 0
+        self.hit_marker_duration = 150
 
 
     def load_texture(self, path, res):
@@ -140,11 +143,33 @@ class GameUI:
         self.draw_invulnerability_indicator()
         self.draw_crosshair()
         self.draw_weapon_ammo()
+        self.draw_fps()
+
+    def draw_fps(self):
+        fps = str(int(self.game.clock.get_fps()))
+        fps_surface = self.enemy_counter_font.render(f"FPS: {fps}", True, (0, 255, 0))
+        self.screen.blit(fps_surface, (10, 10))
 
     def draw_crosshair(self):
         """Draw the crosshair in the center of the screen"""
         if not hasattr(self.game, 'interaction') or not self.game.interaction.is_showing_indicator:
             self.screen.blit(self.crosshair, self.crosshair_pos)
+            
+            if pg.time.get_ticks() - self.hit_marker_time < self.hit_marker_duration:
+                cx = HALF_WIDTH
+                cy = HALF_HEIGHT + self.crosshair_y_offset
+                color = (255, 255, 255)
+                length = 12
+                offset = 8
+                thickness = 2
+                
+                pg.draw.line(self.screen, color, (cx - offset, cy - offset), (cx - offset - length, cy - offset - length), thickness)
+                pg.draw.line(self.screen, color, (cx + offset, cy - offset), (cx + offset + length, cy - offset - length), thickness)
+                pg.draw.line(self.screen, color, (cx - offset, cy + offset), (cx - offset - length, cy + offset + length), thickness)
+                pg.draw.line(self.screen, color, (cx + offset, cy + offset), (cx + offset + length, cy + offset + length), thickness)
+
+    def show_hit_marker(self):
+        self.hit_marker_time = pg.time.get_ticks()
 
     def draw_dash_indicator(self):
         current_time = pg.time.get_ticks()
@@ -181,7 +206,7 @@ class GameUI:
         self.screen.blit(text_surface, text_rect)
 
     def draw_player_health(self):
-        health = str(self.game.player.health)
+        health = str(max(0, self.game.player.health))
         tint_color = self.get_level_tint_color()
 
         for i, char in enumerate(health):

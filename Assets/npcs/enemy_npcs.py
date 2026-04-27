@@ -8,7 +8,7 @@ class KlonoviNPC(NPC):
                  scale=0.6, shift=0.38, animation_time=180):
         config = {
             'attack_dist': 4,
-            'health': 70,
+            'health': 35,
             'attack_damage': 3,
             'speed': 0.02,
             'accuracy': 0.25,
@@ -29,7 +29,7 @@ class StakorNPC(NPC):
                  scale=0.5, shift=0.4, animation_time=200):
         config = {
             'attack_dist': 1.5,
-            'health': 50,
+            'health': 25,
             'attack_damage': 4,
             'speed': 0.035,
             'accuracy': 0.3,
@@ -51,7 +51,7 @@ class TosterNPC(NPC):
                  scale=0.6, shift=0.4, animation_time=180):
         config = {
             'attack_dist': 4.0,
-            'health': 80,
+            'health': 40,
             'attack_damage': 7,
             'speed': 0.035,
             'accuracy': 0.3,
@@ -71,7 +71,7 @@ class ParazitNPC(NPC):
                  scale=0.8, shift=0.4, animation_time=200):
         config = {
             'attack_dist': 2.0,
-            'health': 450,
+            'health': 150,
             'attack_damage': 13,
             'speed': 0.05,
             'accuracy': 0.4,
@@ -91,7 +91,7 @@ class JazavacNPC(NPC):
                  scale=0.6, shift=0.38, animation_time=180):
         config = {
             'attack_dist': 2.0,
-            'health': 120,
+            'health': 60,
             'attack_damage': 12,
             'speed': 0.025,
             'accuracy': 0.3,
@@ -111,7 +111,7 @@ class MadracNPC(NPC):
                  scale=0.6, shift=0.4, animation_time=180):
         config = {
             'attack_dist': 1.5,
-            'health': 200,
+            'health': 100,
             'attack_damage': 10,
             'speed': 0.03,
             'accuracy': 0.3,
@@ -131,7 +131,7 @@ class BossNPC(NPC):
                  scale=1.5, shift=0, animation_time=220):
         config = {
             'attack_dist': 3.5,
-            'health': 800,
+            'health': 400,
             'attack_damage': 20,
             'speed': 0.03,
             'accuracy': 0.45,

@@ -1,4 +1,5 @@
 from Assets.scripts.Util.sprite_object import *
+import pygame as pg
 from Assets.scripts.Weapons.powerup import PowerUp
 from random import choices, shuffle
 from Assets.scripts.Weapons.heal_item import Heal_item
@@ -16,21 +17,44 @@ class ObjectHandler:
         self.win_message_shown = False
         self.all_enemies_defeated = False
 
-        self.spawn_npc()
+        self.current_wave_index = 0
+        self.waves_config = []
+        self.is_waiting_for_wave = False
+        self.wave_spawn_time = 0
+        self.wave_delay = 3000
+
+        self.spawn_wave()
         self.load_decorative_sprites()
 
-    def spawn_npc(self):
+    def spawn_wave(self):
         if len(self.npc_list) > 0:
             self.npc_list = []
             self.npc_positions = {}
             self.win_message_shown = False
 
         enemy_config = self.game.level_manager.get_enemy_config()
-        self.enemies_from_pool_count = enemy_config['count']
-        self.npc_types = enemy_config['types']
-        self.weights = enemy_config['weights']
-        self.restricted_area = enemy_config['restricted_area']
-        fixed_positions_config = enemy_config.get('fixed_positions', [])
+        
+        if 'waves' in enemy_config:
+            self.waves_config = enemy_config['waves']
+            self.restricted_area = enemy_config.get('restricted_area', set())
+        else:
+            self.waves_config = [{
+                'count': enemy_config.get('count', 0),
+                'types': enemy_config.get('types', []),
+                'weights': enemy_config.get('weights', []),
+                'fixed_positions': enemy_config.get('fixed_positions', [])
+            }]
+            self.restricted_area = enemy_config.get('restricted_area', set())
+
+        if self.current_wave_index >= len(self.waves_config):
+            return
+
+        current_wave = self.waves_config[self.current_wave_index]
+
+        self.enemies_from_pool_count = current_wave.get('count', 0)
+        self.npc_types = current_wave.get('types', [])
+        self.weights = current_wave.get('weights', [])
+        fixed_positions_config = current_wave.get('fixed_positions', [])
 
         for item in fixed_positions_config:
             if isinstance(item, dict):
@@ -65,16 +89,28 @@ class ObjectHandler:
             if self.npc_types:
                 self._spawn_random_enemies(remaining_pool_enemies_to_spawn)
 
+    def current_wave_has_enemies(self):
+        if not self.waves_config or self.current_wave_index >= len(self.waves_config):
+            return False
+        current_wave = self.waves_config[self.current_wave_index]
+        return current_wave.get('count', 0) > 0 or any(isinstance(item, dict) for item in current_wave.get('fixed_positions', []))
+
     def check_win(self):
         hostile_npcs = [npc for npc in self.npc_list if npc.alive and not hasattr(npc, 'is_friendly')]
         all_enemies_defeated_now = len(hostile_npcs) == 0
 
-        if all_enemies_defeated_now and not self.win_message_shown and (self.enemies_from_pool_count > 0 or any(isinstance(item, dict) for item in self.game.level_manager.get_enemy_config().get('fixed_positions', []))):
-            self.win_message_shown = True
-            self.game.object_renderer.show_message(f"All hostile entities neutralized! Find the exit door.")
-            self.enable_level_exit()
-        elif all_enemies_defeated_now and self.enemies_from_pool_count == 0 and not any(isinstance(item, dict) for item in self.game.level_manager.get_enemy_config().get('fixed_positions', [])):
-            self.enable_level_exit(show_message=False)
+        if all_enemies_defeated_now and not self.win_message_shown and not self.is_waiting_for_wave:
+            if self.current_wave_index < len(self.waves_config) - 1:
+                self.is_waiting_for_wave = True
+                self.wave_spawn_time = pg.time.get_ticks()
+                self.game.object_renderer.show_message(f"Wave {self.current_wave_index + 2} incoming in 3 seconds!")
+            else:
+                if self.current_wave_has_enemies():
+                    self.win_message_shown = True
+                    self.game.object_renderer.show_message(f"All hostile entities neutralized! Find the exit door.")
+                    self.enable_level_exit()
+                else:
+                    self.enable_level_exit(show_message=False)
 
         self.all_enemies_defeated = all_enemies_defeated_now
 
@@ -82,7 +118,14 @@ class ObjectHandler:
         self.npc_positions = {npc.map_pos for npc in self.npc_list if npc.alive}
         [sprite.update() for sprite in self.sprite_list]
         [npc.update() for npc in self.npc_list]
-        self.check_win()
+        
+        if self.is_waiting_for_wave:
+            if pg.time.get_ticks() - self.wave_spawn_time >= self.wave_delay:
+                self.is_waiting_for_wave = False
+                self.current_wave_index += 1
+                self.spawn_wave()
+        else:
+            self.check_win()
 
     def add_npc(self, npc):
         self.npc_list.append(npc)
@@ -164,8 +207,12 @@ class ObjectHandler:
         self.npc_positions = {}
         self.win_message_shown = False
         self.all_enemies_defeated = False
+        
+        self.current_wave_index = 0
+        self.waves_config = []
+        self.is_waiting_for_wave = False
 
-        self.spawn_npc()
+        self.spawn_wave()
         self.load_decorative_sprites()
 
 
