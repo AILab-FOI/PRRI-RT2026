@@ -7,11 +7,12 @@ HALF_HEIGHT = HEIGHT // 2
 FPS = 144
 
 # Default player positions for each level
-PLAYER_POS = 10.5, 2.5          #uvodni level
-PLAYER_POS_LEVEL2 = 1.5, 2.5    #lvl 1
-PLAYER_POS_LEVEL3 = 1.5, 2.5    #lvl 2
-PLAYER_POS_LEVEL4 = 17.5, 1.5   #lvl 3
-PLAYER_POS_LEVEL5 = 13.5, 1.5   #lvl 4
+PLAYER_POS = 1.5, 1.5          #uvodni level (Level 1)
+PLAYER_POS_LEVEL2 = 1.5, 1.5    #lvl 1 (Level 2)
+PLAYER_POS_LEVEL3 = 1.5, 2.5    #lvl 2 (Level 3)
+PLAYER_POS_LEVEL4 = 1.5, 1.5   #lvl 3 (Level 4)
+PLAYER_POS_LEVEL5 = 13.5, 1.5   #lvl 4 (Level 5)
+PLAYER_POS_LEVEL6 = 9.5, 2.5    #lvl 5 (Level 6)
 
 PLAYER_ANGLE = 0
 PLAYER_SPEED = 0.004

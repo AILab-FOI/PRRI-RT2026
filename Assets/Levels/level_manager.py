@@ -9,7 +9,7 @@ from Assets.npcs.dialogue_npc import create_dialogue_npcs
 class LevelManager:
     def __init__(self, game):
         self.game = game
-        self.current_level = 1
+        self.current_level = 5
         self.level_data = {}
         self.max_level = 0 #deprecated trebalo bi biti automatic
         self.current_weapon_type = 'pistol'
@@ -175,11 +175,12 @@ class LevelManager:
                     )
 
         exit_positions = {
-            1: (10, 20),
-            2: (11, 24),
-            3: (12, 24),
-            4: (12, 24),
-            5: (13, 24)
+            1: (14.5, 3.5),
+            2: (18.5, 17.5),
+            3: (12.5, 23.5),
+            4: (17.5, 18.5),
+            5: (13.5, 23.5),
+            6: (10.5, 15.5)
         }
 
         if self.current_level in exit_positions:

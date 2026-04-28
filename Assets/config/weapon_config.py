@@ -32,7 +32,7 @@ SMG_CONFIG = {
 
 PLASMA_GUN_CONFIG = {
     'name': 'plasmagun',
-    'path': 'resources/sprites/weapon/plasmagun/0.png',
+    'path': 'resources/sprites/weapon/plasmaGun/0.png',
     'scale': 0.5,
     'animation_time': 500,
     'fire_cooldown': 650,

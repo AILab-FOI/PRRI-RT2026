@@ -293,12 +293,18 @@ def get_level_data():
     ]
 
     level_data['enemies'] = {
-        'count': 23,
+        'count': 30,
         'types': [KlonoviNPC, JazavacNPC],
-        'weights': [60, 40],
+        'weights': [50, 50],
         'restricted_area': {(i, j) for i in range(5) for j in range(5)},
         'fixed_positions': []
     }
+
+    level_data['powerups'] = [
+        {'position': (15.5, 15.5), 'powerup_type': 'invulnerability'},
+        {'position': (10.5, 10.5), 'powerup_type': 'invulnerability'},
+        {'position': (20.5, 10.5), 'powerup_type': 'invulnerability'},
+    ]
 
     level_data['dialogue_npcs'] = [
        {
