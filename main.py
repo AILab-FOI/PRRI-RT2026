@@ -164,6 +164,8 @@ class Game:
         if self.victory_screen.active:
             self.victory_screen.update()
             return
+        
+        self.sound.update()
 
         self.player.update()
         self.pathfinding.update()
@@ -175,7 +177,6 @@ class Game:
         self.dialogue_manager.update()
 
         self.intro_sequence.update()
-        self.intro_sequence.update_music_fade()
         self.disorienting_effects.update()
         self.loading_screen.update()
         self.level_transition.update()

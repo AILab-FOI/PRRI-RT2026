@@ -4,6 +4,7 @@ import math
 from Assets.config.weapon_config import get_weapon_config
 from Assets.scripts.Weapons.weapon import Pistol, SMG, PlasmaGun
 
+
 class Player:
     def __init__(self, game):
         self.game = game
@@ -12,7 +13,6 @@ class Player:
         self.shot = False
         self.health = PLAYER_MAX_HEALTH
         self.rel = 0
-        #self.health_recovery_delay = 700
         self.time_prev = pg.time.get_ticks()
 
         self.is_dashing = False
@@ -29,29 +29,26 @@ class Player:
         self.is_invulnerable = False
         self.invulnerability_start_time = 0
         self.invulnerability_time_left = 0
-        
+
         self.is_damage_invulnerable = False
         self.damage_invulnerability_start_time = 0
         self.damage_invulnerability_duration = 200
-        
 
         self.last_heal_time = 0
-        self.heal_cooldown = 5000  # 5 sekundi
+        self.heal_cooldown = 5000
         self.heal_item_count = 0
 
-        self.last_step_time = 0 #timeri za hodanje za zvukove
+        self.last_step_time = 0
         self.step_delay = 350
 
         self.vel_x = 0
         self.vel_y = 0
         self.friction = 0.8
         self.acceleration = 0.9
-        
+
         self.weapon_inventory = [None] * self.game.weapon_slot_count
         self.weapon_unlocked = [False] * self.game.weapon_slot_count
         self.current_weapon_index = -1
-        
-        
 
     def reset(self):
         self.health = PLAYER_MAX_HEALTH
@@ -63,23 +60,12 @@ class Player:
         self.is_damage_invulnerable = False
         self.shot = False
         self.auto_fire = False
-        
-        # Give 1 heal and full ammo for all weapons
+
         self.heal_item_count = 1
         for weapon in self.weapon_inventory:
             if weapon is not None:
                 weapon.bagAmount = 999
                 weapon.currentMagAmmount = weapon.maxMagAmount
-
-    """ def recover_health(self):
-        if self.check_health_recovery_delay() and self.health < PLAYER_MAX_HEALTH:
-            self.health += 1 """
-
-    """ def check_health_recovery_delay(self):
-        time_now = pg.time.get_ticks()
-        if time_now - self.time_prev > self.health_recovery_delay:
-            self.time_prev = time_now
-            return True """
 
     def check_game_over(self):
         if self.health < 1:
@@ -94,13 +80,13 @@ class Player:
         self.damage_invulnerability_start_time = pg.time.get_ticks()
 
         self.game.object_renderer.player_damage()
-        self.game.sound.igrac_damage.play()
+        self.game.sound.play_sfx('igrac_damage')
         self.check_game_over()
 
     def single_fire_event(self, event):
         if self.dialogue_mode or (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active):
             return
-        
+
         if not hasattr(self.game, 'weapon') or self.game.weapon is None:
             return
 
@@ -116,7 +102,6 @@ class Player:
         elif event.type == pg.MOUSEBUTTONUP:
             if event.button == 1:
                 self.auto_fire = False
-                
 
     def fire_weapon(self):
         if not hasattr(self.game, 'weapon') or self.game.weapon is None:
@@ -126,22 +111,22 @@ class Player:
 
         if self.game.weapon.is_reloading:
             return
-        
+
         if not self.game.weapon.can_fire():
             return
-    
-        if(self.game.weapon.currentMagAmmount <= 0):
+
+        if self.game.weapon.currentMagAmmount <= 0:
             return
-        
+
         if weapon_config and 'sound' in weapon_config:
             sound_name = weapon_config['sound']
-            if hasattr(self.game.sound, sound_name):
-                getattr(self.game.sound, sound_name).play()
+            if self.game.sound.get_sound(sound_name) is not None:
+                self.game.sound.play_sfx(sound_name)
         else:
             if self.game.weapon.name == 'smg':
-                self.game.sound.smg.play()
+                self.game.sound.play_sfx('smg')
             else:
-                self.game.sound.pistolj.play()
+                self.game.sound.play_sfx('pistolj')
 
         self.shot = True
         self.game.weapon.currentMagAmmount -= 1
@@ -155,7 +140,7 @@ class Player:
         weapon_config = get_weapon_config(self.game.weapon.name)
         if self.game.weapon.bagAmount <= 0 or self.game.weapon.currentMagAmmount == self.game.weapon.maxMagAmount:
             return False
-        
+
         missing_ammo = self.game.weapon.maxMagAmount - self.game.weapon.currentMagAmmount
         ammo_to_reload = min(missing_ammo, self.game.weapon.bagAmount)
 
@@ -164,49 +149,34 @@ class Player:
 
         self.game.weapon.currentMagAmmount += ammo_to_reload
         self.game.weapon.bagAmount -= ammo_to_reload
-
-
+        return True
 
     def try_heal(self):
         current_time = pg.time.get_ticks()
-        if (self.heal_item_count > 0 and self.health < PLAYER_MAX_HEALTH and
-            current_time - self.last_heal_time >= self.heal_cooldown):
-                self.health = min(self.health + 20, PLAYER_MAX_HEALTH)
-                self.heal_item_count -= 1
-                self.game.sound.heal.play()
-                self.game.object_renderer.player_heal()
+        if (
+            self.heal_item_count > 0
+            and self.health < PLAYER_MAX_HEALTH
+            and current_time - self.last_heal_time >= self.heal_cooldown
+        ):
+            self.health = min(self.health + 20, PLAYER_MAX_HEALTH)
+            self.heal_item_count -= 1
+            self.game.sound.play_sfx('heal')
+            self.game.object_renderer.player_heal()
+            self.last_heal_time = current_time
 
-                self.last_heal_time = current_time
-
-    """
-    def heal_player(self):
-        current_time = pg.time.get_ticks()
-
-        if self.health >= PLAYER_MAX_HEALTH:
-            return False
-
-        if current_time - self.last_heal_time < self.heal_cooldown:
-            return False
-
-        self.health = min(self.health + PLAYER_BASE_HEAL, PLAYER_MAX_HEALTH)
-        self.last_heal_time = current_time
-        return True
-        """
-    
-    def try_addAmmo(self,amount):
+    def try_addAmmo(self, amount):
         if not hasattr(self.game, 'weapon') or self.game.weapon is None:
             return False
 
         if self.game.weapon.bagAmount + amount >= 999:
             return False
-        
+
         self.game.weapon.bagAmount = min(999, self.game.weapon.bagAmount + amount)
         return True
 
-
     def movement(self):
         if self.game.interaction.input_active:
-            self.vel_x *= 0.5 
+            self.vel_x *= 0.5
             self.vel_y *= 0.5
             return
 
@@ -231,20 +201,12 @@ class Player:
             self.vel_x -= acc * sin_a
             self.vel_y += acc * cos_a
 
-
-        current_time = pg.time.get_ticks() #hodanje i zvukovi
+        current_time = pg.time.get_ticks()
         if (abs(self.vel_x) > 0.01 or abs(self.vel_y) > 0.01) and not self.is_dashing:
             if current_time - self.last_step_time >= self.step_delay:
-                if self.game.sound.footstep:
-                    self.game.sound.footstep.play()
+                if self.game.sound.get_sound('footstep') is not None:
+                    self.game.sound.play_sfx('footstep')
                 self.last_step_time = current_time
-
-
-        """if abs(self.vel_x) > 0.1 or abs(self.vel_y) > 0.1:
-            length = math.sqrt(self.vel_x * self.vel_x + self.vel_y * self.vel_y)
-            self.dash_direction = (self.vel_x / length, self.vel_y / length)
-        else:
-            self.dash_direction = (cos_a, sin_a)"""
 
         if keys[pg.K_SPACE] and not self.is_dashing:
             self.dash()
@@ -257,7 +219,7 @@ class Player:
 
     def check_wall_collision(self, dx, dy):
         offset = 0.15 if dx > 0 else -0.15
-    
+
         if self.check_wall(int(self.x + dx + offset), int(self.y)):
             self.x += dx
         else:
@@ -273,18 +235,11 @@ class Player:
         if self.dialogue_mode or (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active):
             return
 
-        """mx, _ = pg.mouse.get_pos()
-        if mx < MOUSE_BORDER_LEFT or mx > MOUSE_BORDER_RIGHT:
-            pg.mouse.set_pos([HALF_WIDTH, HALF_HEIGHT])"""
-
         if not pg.event.get_grab():
             return
 
-        """self.rel = pg.mouse.get_rel()[0]
-        self.rel = max(-MOUSE_MAX_REL, min(MOUSE_MAX_REL, self.rel))
-        self.angle += self.rel * MOUSE_SENSITIVITY * self.game.delta_time"""
         rel_x = pg.mouse.get_rel()[0]
-        rel_x= max(-MOUSE_MAX_REL, min(MOUSE_MAX_REL, rel_x))
+        rel_x = max(-MOUSE_MAX_REL, min(MOUSE_MAX_REL, rel_x))
         self.angle += rel_x * MOUSE_SENSITIVITY * self.game.delta_time
 
     def get_dash_direction(self):
@@ -313,28 +268,9 @@ class Player:
             return 0, 0
         return dx / length, dy / length
 
-    """def dash(self):
-        if hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active:
-            return False
-
-        current_time = pg.time.get_ticks()
-        if current_time - self.last_dash_time < PLAYER_DASH_COOLDOWN:
-            return False
-
-        dash_dx, dash_dy = self.get_dash_direction()
-        if dash_dx==0 and dash_dy==0:
-               return 0;
-
-        self.is_dashing = True
-        self.dash_start_time = current_time
-        self.last_dash_time = current_time
-
-        self.game.sound.player_dash.play()
-        return True"""
-
     def dash(self):
         if hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active:
-         return False
+            return False
 
         current_time = pg.time.get_ticks()
         if current_time - self.last_dash_time < PLAYER_DASH_COOLDOWN:
@@ -349,7 +285,7 @@ class Player:
         self.dash_start_time = current_time
         self.last_dash_time = current_time
 
-        self.game.sound.player_dash.play()
+        self.game.sound.play_sfx('player_dash')
         return True
 
     def update_dash(self):
@@ -369,8 +305,8 @@ class Player:
         self.is_invulnerable = True
         self.invulnerability_start_time = pg.time.get_ticks()
         self.invulnerability_time_left = POWERUP_INVULNERABILITY_DURATION
-        self.game.sound.powerup_pickup.play()
-        self.game.sound.powerup_active.play(-1)
+        self.game.sound.play_sfx('powerup_pickup')
+        self.game.sound.play_sfx('powerup_active', loops=-1)
 
     def update_invulnerability(self):
         if not self.is_invulnerable:
@@ -383,26 +319,31 @@ class Player:
 
         if self.invulnerability_time_left <= 0:
             self.is_invulnerable = False
-            self.game.sound.powerup_active.stop()
-            self.game.sound.powerup_end.play()
+            self.game.sound.stop_sfx('powerup_active')
+            self.game.sound.play_sfx('powerup_end')
 
     def update_damage_invulnerability(self):
         if not self.is_damage_invulnerable:
             return
-            
+
         if pg.time.get_ticks() - self.damage_invulnerability_start_time > self.damage_invulnerability_duration:
             self.is_damage_invulnerable = False
 
     def update(self):
-        if self.dialogue_mode or (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active)or (hasattr(self.game, 'interaction') and self.game.interaction.input_active):
+        if self.dialogue_mode or (
+            hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active
+        ) or (
+            hasattr(self.game, 'interaction') and self.game.interaction.input_active
+        ):
             return
+
         if not self.is_dashing:
             self.movement()
+
         self.update_dash()
         self.update_invulnerability()
         self.update_damage_invulnerability()
         self.mouse_control()
-        #self.recover_health()
         self.update_auto_fire()
 
     def update_auto_fire(self):
@@ -439,7 +380,7 @@ class Player:
 
         if not self.weapon_unlocked[index]:
             return False
-    
+
         if self.weapon_inventory[index] is None:
             return False
 
@@ -499,7 +440,7 @@ class Player:
                 weapon_name = weapon.name
 
             print(f"Slot {i}: {weapon_name}, unlocked={unlocked}, selected={selected}")
-    
+
     @property
     def pos(self):
         return self.x, self.y

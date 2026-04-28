@@ -30,19 +30,12 @@ class VictoryScreen:
         self.active = True
         pg.mouse.set_visible(True)
 
-        # Stop background music
-        pg.mixer.music.stop()
+        self.game.sound.stop_music()
+        self.game.sound.stop_all_sfx()
 
-        # Stop all currently playing sounds
-        pg.mixer.stop()
-
-        # Play victory sound with adjusted volume
-        if self.game.sound.victory:
-            self.original_volume = self.game.sound.victory.get_volume()
-            self.game.sound.victory.set_volume(0.4)
-            self.game.sound.victory.play()
-            # Return volume to original value after 500ms
-            pg.time.set_timer(pg.USEREVENT + 3, 500)
+        self.game.sound.fadeout_music(400)
+        self.game.sound.fadeout_all_sfx(200)
+        self.game.sound.play_sfx('victory', fade_ms=80)
 
     def handle_events(self):
         if not self.active:
@@ -54,12 +47,6 @@ class VictoryScreen:
             if event.type == pg.QUIT:
                 pg.quit()
                 sys.exit()
-
-            # Handle event for restoring victory sound volume to original value
-            elif event.type == pg.USEREVENT + 3:
-                if hasattr(self, 'original_volume') and self.game.sound.victory:
-                    self.game.sound.victory.set_volume(self.original_volume)
-                pg.time.set_timer(pg.USEREVENT + 3, 0)  # Stop timer
 
             for i, button in enumerate(self.buttons):
                 button.update(mouse_pos, self.game)

@@ -8,6 +8,8 @@ def get_level_data():
     """Return the complete level 1 data"""
     level_data = create_base_level_structure()
 
+    level_data['intro_dialogue'] = 'level1_intro'
+
     level_data['weapons'] = [
         {
             'position': (2.5, 3.5),
