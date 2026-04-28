@@ -31,30 +31,11 @@ def get_level_data():
     level_data['sprites'] = []
 
     level_data['enemies'] = {
-        'waves': [
-            {
-                # Wave 1
-                'count': 6,
-                'types': [StakorNPC],
-                'weights': [100],
-                'fixed_positions': []
-            },
-            {
-                # Wave 2
-                'count': 8,
-                'types': [TosterNPC, StakorNPC],
-                'weights': [60, 40],
-                'fixed_positions': []
-            },
-            {
-                # Wave 3
-                'count': 8,
-                'types': [TosterNPC],
-                'weights': [100],
-                'fixed_positions': []
-            }
-        ],
-        'restricted_area': {(i, j) for i in range(10) for j in range(10)}
+        'count': 22,
+        'types': [StakorNPC, TosterNPC],
+        'weights': [60, 40],
+        'restricted_area': {(i, j) for i in range(10) for j in range(10)},
+        'fixed_positions': []
     }
 
     level_data['dialogue_npcs'] = [

@@ -293,11 +293,30 @@ def get_level_data():
     ]
 
     level_data['enemies'] = {
-        'count': 30,
-        'types': [KlonoviNPC, JazavacNPC],
-        'weights': [50, 50],
-        'restricted_area': {(i, j) for i in range(5) for j in range(5)},
-        'fixed_positions': []
+        'waves': [
+            {
+                # Wave 1
+                'count': 10,
+                'types': [KlonoviNPC],
+                'weights': [100],
+                'fixed_positions': []
+            },
+            {
+                # Wave 2
+                'count': 12,
+                'types': [KlonoviNPC, JazavacNPC],
+                'weights': [70, 30],
+                'fixed_positions': []
+            },
+            {
+                # Wave 3
+                'count': 8,
+                'types': [JazavacNPC],
+                'weights': [100],
+                'fixed_positions': []
+            }
+        ],
+        'restricted_area': {(i, j) for i in range(5) for j in range(5)}
     }
 
     level_data['powerups'] = [

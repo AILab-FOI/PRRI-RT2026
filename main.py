@@ -141,6 +141,7 @@ class Game:
             self.player.x, self.player.y = PLAYER_POS
         elif self.level_manager.current_level == 2:
             self.player.x, self.player.y = PLAYER_POS_LEVEL2
+            self.player.angle = math.pi / 2
         elif self.level_manager.current_level == 3:
             self.player.x, self.player.y = PLAYER_POS_LEVEL3
         elif self.level_manager.current_level == 4:

@@ -10,6 +10,11 @@ def get_level_data():
 
     level_data['intro_dialogue'] = 'level1_intro'
 
+    level_data['doors'] = [
+        {'position': (4, 3), 'door_id': 1, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (8, 3), 'door_id': 2, 'requires_code': False, 'code': None, 'requires_door_id': None},
+    ]
+
     level_data['weapons'] = [
         {
             'position': (2.5, 3.5),
