@@ -10,147 +10,31 @@ def get_level_data():
 
     level_data['powerups'] = [
         {
-            'position': (24, 27),
+            'position': (17.5, 1.5),
             'powerup_type': 'invulnerability'
         },
         {
-            'position': (10, 27),
+            'position': (17.5, 17.5),
             'powerup_type': 'invulnerability'
         },
     ]
 
     # Doors
     level_data['doors'] = [
-
-        {
-            #glavna vrata prema mini bosss
-            'position': (17, 21),
-            'door_id': 1,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-
-        #prvi lijevi hodnik
-        {
-            #prva vrata desno
-            'position': (10, 4),
-            'door_id': 2,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-        {
-            #druga vrata desno
-            'position': (4, 4),
-            'door_id': 3,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-        {
-            #prva vrata lijevo
-            'position': (6, 7),
-            'door_id': 4,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-        {
-            #druga vrata lijevo
-            'position': (3, 7),
-            'door_id': 5,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-
-        #prvi desni hodnik
-        {
-            #prva vrata lijevo
-            'position': (24, 4),
-            'door_id': 6,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-        {
-            #druga vrata lijevo
-            'position': (30, 4),
-            'door_id': 7,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-        {
-            #prva vrata desno
-            'position': (28, 7),
-            'door_id': 8,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-        {
-            #druga vrata desno
-            'position': (31, 7),
-            'door_id': 9,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-
-        #drugi lijevi hodnik
-        {
-            #prva vrata desno
-            'position': (10, 12),
-            'door_id': 10,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-        {
-            #prva vrata lijevo
-            'position': (10, 15),
-            'door_id': 11,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-        {
-            #druga vrata lijevo
-            'position': (4, 15),
-            'door_id': 12,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-
-        #drugi desni hodnik
-        {
-            #prva vrata lijevo
-            'position': (24, 12),
-            'door_id': 13,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-        {
-            #prva vrata desno
-            'position': (24, 15),
-            'door_id': 14,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-        {
-            #druga vrata desno
-            'position': (30, 15),
-            'door_id': 15,
-            'requires_code': False,
-            'code': None,
-            'requires_door_id': None
-        },
-
+        {'position': (3, 4), 'door_id': 1, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (5, 6), 'door_id': 2, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (13, 6), 'door_id': 3, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (15, 6), 'door_id': 4, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (3, 8), 'door_id': 5, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (7, 8), 'door_id': 6, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (11, 8), 'door_id': 7, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (5, 10), 'door_id': 8, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (9, 10), 'door_id': 9, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (3, 12), 'door_id': 10, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (7, 12), 'door_id': 11, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (5, 14), 'door_id': 12, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (7, 14), 'door_id': 13, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (3, 16), 'door_id': 14, 'requires_code': False, 'code': None, 'requires_door_id': None},
     ]
 
     # Decorative sprites
@@ -160,14 +44,15 @@ def get_level_data():
 
     # Enemy configuration
     level_data['enemies'] = {
-        'count': 14,
-        'types': [TosterNPC, MadracNPC],
-        'weights': [50, 50],
+        'count': 8,
+        'types': [ParazitNPC, MadracNPC],
+        'weights': [30, 70],
         'restricted_area': {
-            *{(i, j) for i in range(14, 21) for j in range(8)}
+            *{(i, j) for i in range(5) for j in range(5)}
             },
         'fixed_positions': [
-            {'type': ParazitNPC, 'position': (24, 28)},
+            {'type': ParazitNPC, 'position': (1.5, 13.5)},
+            {'type': ParazitNPC, 'position': (17.5, 17.5)},
         ]
     }
 

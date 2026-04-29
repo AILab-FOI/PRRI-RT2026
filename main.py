@@ -1,6 +1,11 @@
 import pygame as pg
 import os
 import sys
+import gc
+
+# Reduce GC frequency to avoid periodic FPS drops.
+# Default (700, 10, 10) causes frequent pauses in game loops.
+gc.set_threshold(25000, 50, 50)
 from Assets.settings import *
 from Assets.Levels.map import *
 from Assets.scripts.Character.player import *
@@ -141,6 +146,7 @@ class Game:
             self.player.x, self.player.y = PLAYER_POS
         elif self.level_manager.current_level == 2:
             self.player.x, self.player.y = PLAYER_POS_LEVEL2
+            self.player.angle = math.pi / 2
         elif self.level_manager.current_level == 3:
             self.player.x, self.player.y = PLAYER_POS_LEVEL3
         elif self.level_manager.current_level == 4:
@@ -148,7 +154,7 @@ class Game:
         elif self.level_manager.current_level == 5:
             self.player.x, self.player.y = PLAYER_POS_LEVEL5
         elif self.level_manager.current_level == 6:
-            self.player.x, self.player.y = PLAYER_POS
+            self.player.x, self.player.y = PLAYER_POS_LEVEL6
 
         self.object_renderer.update_sky_image()
         self.sound.change_music_for_level(self.level_manager.current_level)

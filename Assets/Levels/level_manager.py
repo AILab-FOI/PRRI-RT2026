@@ -10,7 +10,7 @@ from Assets.npcs.dialogue_npc import create_dialogue_npcs
 class LevelManager:
     def __init__(self, game):
         self.game = game
-        self.current_level = 1
+        self.current_level = 3
         self.level_data = {}
         self.max_level = 0 #deprecated trebalo bi biti automatic
         self.current_weapon_type = 'pistol'
@@ -177,23 +177,35 @@ class LevelManager:
                     )
 
         exit_positions = {
-            1: (10, 20),
-            2: (11, 24),
-            3: (12, 24),
-            4: (12, 24),
-            5: (13, 24)
+            1: (14.5, 3.5),
+            2: (18.5, 17.5),
+            3: (12.5, 23.5),
+            4: (17.5, 18.5),
+            5: (13.5, 23.5),
+            6: (10.5, 15.5)
         }
 
         if self.current_level in exit_positions:
             exit_pos = exit_positions[self.current_level]
+            
+            # Postavljanje koda za 2. level (kod je '8332' kao na terminalu)
+            req_code = False
+            exit_code = None
+            if self.current_level == 2:
+                req_code = True
+                exit_code = '8332'
+                
             level_exit = InteractiveObject(
                 self.game,
                 path=level_door_path,
                 pos=exit_pos,
                 interaction_type="level_door",
-                is_level_exit=True
+                is_level_exit=True,
+                requires_code=req_code,
+                code=exit_code
             )
-            self.game.object_handler.add_sprite(level_exit)
+            # Ne dodajemo u sprite_list jer user koristi zidnu teksturu na mapi
+            # self.game.object_handler.add_sprite(level_exit)
             self.game.interaction.add_object(level_exit)
 
     def auto_detect_interactive_objects(self):

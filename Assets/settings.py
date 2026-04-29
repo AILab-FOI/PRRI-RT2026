@@ -7,12 +7,12 @@ HALF_HEIGHT = HEIGHT // 2
 FPS = 144
 
 # Default player positions for each level
-PLAYER_POS = 10.5, 2.5          #uvodni level
-PLAYER_POS_LEVEL2 = 1.5, 2.5    #lvl 1
-PLAYER_POS_LEVEL3 = 1.5, 2.5    #lvl 2
-PLAYER_POS_LEVEL4 = 17.5, 1.5   #lvl 3
-PLAYER_POS_LEVEL5 = 13.5, 1.5   #lvl 4
-
+PLAYER_POS = 1.5, 1.5          #uvodni level (Level 1)
+PLAYER_POS_LEVEL2 = 1.5, 1.5    #lvl 2 
+PLAYER_POS_LEVEL3 = 1.5, 2.5    #lvl 3 
+PLAYER_POS_LEVEL4 = 1.5, 1.5   #lvl 4
+PLAYER_POS_LEVEL5 = 13.5, 1.5   #lvl 5 
+PLAYER_POS_LEVEL6 = 9.5, 2.5    #lvl 6 
 PLAYER_ANGLE = 0
 PLAYER_SPEED = 0.004
 PLAYER_ROT_SPEED = 0.002
@@ -45,7 +45,7 @@ FLOOR_COLOR = (30, 30, 30)
 FLOOR_COLORS = {
     1: (30, 30, 30), #level 1 dark space match
     2: (30, 30, 30),  # Level 1: Dark gray
-    3: (216, 217, 217),  # Level 2: White
+    3: (20, 22, 25),  # Level 2: Tamno siva usklađena s novom teksturom zida
     4: (30, 30, 30),  # Level 3: Dark gray (same as default)
     5: (30, 30, 30),  # Level 3: Dark gray (same as default)
 }

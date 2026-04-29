@@ -74,7 +74,7 @@ class Interaction:
                             (HALF_WIDTH, HALF_HEIGHT + 15), 2)
 
             if self.active_object.interaction_type == "level_door":
-                if hasattr(self.game, 'level_manager') and self.game.level_manager.current_level == 5:
+                if hasattr(self.game, 'level_manager') and self.game.level_manager.current_level == 6:
                     prompt_text = "Press 'E' to finish the game"
                 else:
                     prompt_text = "Press 'E' to go to the next level"
@@ -170,7 +170,10 @@ class Interaction:
                 if self.active_object.is_level_exit:
                     if hasattr(self.game.object_handler, 'all_enemies_defeated') and self.game.object_handler.all_enemies_defeated:
                         if self.active_object.is_enabled:
-                            self.game.next_level()
+                            if self.active_object.requires_code and not self.active_object.is_unlocked:
+                                self.input_active = True
+                            else:
+                                self.game.next_level()
                         else:
                             self.message = "This door is locked."
                             self.message_time = pg.time.get_ticks()
@@ -190,8 +193,12 @@ class Interaction:
 
         if self.input_code == correct_code:
             self.active_object.is_unlocked = True
-            self.unlocked_doors.add(self.active_object.door_id)
-            self.open_door()
+            if self.active_object.interaction_type == "door":
+                self.unlocked_doors.add(self.active_object.door_id)
+                self.open_door()
+            elif self.active_object.interaction_type == "level_door":
+                self.input_active = False
+                self.game.next_level()
         else:
             self.game.player.get_damage(10)
             self.message = "Incorrect code! Security system activated!"

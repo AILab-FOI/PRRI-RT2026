@@ -1,7 +1,7 @@
 """
 Level 5 configuration
 """
-from Assets.npcs.enemy_npcs import BossNPC
+from Assets.npcs.enemy_npcs import BossNPC, KlonoviNPC
 from Assets.Levels.base_level import create_base_level_structure
 
 def get_level_data():
@@ -48,19 +48,21 @@ def get_level_data():
 
     # Enemy configuration
     level_data['enemies'] = {
-        'count': 0,
-        'types': [BossNPC],
-        'weights': [50, 50],
-        'restricted_area': {(i, j) for i in range(10) for j in range(10)},
+        'count': 5,
+        'types': [KlonoviNPC],
+        'weights': [100],
+        'restricted_area': {(i, j) for i in range(10, 17) for j in range(6)},
         'fixed_positions': [
             {'type': BossNPC, 'position': (13, 17)},  # Boss
+            {'type': KlonoviNPC, 'position': (11, 15)},
+            {'type': KlonoviNPC, 'position': (15, 15)},
         ]
     }
 
     # Dialogue NPCs
     level_data['dialogue_npcs'] = [
         {
-            'pos': (13.5, 30.5),
+            'pos': (13.5, 22.5),
             'dialogue_id': 'marvin_ending',
             'path': 'resources/sprites/npc/dialogue_npc/0.png'
         }

@@ -2,7 +2,7 @@
 Level 1 configuration
 """
 from Assets.Levels.base_level import create_base_level_structure
-
+from Assets.npcs.enemy_npcs import StakorNPC, KlonoviNPC
 
 def get_level_data():
     """Return the complete level 1 data"""
@@ -10,20 +10,33 @@ def get_level_data():
 
     level_data['intro_dialogue'] = 'level1_intro'
 
+    level_data['doors'] = [
+        {'position': (4, 3), 'door_id': 1, 'requires_code': False, 'code': None, 'requires_door_id': None},
+        {'position': (8, 3), 'door_id': 2, 'requires_code': False, 'code': None, 'requires_door_id': None},
+    ]
+
     level_data['weapons'] = [
         {
-            'position': (10, 10),
+            'position': (2.5, 3.5),
             'weapon_index': 0,
             'path': 'resources/sprites/weapon/pistol_stand.png'
         }
     ]
 
     level_data['enemies'] = {
-        'count': 0,
-        'types': [],
-        'weights': [],
-        'restricted_area': {(i, j) for i in range(9, 12) for j in range(9, 12)},
+        'count': 4,
+        'types': [StakorNPC, KlonoviNPC],
+        'weights': [70, 30],
+        'restricted_area': {(i, j) for i in range(5) for j in range(7)},
         'fixed_positions': []
     }
+
+    level_data['heal_item'] = [
+        {'position': (2.5, 6.5)},
+    ]
+
+    level_data['ammo_pickup'] = [
+        {'position': (6.5, 6.5)},
+    ]
 
     return level_data
