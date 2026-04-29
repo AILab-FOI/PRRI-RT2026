@@ -194,7 +194,8 @@ class LevelManager:
                 interaction_type="level_door",
                 is_level_exit=True
             )
-            self.game.object_handler.add_sprite(level_exit)
+            # Ne dodajemo u sprite_list jer user koristi zidnu teksturu na mapi
+            # self.game.object_handler.add_sprite(level_exit)
             self.game.interaction.add_object(level_exit)
 
     def auto_detect_interactive_objects(self):
