@@ -45,7 +45,7 @@ FLOOR_COLOR = (30, 30, 30)
 FLOOR_COLORS = {
     1: (30, 30, 30), #level 1 dark space match
     2: (30, 30, 30),  # Level 1: Dark gray
-    3: (216, 217, 217),  # Level 2: White
+    3: (20, 22, 25),  # Level 2: Tamno siva usklađena s novom teksturom zida
     4: (30, 30, 30),  # Level 3: Dark gray (same as default)
     5: (30, 30, 30),  # Level 3: Dark gray (same as default)
 }

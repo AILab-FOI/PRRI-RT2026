@@ -12,21 +12,21 @@ def get_level_data():
         'waves': [
             {
                 # Wave 1
-                'count': 10,
+                'count': 0, # Privremeno isključeno zbog testiranja tekstura
                 'types': [KlonoviNPC],
                 'weights': [100],
                 'fixed_positions': []
             },
             {
                 # Wave 2
-                'count': 12,
+                'count': 0,
                 'types': [KlonoviNPC, JazavacNPC],
                 'weights': [70, 30],
                 'fixed_positions': []
             },
             {
                 # Wave 3
-                'count': 8,
+                'count': 0,
                 'types': [JazavacNPC],
                 'weights': [100],
                 'fixed_positions': []
