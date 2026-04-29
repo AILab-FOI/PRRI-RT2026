@@ -115,9 +115,14 @@ class ObjectHandler:
         self.all_enemies_defeated = all_enemies_defeated_now
 
     def update(self):
+        # Remove corpses whose linger timer has expired
+        self.npc_list = [npc for npc in self.npc_list if not getattr(npc, 'should_remove', False)]
+
         self.npc_positions = {npc.map_pos for npc in self.npc_list if npc.alive}
-        [sprite.update() for sprite in self.sprite_list]
-        [npc.update() for npc in self.npc_list]
+        for sprite in self.sprite_list:
+            sprite.update()
+        for npc in self.npc_list:
+            npc.update()
         
         if self.is_waiting_for_wave:
             if pg.time.get_ticks() - self.wave_spawn_time >= self.wave_delay:

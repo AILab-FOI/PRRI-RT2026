@@ -34,11 +34,21 @@ class ObjectRenderer:
         }
         self.sky_image = self.sky_images[1]
 
+        # Pre-scale sky panoramas to full unfolded width so draw_sky
+        # never needs pg.transform.scale per frame (major perf win).
+        self._unfolded_width = int(WIDTH * math.tau / FOV)
+        self._sky_unfolded = {}
+        for lvl, sky_img in self.sky_images.items():
+            self._sky_unfolded[lvl] = pg.transform.scale(
+                sky_img, (self._unfolded_width, HALF_HEIGHT)
+            ).convert()
+        self._sky_current = self._sky_unfolded[1]
 
-        self.blood_screen = self.get_texture('resources/teksture/blood_screen.png', RES)
+
+        self.blood_screen = self.get_texture('resources/teksture/blood_screen.png', RES, alpha=True)
         self.damage_alpha = 0
         self.damage_timer = 0
-        self.heal_screen = self.get_texture('resources/teksture/heal_screen.png', RES)
+        self.heal_screen = self.get_texture('resources/teksture/heal_screen.png', RES, alpha=True)
         self.heal_alpha = 0
         self.heal_timer = 0
         self.game_over_image = self.get_texture('resources/teksture/theEnd.png', RES)
@@ -105,6 +115,11 @@ class ObjectRenderer:
                 self.sky_image = self.sky_images[current_level]
             else:
                 self.sky_image = self.sky_images[3]
+            # Update fast-path unfolded sky reference
+            if current_level in self._sky_unfolded:
+                self._sky_current = self._sky_unfolded[current_level]
+            else:
+                self._sky_current = self._sky_unfolded.get(3, next(iter(self._sky_unfolded.values())))
 
     def draw_background(self):
         self.draw_sky()
@@ -120,46 +135,37 @@ class ObjectRenderer:
     def draw_sky(self):
         self.update_sky_image()
 
-        sky = self.sky_image
-        sky_w = sky.get_width()
-        sky_h = sky.get_height()
+        sky = self._sky_current
+        sky_w = self._unfolded_width
 
         current_level = 1
         if hasattr(self.game, 'level_manager'):
             current_level = self.game.level_manager.current_level
 
-            level_rotation = LEVEL_ROTATION.get(current_level, 0.0)
+        level_rotation = LEVEL_ROTATION.get(current_level, 0.0)
+        left_angle = (self.game.player.angle - HALF_FOV + level_rotation) % math.tau
+        start_x = int((left_angle / math.tau) * sky_w) % sky_w
 
-            left_angle = (self.game.player.angle - HALF_FOV + level_rotation) % math.tau
-            visible_angle = FOV
-
-            sample_width = int((visible_angle / math.tau) * sky_w)
-            sample_width = max(1, sample_width)
-
-            start_x = int((left_angle / math.tau) * sky_w) % sky_w
-
-            if start_x + sample_width <= sky_w:
-                sky_strip = sky.subsurface((start_x, 0, sample_width, sky_h))
-            else:
-                part1_w = sky_w - start_x
-                part2_w = sample_width - part1_w
-
-                sky_strip = pg.Surface((sample_width, sky_h), pg.SRCALPHA)
-                sky_strip.blit(sky, (0, 0), (start_x, 0, part1_w, sky_h))
-                sky_strip.blit(sky, (part1_w, 0), (0, 0, part2_w, sky_h))
-
-            sky_strip = pg.transform.scale(sky_strip, (WIDTH, HALF_HEIGHT))
-            self.screen.blit(sky_strip, (0, 0))
+        # Fast path: just blit a WIDTH-wide region, no scaling needed
+        if start_x + WIDTH <= sky_w:
+            self.screen.blit(sky, (0, 0), (start_x, 0, WIDTH, HALF_HEIGHT))
+        else:
+            part1_w = sky_w - start_x
+            self.screen.blit(sky, (0, 0), (start_x, 0, part1_w, HALF_HEIGHT))
+            self.screen.blit(sky, (part1_w, 0), (0, 0, WIDTH - part1_w, HALF_HEIGHT))
 
     def render_game_objects(self):
-        list_objects = sorted(self.game.raycasting.objects_to_render, key=lambda t: t[0], reverse=True)
-        for _, image, pos in list_objects:
-            self.screen.blit(image, pos)
+        objs = self.game.raycasting.objects_to_render
+        objs.sort(key=lambda t: t[0], reverse=True)
+        blit = self.screen.blit
+        for _, image, pos in objs:
+            blit(image, pos)
 
     @staticmethod
-    def get_texture(path, res=(TEXTURE_SIZE, TEXTURE_SIZE)):
+    def get_texture(path, res=(TEXTURE_SIZE, TEXTURE_SIZE), alpha=False):
         texture_path = resource_path(path)
-        texture = pg.image.load(texture_path).convert_alpha()
+        texture = pg.image.load(texture_path)
+        texture = texture.convert_alpha() if alpha else texture.convert()
         return pg.transform.scale(texture, res)
     
     def get_sky_texture(self, path):

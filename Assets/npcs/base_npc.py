@@ -1,6 +1,7 @@
 from Assets.scripts.Util.sprite_object import AnimatedSprite
 from random import randint, random
 import math
+import pygame as pg
 from Assets.settings import *
 
 
@@ -72,6 +73,11 @@ class NPC(AnimatedSprite):
         self.player_search_trigger = False
         self.play_death_sound = False
         self.death_sound_delay = 0
+        # Corpse removal timer
+        self.should_remove = False
+        self.death_anim_done = False
+        self.death_done_time = 0
+        self.corpse_linger_ms = 5000  # remove body 5s after death anim ends
 
     def _update_config_recursive(self, target, source):
         for key, value in source.items():
@@ -137,6 +143,9 @@ class NPC(AnimatedSprite):
                     self._current_image_id = 0
                 if hasattr(self, '_scaled_image_cache'):
                     self._scaled_image_cache = {}
+            elif not self.death_anim_done and self.death_frame >= len(self.death_images) - 1:
+                self.death_anim_done = True
+                self.death_done_time = pg.time.get_ticks()
 
     def animate_pain(self):
         self.animate(self.pain_images)
@@ -177,6 +186,9 @@ class NPC(AnimatedSprite):
     def run_logic(self):
         if not self.alive:
             self.animate_death()
+            # Mark for removal after corpse linger time
+            if self.death_anim_done and pg.time.get_ticks() - self.death_done_time > self.corpse_linger_ms:
+                self.should_remove = True
             return
         self.ray_cast_value = self.ray_cast_player_npc()
         self.check_hit_in_npc()

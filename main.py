@@ -1,6 +1,11 @@
 import pygame as pg
 import os
 import sys
+import gc
+
+# Reduce GC frequency to avoid periodic FPS drops.
+# Default (700, 10, 10) causes frequent pauses in game loops.
+gc.set_threshold(25000, 50, 50)
 from Assets.settings import *
 from Assets.Levels.map import *
 from Assets.scripts.Character.player import *

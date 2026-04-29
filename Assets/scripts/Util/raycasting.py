@@ -105,61 +105,67 @@ class RayCasting:
     '''
 
     def ray_cast(self):
-        self.ray_casting_result = []
+        result = self.ray_casting_result
+        result.clear()
+        append = result.append
 
-        px,py = self.game.player.pos
-        map_x,map_y = int(px),int(py)
+        px, py = self.game.player.pos
+        world = self.game.map.world_map
 
         angle = self.game.player.angle
         dir_x = math.cos(angle)
         dir_y = math.sin(angle)
 
-        plane_len= math.tan(FOV/2)
-        plane_x =-dir_y * plane_len
-        plane_y =dir_x * plane_len
+        plane_len = math.tan(FOV / 2)
+        plane_x = -dir_y * plane_len
+        plane_y = dir_x * plane_len
+
+        inv_num = 2.0 / NUM_RAYS
+        max_steps = MAX_DEPTH * 4
+        _floor = math.floor
 
         for ray in range(NUM_RAYS):
-            camera_x = 2 * ray / NUM_RAYS - 1
+            camera_x = ray * inv_num - 1
             ray_dir_x = dir_x + plane_x * camera_x
             ray_dir_y = dir_y + plane_y * camera_x
 
-            map_x = int(px)
-            map_y = int(py)
+            mx = int(px)
+            my = int(py)
 
             delta_dist_x = abs(1 / ray_dir_x) if ray_dir_x != 0 else 1e30
             delta_dist_y = abs(1 / ray_dir_y) if ray_dir_y != 0 else 1e30
 
             if ray_dir_x < 0:
                 step_x = -1
-                side_dist_x = (px - map_x) * delta_dist_x
+                side_dist_x = (px - mx) * delta_dist_x
             else:
                 step_x = 1
-                side_dist_x = (map_x + 1.0 - px) * delta_dist_x
+                side_dist_x = (mx + 1.0 - px) * delta_dist_x
 
             if ray_dir_y < 0:
                 step_y = -1
-                side_dist_y = (py - map_y) * delta_dist_y
+                side_dist_y = (py - my) * delta_dist_y
             else:
                 step_y = 1
-                side_dist_y = (map_y + 1.0 - py) * delta_dist_y
+                side_dist_y = (my + 1.0 - py) * delta_dist_y
 
             hit = False
             side = 0
             texture = 1
 
-            for _ in range(MAX_DEPTH * 4):
+            for _ in range(max_steps):
                 if side_dist_x < side_dist_y:
                     side_dist_x += delta_dist_x
-                    map_x += step_x
+                    mx += step_x
                     side = 0
                 else:
                     side_dist_y += delta_dist_y
-                    map_y += step_y
+                    my += step_y
                     side = 1
 
-                tile = (map_x, map_y)
-                if tile in self.game.map.world_map:
-                    texture = self.game.map.world_map[tile]
+                wall_val = world.get((mx, my))
+                if wall_val:
+                    texture = wall_val
                     hit = True
                     break
 
@@ -173,7 +179,7 @@ class RayCasting:
                 perp_depth = side_dist_y - delta_dist_y
                 wall_x = px + perp_depth * ray_dir_x
 
-            wall_x -= math.floor(wall_x)
+            wall_x -= _floor(wall_x)
 
             if side == 0:
                 offset = wall_x if ray_dir_x < 0 else (1 - wall_x)
@@ -182,7 +188,7 @@ class RayCasting:
 
             proj_height = SCREEN_DIST / (perp_depth + 0.0001)
 
-            self.ray_casting_result.append((perp_depth, proj_height, texture, offset))
+            append((perp_depth, proj_height, texture, offset))
 
     def update(self):
         self.ray_cast()
