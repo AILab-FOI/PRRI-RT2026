@@ -193,7 +193,7 @@ class ObjectRenderer:
             12: self.get_texture('resources/teksture/ukras4.png'), ## ne korišteno warning terminal
 
             14: self.get_texture('resources/teksture/ukras1.png'), ## panel za level 1 crno sivi
-            15: self.get_texture('resources/teksture/prozor.jpg'), ## prozor ne korišten nema smisla
+            15: self.get_texture('resources/teksture/novizid1.png'), ## novo test
 
             #2. level
             4: self.get_texture('resources/teksture/level2/zid2.png'), ## bijeli zid level 1 / level 2 - prijelaz/vanjski
