@@ -16,7 +16,7 @@ PISTOL_CONFIG = {
 SMG_CONFIG = {
     'name': 'smg',
     'path': 'resources/sprites/weapon/smg/0.png',
-    'scale': 1.2,
+    'scale': 0.4,
     'animation_time': 70,
     'fire_cooldown': 120,
     'damage': 15,
@@ -26,7 +26,7 @@ SMG_CONFIG = {
     'auto_fire': True,
     'auto_fire_delay': 70,
     'sound': 'smg',
-    'right_offset': 230,
+    'right_offset': 0,
     'description': 'Rapid-fire weapon ideal for close quarters combat.'
 }
 

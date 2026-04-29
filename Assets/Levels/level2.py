@@ -10,7 +10,7 @@ def get_level_data():
 
     level_data['terminals'] = [
         {
-            'position': (1.5, 17.5),
+            'position': (1, 17),
             'code': '8332',
             'unlocks_door_id': None
         }
@@ -20,7 +20,7 @@ def get_level_data():
 
     level_data['weapons'] = [
         {
-            'position': (2, 4),
+            'position': (1.5, 4.5),
             'weapon_index': 1,
             'path': 'resources/sprites/weapon/puska_stand.png'
         },
