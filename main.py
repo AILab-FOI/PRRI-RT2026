@@ -64,7 +64,7 @@ class Game:
         self.weapon_slot_count = len(self.weapon_classes)
 
         self.game_initialized = False
-        self.show_menu()
+        self.show_menu(play_menu_music=True)
 
         
 
@@ -230,10 +230,14 @@ class Game:
         self.new_game()
         pg.mouse.set_visible(False)
 
-    def show_menu(self):
+    def show_menu(self, play_menu_music=False):
         pg.mouse.set_pos([HALF_WIDTH, HALF_HEIGHT]) #postavlja miš na centar prozora])
         pg.event.set_grab(False)#oslobađa miš
         pg.mouse.set_visible(True)
+        
+        if play_menu_music:
+            self.sound.change_music_for_level(0)
+        
         self.menu.state = 'main'
         self.menu.run()
 
