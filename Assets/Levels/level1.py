@@ -39,4 +39,8 @@ def get_level_data():
         {'position': (6.5, 6.5)},
     ]
 
+    level_data['pickup_item'] = [
+        {'position':(2, 2)}
+    ]
+
     return level_data

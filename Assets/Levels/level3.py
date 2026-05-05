@@ -38,15 +38,18 @@ def get_level_data():
     level_data['powerups'] = [
         {'position': (15.5, 15.5), 'powerup_type': 'invulnerability'},
         {'position': (10.5, 10.5), 'powerup_type': 'invulnerability'},
-        {'position': (20.5, 10.5), 'powerup_type': 'invulnerability'},
     ]
-
+    #{'position': (11.5, 11.5), 'powerup_type': 'invulnerability'}, ovo se stoposto ispise
     level_data['dialogue_npcs'] = [
        {
             'pos': (30.8, 12.3),
             'dialogue_id': 'level2_puzzle',
             'path': 'resources/sprites/npc/dialogue_npc/0.png'
        }
+    ]
+
+    level_data['pickup_item'] = [
+        {'position':(11.5, 11.5)}
     ]
 
     return level_data

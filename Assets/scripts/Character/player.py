@@ -38,6 +38,8 @@ class Player:
         self.heal_cooldown = 5000
         self.heal_item_count = 0
 
+        self.pickup_item_count = 0
+
         self.last_step_time = 0
         self.step_delay = 350
 
