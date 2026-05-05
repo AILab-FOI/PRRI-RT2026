@@ -222,7 +222,7 @@ class ObjectRenderer:
 
 
             #uvodni level
-            33: self.get_texture('resources/teksture/uvod/zid1.jpg'), #bijeli zid crvena svjetla manja količina krvi u sredini
+            33: self.get_texture('resources/teksture/uvod/zid1.png'), #bijeli zid crvena svjetla manja količina krvi u sredini
             34: self.get_texture('resources/teksture/uvod/zid2.jpg'), #bijeli zid s srednjom količinom krvi
             35: self.get_texture('resources/teksture/uvod/zid3.jpg'), #bijeli zid s velikom količinom krvi
             36: self.get_texture('resources/teksture/uvod/zid4.jpg'), #bijeli zid s krvavom rukom u sredini
