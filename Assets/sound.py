@@ -113,7 +113,7 @@ class Sound:
 
         self.sound_files = {
             # Weapon sounds
-            'pistolj': 'Pistolj.wav',
+            'pistolj': 'Pistolj_wportalsfx.mp3',
             'smg': 'Puska.mp3',
             'plasmagun': 'plasmaGun.wav',
             'weapon_pickup': 'podizanje_oruzja.wav',
