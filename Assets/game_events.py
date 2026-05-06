@@ -65,6 +65,9 @@ class GameEvents:
     
     def handle_keydown(self,key):
          match key:
+            case pg.K_TAB:
+               if self.game.dialogue_manager.dialogue_active:
+                  self.game.dialogue_manager.end_dialogue()
             case pg.K_r:
                 self.game.player.reload_weapon()
             case pg.K_e:

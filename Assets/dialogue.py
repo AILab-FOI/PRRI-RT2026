@@ -268,3 +268,7 @@ class DialogueManager:
         prompt_x = box_x + box_width - prompt_text.get_width() - self.dialogue_box_padding
         prompt_y = box_y + box_height - prompt_text.get_height() - self.dialogue_box_padding
         screen.blit(prompt_text, (prompt_x, prompt_y))
+
+        skip_text = self.font.render("Press TAB to skip", True, (150, 150, 150))
+        skip_rect = skip_text.get_rect(bottomleft=(box_x + self.dialogue_box_padding, box_y + box_height - self.dialogue_box_padding))
+        screen.blit(skip_text, skip_rect)

@@ -153,6 +153,7 @@ class SMG(Weapon):
                          fire_cooldown=config['fire_cooldown'])
         self.accuracy = config['accuracy']
         self.auto_fire = config['auto_fire']
+        self.reload_duration = config.get('reload_duration', 400)
         right_offset = config.get('right_offset', 230)
         self.weapon_pos = (HALF_WIDTH - self.images[0].get_width() // 2 + right_offset,
                           HEIGHT - self.images[0].get_height())

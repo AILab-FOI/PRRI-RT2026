@@ -46,6 +46,7 @@ class Sound:
             'smg': 0.28,
             'plasmagun': 0.35,
             'weapon_pickup': 0.35,
+            'reload_smg': 0.30,
 
             # Player sounds
             'igrac_damage': 0.35,
@@ -113,9 +114,10 @@ class Sound:
         self.sound_files = {
             # Weapon sounds
             'pistolj': 'Pistolj.wav',
-            'smg': 'Puska.wav',
+            'smg': 'Puska.mp3',
             'plasmagun': 'plasmaGun.wav',
             'weapon_pickup': 'podizanje_oruzja.wav',
+            'reload_smg': 'reload_smg.mp3',
 
             # Player sounds
             'igrac_damage': 'Igrac_damage.wav',

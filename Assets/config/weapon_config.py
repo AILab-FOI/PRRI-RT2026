@@ -25,6 +25,8 @@ SMG_CONFIG = {
     'accuracy': 0.75,
     'auto_fire': True,
     'auto_fire_delay': 70,
+    'reload_sound': 'reload_smg',
+    'reload_duration': 700,
     'sound': 'smg',
     'right_offset': 0,
     'description': 'Rapid-fire weapon ideal for close quarters combat.'

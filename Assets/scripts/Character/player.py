@@ -147,6 +147,10 @@ class Player:
         self.game.weapon.is_reloading = True
         self.game.weapon.reload_start_time = pg.time.get_ticks()
 
+        weapon_config=get_weapon_config(self.game.weapon.name)
+        if weapon_config and 'reload_sound' in weapon_config:
+                self.game.sound.play_sfx(weapon_config['reload_sound'])
+
         self.game.weapon.currentMagAmmount += ammo_to_reload
         self.game.weapon.bagAmount -= ammo_to_reload
         return True
