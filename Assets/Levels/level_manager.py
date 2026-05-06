@@ -10,7 +10,7 @@ from Assets.npcs.dialogue_npc import create_dialogue_npcs
 class LevelManager:
     def __init__(self, game):
         self.game = game
-        self.current_level = 3
+        self.current_level = 1
         self.level_data = {}
         self.max_level = 0 #deprecated trebalo bi biti automatic
         self.current_weapon_type = 'pistol'
@@ -50,19 +50,6 @@ class LevelManager:
             self.max_level = max(self.level_data.keys(), default=0)
             print(f"Loaded {len(self.level_data)} levels. Max level: {self.max_level}")
             
-
-            """
-            Old #Ostvaviti za svaku slucaj 
-            for level_num in range(1, self.max_level + 1):
-                try:
-                    print("importint level ",level_num)
-                    level_module = importlib.import_module(f'Assets.Levels.Lvl{level_num}.level{level_num}')
-                    self.level_data[level_num] = level_module.get_level_data()
-                except ImportError:
-                    from Levels.base_level import create_base_level_structure
-                    print("import error  level ",level_num)
-                    self.level_data[level_num] = create_base_level_structure()
-            """
         except Exception as e:
             print(f"Critical error during level initialization: {e}")
             self.level_data = {}
@@ -331,3 +318,13 @@ class LevelManager:
         elif next_level > self.max_level:
             return False
         return False
+    
+    def register_runtime_level(self, level_number, level_data):
+        self.level_data[level_number] = level_data
+        self.max_level = max(self.max_level, level_number)
+
+    def create_and_register_runtime_level(self, level_number, seed):
+        from Assets.scripts.MapGenerator.runtime_level import build_runtime_level
+        level_data = build_runtime_level(seed)
+        self.register_runtime_level(level_number, level_data)
+        return level_data

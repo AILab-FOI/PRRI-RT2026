@@ -7,7 +7,7 @@ from Assets.npcs.enemy_npcs import StakorNPC, KlonoviNPC
 def get_level_data():
     """Return the complete level 1 data"""
     level_data = create_base_level_structure()
-
+    
     level_data['intro_dialogue'] = 'level1_intro'
 
     level_data['doors'] = [
@@ -38,5 +38,5 @@ def get_level_data():
     level_data['ammo_pickup'] = [
         {'position': (6.5, 6.5)},
     ]
-
+    
     return level_data

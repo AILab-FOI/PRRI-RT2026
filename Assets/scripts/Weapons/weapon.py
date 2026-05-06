@@ -35,21 +35,6 @@ class Weapon(AnimatedSprite):
         self.kick_duration = 80
         self.is_kicking = False
         
-    '''
-    def animate_shot(self):
-        if self.is_firing:
-            self.game.player.shot = False
-            if self.animation_trigger:
-                self.images.rotate(-1)
-                self.image = self.images[0]
-                self.frame_counter += 1
-                if self.frame_counter == self.num_images:
-                    self.is_firing = False
-                    self.frame_counter = 0
-                elif self.frame_counter == 1:
-                    self.is_kicking = True
-                    self.kick_start_time = pg.time.get_ticks()
-    '''
     def animate_shot(self):
         elapsed = pg.time.get_ticks() - self.last_fire_time
         if elapsed < self.fire_cooldown:

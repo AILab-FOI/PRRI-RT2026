@@ -1,11 +1,15 @@
+from Assets.scripts.MapGenerator.runtime_level import build_runtime_level
 import pygame as pg
 import os
 import sys
 import gc
+import time
+import math
 
 # Reduce GC frequency to avoid periodic FPS drops.
 # Default (700, 10, 10) causes frequent pauses in game loops.
 gc.set_threshold(25000, 50, 50)
+
 from Assets.settings import *
 from Assets.Levels.map import *
 from Assets.scripts.Character.player import *
@@ -29,6 +33,8 @@ from Assets.scripts.UI.victory_screen import VictoryScreen
 from Assets.scripts.UI.ui import GameUI
 from Assets.scripts.Effects.visual_effects import DisorientingEffects
 from Assets.scripts.Util.font_manager import resource_path
+from Assets.scripts.MapGenerator.map_Generator import MapGenerator
+
 
 class Game:
     def __init__(self):
@@ -40,9 +46,9 @@ class Game:
         pg.display.set_icon(icon)
 
         pg.mouse.set_visible(False)
-        pg.event.set_grab(True)#zaključava miš unutar prozora igre
-        pg.mouse.get_rel() #resetira kursor na centar prozora
-        self.is_fullscreen= False
+        pg.event.set_grab(True)  # lock mouse inside window
+        pg.mouse.get_rel()       # reset cursor to center
+        self.is_fullscreen = False
         self.update_display_mode()
         self.screen = pg.display.set_mode(RES)
         self.clock = pg.time.Clock()
@@ -59,49 +65,44 @@ class Game:
         self.victory_screen = VictoryScreen(self)
         self.game_events = GameEvents(self)
         self.disorienting_effects = DisorientingEffects(self)
-
         self.weapon_classes = [Pistol, SMG, PlasmaGun]
         self.weapon_slot_count = len(self.weapon_classes)
+
+        self.level_manager = LevelManager(self)
 
         self.game_initialized = False
         self.show_menu(play_menu_music=True)
 
-        
-
-
-
     def update_display_mode(self):
         if self.is_fullscreen:
-               self.screen=pg.display.set_mode(RES, pg.FULLSCREEN)
+            self.screen = pg.display.set_mode(RES, pg.FULLSCREEN)
         else:
-            self.screen=pg.display.set_mode(RES)
+            self.screen = pg.display.set_mode(RES)
 
         if hasattr(self, 'menu'):
             self.menu.screen = self.screen
 
-
-
     def new_game(self):
-        if not hasattr(self, 'level_manager'):
-            print("create new level manager")
-            self.level_manager = LevelManager(self)
+        # --- 1. ALWAYS create map and then load the current level ---
 
         if not hasattr(self, 'map'):
             self.map = Map(self)
-        else:
-            self.map.load_level(self.level_manager.current_level)
+
+        self.map.load_level(self.level_manager.current_level)
+
+        # --- 2. Core objects (only create once, otherwise reset) ---
 
         if not hasattr(self, 'player'):
             self.player = Player(self)
         else:
             self.player.reset()
-        
+
         if not hasattr(self, 'weapon'):
             self.weapon = None
-        
+
         if not hasattr(self, 'object_renderer'):
             self.object_renderer = ObjectRenderer(self)
-        
+
         if not hasattr(self, 'raycasting'):
             self.raycasting = RayCasting(self)
 
@@ -110,23 +111,9 @@ class Game:
         else:
             self.object_handler.reset()
 
-        
-        '''
-        if self.level_manager.current_level == 1:
-            self.weapon = None
-        elif hasattr(self, 'level_manager'):
-            if self.level_manager.current_weapon_type == 'smg':
-                self.weapon = SMG(self)
-            elif self.level_manager.current_weapon_type == 'plasmagun':
-                self.weapon = PlasmaGun(self)
-            else:
-                self.weapon = Pistol(self)
-        else:
-            self.weapon = Pistol(self)
-        '''
         if not hasattr(self, 'pathfinding'):
             self.pathfinding = PathFinding(self)
-            
+
         if not hasattr(self, 'interaction'):
             self.interaction = Interaction(self)
 
@@ -138,11 +125,21 @@ class Game:
         else:
             self.game_ui.update_level(self.level_manager.current_level)
 
+        # --- 3. Setup world data on top of the loaded map ---
+
         self.level_manager.setup_dialogue_npcs()
         self.level_manager.setup_interactive_objects()
         self.pathfinding.update_graph()
 
-        if self.level_manager.current_level == 1:
+        # --- 4. Spawn player ---
+
+        current_level_data = self.level_manager.get_current_level_data()
+        spawn = current_level_data.get('player_spawn') if current_level_data else None
+
+        if spawn:
+            self.player.x, self.player.y = spawn
+            self.player.angle = 0
+        elif self.level_manager.current_level == 1:
             self.player.x, self.player.y = PLAYER_POS
         elif self.level_manager.current_level == 2:
             self.player.x, self.player.y = PLAYER_POS_LEVEL2
@@ -156,9 +153,11 @@ class Game:
         elif self.level_manager.current_level == 6:
             self.player.x, self.player.y = PLAYER_POS_LEVEL6
 
+        # --- 5. Audio and UI ---
+
         self.object_renderer.update_sky_image()
         self.sound.change_music_for_level(self.level_manager.current_level)
-        
+
         if self.level_manager.current_level == 1:
             self.intro_sequence.start()
 
@@ -170,7 +169,7 @@ class Game:
         if self.victory_screen.active:
             self.victory_screen.update()
             return
-        
+
         self.sound.update()
 
         self.player.update()
@@ -231,24 +230,39 @@ class Game:
         pg.mouse.set_visible(False)
 
     def show_menu(self, play_menu_music=False):
-        pg.mouse.set_pos([HALF_WIDTH, HALF_HEIGHT]) #postavlja miš na centar prozora])
-        pg.event.set_grab(False)#oslobađa miš
+        pg.mouse.set_pos([HALF_WIDTH, HALF_HEIGHT])
+        pg.event.set_grab(False)
         pg.mouse.set_visible(True)
-        
+
         if play_menu_music:
             self.sound.change_music_for_level(0)
-        
+
         self.menu.state = 'main'
         self.menu.run()
 
         if not self.game_initialized:
             self.new_game()
             self.game_initialized = True
-        
-        pg.event.set_grab(True)#zaključava miš unutar prozora igre
+
+        pg.event.set_grab(True)
         pg.mouse.set_visible(False)
-        pg.mouse.get_rel() #resetira kursor na centar prozora
+        pg.mouse.get_rel()
         self.game_loop()
+
+    def transition_to_runtime_level(self):
+        seed = int(time.time())
+        runtime_level_number = 99
+
+        level_data = build_runtime_level(seed)
+        self.level_manager.register_runtime_level(runtime_level_number, level_data)
+        self.level_manager.current_level = runtime_level_number
+
+        print(f"[DEBUG] Generated runtime level with seed: {seed}")
+        print(f"[DEBUG] Player spawn: {level_data.get('player_spawn')}")
+        for row in level_data['map']:
+            print(row)
+
+        self.new_game()
 
     def game_loop(self):
         while True:

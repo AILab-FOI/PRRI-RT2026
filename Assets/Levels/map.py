@@ -141,32 +141,65 @@ MAPS = {
         [40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40],
     ]
 }
-
 class Map:
     def __init__(self, game):
         self.game = game
         self.level = getattr(game.level_manager, 'current_level', 1)
+        self.mini_map = []
+        self.world_map = {}
+        self.rows = 0
+        self.cols = 0
         self.load_level(self.level)
 
     def load_level(self, level):
-        """Load a specific level map"""
-        
+        self.level = level
+
+        # 1. Prefer original built-in maps for old levels
         if level in MAPS:
-            
-            self.level = level
             self.mini_map = MAPS[level]
-            self.world_map = {}
-            self.rows = len(self.mini_map)
-            self.cols = len(self.mini_map[0])
-            self.get_map()
-            return True
+
+        # 2. Otherwise try LevelManager runtime/custom data
         else:
-            return False
+            level_data = self.game.level_manager.load_level(level)
+            if not level_data or 'map' not in level_data:
+                print(f"[ERROR] Map.load_level: no map found for level {level}")
+                return False
+            self.mini_map = level_data['map']
+
+        # 3. Build derived map data
+        self.rows = len(self.mini_map)
+        self.cols = len(self.mini_map[0]) if self.rows > 0 else 0
+        self.get_map()
+        return True
 
     def get_map(self):
-        """Build world_map dictionary from mini_map"""
         self.world_map = {}
         for j, row in enumerate(self.mini_map):
             for i, value in enumerate(row):
                 if value:
                     self.world_map[(i, j)] = value
+                    
+    '''            
+class Map:
+    def __init__(self, game):
+        self.game = game
+        self.level = getattr(game.level_manager, 'current_level', 1)
+        self.mini_map = []
+        self.world_map = {}
+        self.rows = 0
+        self.cols = 0
+        self.load_level(self.level)
+
+    def load_level(self, level):
+        level_data = self.game.level_manager.load_level(level)
+        if not level_data or 'map' not in level_data:
+            return False
+
+        self.level = level
+        self.mini_map = level_data['map']
+        self.rows = len(self.mini_map)
+        self.cols = len(self.mini_map[0]) if self.rows > 0 else 0
+        self.get_map()
+        return True
+
+    '''  
