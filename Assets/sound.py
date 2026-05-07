@@ -60,6 +60,9 @@ class Sound:
             'npc_pain': 0.30,
             'npc_death': 0.45,
             'npc_attack': 0.30,
+            'npc_knocked': 0.45,
+            'npc_warning': 0.30,
+            'npc_gone': 0.35,
 
             # Enemy-specific sounds
             'napad_stakor': 0.35,
@@ -127,6 +130,9 @@ class Sound:
             'npc_pain': 'npc_pain.wav',
             'npc_death': 'npc_death.wav',
             'npc_attack': 'npc_attack.wav',
+            'npc_knocked': 'npc_knocked.wav',
+            'npc_warning': 'npc_warning.wav',
+            'npc_gone': 'npc_gone.wav',
 
             # Enemy-specific sounds
             'napad_stakor': 'stakor_napad.mp3',

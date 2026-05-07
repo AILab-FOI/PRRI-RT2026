@@ -274,7 +274,7 @@ class LevelManager:
         # Auto-dijalog pri ulasku na razinu
         if level_data and 'intro_dialogue' in level_data:
             dialogue_id = level_data['intro_dialogue']
-            pg.time.set_timer(pg.USEREVENT + 10, 6500, loops=1)
+            pg.time.set_timer(pg.USEREVENT + 10, 5250, loops=1)
             self.game._pending_intro_dialogue = dialogue_id
         
 

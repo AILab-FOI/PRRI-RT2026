@@ -78,6 +78,11 @@ class NPC(AnimatedSprite):
         self.death_anim_done = False
         self.death_done_time = 0
         self.corpse_linger_ms = 5000  # remove body 5s after death anim ends
+        self.npc_knocked_played=False
+        self.npc_warning_played=False
+        self.npc_gone_played=False
+        self.npc_knocked_delay=150
+        self.npc_warning_delay=1000 #prije despawna se aktivira "portal opening sfx"
 
     def _update_config_recursive(self, target, source):
         for key, value in source.items():
@@ -147,6 +152,7 @@ class NPC(AnimatedSprite):
                 self.death_anim_done = True
                 self.death_done_time = pg.time.get_ticks()
 
+
     def animate_pain(self):
         self.animate(self.pain_images)
         if self.animation_trigger:
@@ -187,8 +193,23 @@ class NPC(AnimatedSprite):
         if not self.alive:
             self.animate_death()
             # Mark for removal after corpse linger time
-            if self.death_anim_done and pg.time.get_ticks() - self.death_done_time > self.corpse_linger_ms:
-                self.should_remove = True
+            if self.death_anim_done:
+                 elapsed=pg.time.get_ticks() - self.death_done_time
+
+                 #npc knocked 150ms nakon smrti
+                 if not self.npc_knocked_played and elapsed >= self.npc_knocked_delay:
+                        self.npc_knocked_played=True
+                        self.game.sound.play_sfx('npc_knocked')
+                 #npc warning 4s nakon smrti ( 1 prije despawna)
+                 if not self.npc_warning_played and elapsed >= self.corpse_linger_ms - self.npc_warning_delay:
+                        self.npc_warning_played=True
+                        self.game.sound.play_sfx('npc_warning')
+                 #npc despawn
+                 if elapsed >= self.corpse_linger_ms:
+                    if not self.npc_gone_played:
+                        self.npc_gone_played = True
+                        self.game.sound.play_sfx('npc_gone')
+                    self.should_remove = True
             return
         self.ray_cast_value = self.ray_cast_player_npc()
         self.check_hit_in_npc()
