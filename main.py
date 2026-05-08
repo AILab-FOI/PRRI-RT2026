@@ -1,10 +1,9 @@
-from Assets.scripts.MapGenerator.runtime_level import build_runtime_level
+
 import pygame as pg
-import os
-import sys
 import gc
 import time
 import math
+
 
 # Reduce GC frequency to avoid periodic FPS drops.
 # Default (700, 10, 10) causes frequent pauses in game loops.
@@ -33,8 +32,7 @@ from Assets.scripts.UI.victory_screen import VictoryScreen
 from Assets.scripts.UI.ui import GameUI
 from Assets.scripts.Effects.visual_effects import DisorientingEffects
 from Assets.scripts.Util.font_manager import resource_path
-from Assets.scripts.MapGenerator.map_Generator import MapGenerator
-
+from Assets.scripts.MapGenerator.runtime_level import build_runtime_level
 
 class Game:
     def __init__(self):
@@ -241,7 +239,7 @@ class Game:
         self.menu.run()
 
         if not self.game_initialized:
-            self.new_game()
+            self.transition_to_runtime_level()
             self.game_initialized = True
 
         pg.event.set_grab(True)

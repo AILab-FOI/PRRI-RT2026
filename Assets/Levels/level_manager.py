@@ -57,9 +57,23 @@ class LevelManager:
            
 
     def load_level(self, level_number):
+        # 1. If it's a known handcrafted level (1-6)
         if level_number in self.level_data:
             self.current_level = level_number
             return self.level_data[level_number]
+            
+        # 2. If it's Level 99 (Procedural Endless/Arena)
+        elif level_number == 99:
+            import time
+            seed = int(time.time())
+            
+            # Generate the level and register it so it behaves like a normal level
+            print(f"Generating Procedural Level {level_number}...")
+            evel_data = self.create_and_register_runtime_level(level_number, seed)
+            
+            self.current_level = level_number
+            return self.level_data
+            
         return None
 
     def get_current_level_data(self):
@@ -324,7 +338,11 @@ class LevelManager:
         self.max_level = max(self.max_level, level_number)
 
     def create_and_register_runtime_level(self, level_number, seed):
+        # Updated to import from your actual path (make sure this path matches your files!)
         from Assets.scripts.MapGenerator.runtime_level import build_runtime_level
-        level_data = build_runtime_level(seed)
+        
+        # Pass the level_number so settings.py knows which rules to apply
+        level_data = build_runtime_level(seed, level_id=level_number) 
+        
         self.register_runtime_level(level_number, level_data)
         return level_data
