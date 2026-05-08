@@ -157,6 +157,7 @@ class Game:
         self.object_renderer.update_sky_image()
         self.sound.change_music_for_level(self.level_manager.current_level)
 
+        #print("[DEBUG] Current Level:", self.level_manager.current_level)
         if self.level_manager.current_level == 1:
             self.intro_sequence.start()
 
@@ -240,7 +241,8 @@ class Game:
         self.menu.run()
 
         if not self.game_initialized:
-            self.transition_to_runtime_level()
+            self.new_game() #regular level
+            #self.transition_to_runtime_level() #rng level
             self.game_initialized = True
 
         pg.event.set_grab(True)

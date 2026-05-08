@@ -44,7 +44,6 @@ def build_runtime_level(seed, level_id=99):
     corridor_thickness=room_settings.get('corridor_thickness', 1),
     force_spawn_room=room_settings.get('force_spawn_room', True)
 )
-
     level_data['map'] = generated['map']
     level_data['player_spawn'] = generated['player_spawn']
     level_data['rooms'] = generated['rooms']
