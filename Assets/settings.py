@@ -84,7 +84,7 @@ HALF_TEXTURE_SIZE = TEXTURE_SIZE // 2
 
 
 PROCEDURAL_MAP_SIZE = {
-    99: (100, 100)  # Massive map!
+    99: (40, 40)  # Massive map!
 }
 
 PROCEDURAL_TILE_SET = {
@@ -94,11 +94,11 @@ PROCEDURAL_TILE_SET = {
 PROCEDURAL_WAVES = {
     99: {
         'total_waves': 999, 
-        'start_enemies': 5, 
+        'start_enemies': 25, 
         'wave_multiplier': 1.5, 
         'types': ['StakorNPC', 'KlonoviNPC'], 
         'weights': [70, 30],
-        'safe_spawn_radius': 12  # Enemies cannot spawn within 12 tiles of the player
+        'safe_spawn_radius': 15  # Enemies cannot spawn within 12 tiles of the player
     }
 }
 
@@ -108,8 +108,8 @@ PROCEDURAL_ITEMS = {
 
 PROCEDURAL_ROOM_SETTINGS = {
     99: {
-        'size_multiplier': 2.0,
-        'room_count': 35,
+        'size_multiplier': 1.5,
+        'room_count': 15,
         'corridor_thickness': 2,
         'force_spawn_room': True
     }
@@ -117,9 +117,10 @@ PROCEDURAL_ROOM_SETTINGS = {
 
 NPC_DROP_SETTINGS = {
     'enabled': True,
-    'drop_chance': 35,
+    'drop_chance': 15,
     'item_weights': {
-        'heal': 35,
-        'ammo': 65
+        'heal': 5,
+        'ammo': 20,
+        'powerups': 10
     }
 }

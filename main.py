@@ -277,6 +277,8 @@ class Game:
             self.object_handler.add_heal_item(pos=pos)
         elif chosen == 'ammo':
             self.object_handler.add_ammo_item(pos=pos)
+        elif chosen == 'powerups':
+            self.object_handler.add_powerup(pos=pos)
         
     
 
