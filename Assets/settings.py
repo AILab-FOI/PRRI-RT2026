@@ -114,3 +114,12 @@ PROCEDURAL_ROOM_SETTINGS = {
         'force_spawn_room': True
     }
 }
+
+NPC_DROP_SETTINGS = {
+    'enabled': True,
+    'drop_chance': 35,
+    'item_weights': {
+        'heal': 35,
+        'ammo': 65
+    }
+}

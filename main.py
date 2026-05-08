@@ -3,6 +3,7 @@ import pygame as pg
 import gc
 import time
 import math
+import random
 
 
 # Reduce GC frequency to avoid periodic FPS drops.
@@ -261,6 +262,23 @@ class Game:
             print(row)
 
         self.new_game()
+        
+    def spawn_npc_drop(self, pos):
+        if not NPC_DROP_SETTINGS.get('enabled', False):
+            return
+
+        if random.randint(1, 100) > NPC_DROP_SETTINGS.get('drop_chance', 0):
+            return
+
+        weights = NPC_DROP_SETTINGS.get('item_weights', {})
+        chosen = random.choices(list(weights.keys()), weights=list(weights.values()), k=1)[0]
+
+        if chosen == 'heal':
+            self.object_handler.add_heal_item(pos=pos)
+        elif chosen == 'ammo':
+            self.object_handler.add_ammo_item(pos=pos)
+        
+    
 
     def game_loop(self):
         while True:
@@ -272,3 +290,5 @@ class Game:
 
 if __name__ == '__main__':
     game = Game()
+    
+    

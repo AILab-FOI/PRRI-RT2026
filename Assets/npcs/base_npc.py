@@ -188,6 +188,9 @@ class NPC(AnimatedSprite):
                 self._current_image_id = 0
             if hasattr(self, '_scaled_image_cache'):
                 self._scaled_image_cache = {}
+            
+            if hasattr(self.game, 'spawn_npc_drop'):
+                self.game.spawn_npc_drop((int(self.x) + 0.5, int(self.y) + 0.5))
 
     def run_logic(self):
         if not self.alive:
