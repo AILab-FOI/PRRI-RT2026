@@ -61,35 +61,54 @@ def build_runtime_level(seed, level_id=99):
 
     occupied = [level_data['player_spawn']]
 
-    # Pistol 2 tiles in front of player
-    player_angle = getattr(s, 'PLAYER_ANGLE', 0)
-    pistol_pos = generator.pick_position_in_front_of_player(
+    pistol_pos = generator.pick_spawn_chamber_weapon_pos(
         generated['map'],
-        level_data['player_spawn'],
-        player_angle,
-        distance_tiles=2
+        level_data['player_spawn']
     )
 
-    formatted_weapons = []
+    level_data['weapons'] = []
+
     if pistol_pos is not None:
-        formatted_weapons.append({
-            'weapon_index': 0,   # pistol
-            'path': 'resources/sprites/weapon/pistol/0.png',
-            'position': pistol_pos
+        level_data['weapons'].append({
+            'position': pistol_pos,
+            'weapon_index': 0,
+            'path': 'resources/sprites/weapon/pistol_stand.png'
         })
         occupied.append(pistol_pos)
 
-    # Optional extra random weapons from settings
-    extra_weapon_count = max(0, spawn_counts.get('weapons', 0) - len(formatted_weapons))
-    weapon_pos = generator.pick_random_locations(generated['map'], extra_weapon_count, occupied)
-    occupied.extend(weapon_pos)
+        # try to place second weapon 2 tiles next to pistol
+        px, py = pistol_pos
+        candidate_positions = [
+            (px + 2.0, py),   # right
+            (px - 2.0, py),   # left
+            (px, py + 2.0),   # down
+            (px, py - 2.0),   # up
+            (px + 1.0, py),   # fallback right
+            (px - 1.0, py),   # fallback left
+            (px, py + 1.0),   # fallback down
+            (px, py - 1.0),   # fallback up
+        ]
 
-    for pos in weapon_pos:
-        formatted_weapons.append({
-            'weapon_index': 1,
-            'path': 'resources/sprites/weapon/shotgun/0.png',
-            'position': pos
-        })
+        second_weapon_pos = None
+        for cx, cy in candidate_positions:
+            tx, ty = int(cx), int(cy)
+            if (
+                0 <= ty < len(generated['map']) and
+                0 <= tx < len(generated['map'][0]) and
+                generated['map'][ty][tx] == 0 and
+                (cx, cy) not in occupied
+            ):
+                second_weapon_pos = (tx + 0.5, ty + 0.5)
+                break
+
+        if second_weapon_pos is not None:
+            level_data['weapons'].append({
+                'position': second_weapon_pos,
+                'weapon_index': 1,
+                'path': 'resources/sprites/weapon/puska_stand.png'
+            })
+            occupied.append(second_weapon_pos)
+
 
     heal_pos = generator.pick_random_locations(generated['map'], spawn_counts['heals'], occupied)
     occupied.extend(heal_pos)
@@ -103,7 +122,6 @@ def build_runtime_level(seed, level_id=99):
     level_data['intro_dialogue'] = 'level99_intro'
     level_data['terminals'] = []
     level_data['doors'] = []
-    level_data['weapons'] = formatted_weapons
     level_data['heal_item'] = formatted_heals
     level_data['ammo_pickup'] = formatted_ammo
 

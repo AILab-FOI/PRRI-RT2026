@@ -28,13 +28,17 @@ class MapGenerator:
                 for ix in range(x, x2):
                     grid[iy][ix] = EMPTY
 
-        def carve_corridor(x1, y1, x2, y2):
+        def carve_corridor(x1, y1, x2, y2, avoid_rect=None):
             def dig(cx, cy):
                 for dy in range(corridor_thickness):
                     for dx in range(corridor_thickness):
                         tx = cx + dx
                         ty = cy + dy
                         if 0 < tx < width - 1 and 0 < ty < height - 1:
+                            if avoid_rect is not None:
+                                ax, ay, aw, ah = avoid_rect
+                                if ax <= tx < ax + aw and ay <= ty < ay + ah:
+                                    continue
                             grid[ty][tx] = EMPTY
 
             if self.rng.random() < 0.5:
@@ -52,7 +56,7 @@ class MapGenerator:
             rx, ry, rw, rh = room
             return rx + rw // 2, ry + rh // 2
 
-        # 1. Generate normal rooms first
+        # --- 1. Generate normal rooms first ---
         for _ in range(room_count):
             attempts = 0
             while attempts < 40:
@@ -61,23 +65,17 @@ class MapGenerator:
                 base_rw = self.rng.randint(3, 6)
                 base_rh = self.rng.randint(3, 5)
 
-                rw = int(base_rw * room_size_multiplier)
-                rh = int(base_rh * room_size_multiplier)
-
-                rw = max(3, min(rw, width - 3))
-                rh = max(3, min(rh, height - 3))
+                rw = max(3, min(int(base_rw * room_size_multiplier), width - 3))
+                rh = max(3, min(int(base_rh * room_size_multiplier), height - 3))
 
                 rx = self.rng.randint(1, width - rw - 2)
                 ry = self.rng.randint(1, height - rh - 2)
 
                 new_room = (rx, ry, rw, rh)
-                overlap = False
 
+                overlap = False
                 for ox, oy, ow, oh in rooms:
-                    if (
-                        rx < ox + ow and rx + rw > ox and
-                        ry < oy + oh and ry + rh > oy
-                    ):
+                    if rx < ox + ow and rx + rw > ox and ry < oy + oh and ry + rh > oy:
                         overlap = True
                         break
 
@@ -86,27 +84,27 @@ class MapGenerator:
                     rooms.append(new_room)
                     break
 
-        # 2. Connect normal rooms first
+        # --- 2. Connect normal rooms with corridors ---
         for i in range(1, len(rooms)):
             x1, y1 = room_center(rooms[i - 1])
             x2, y2 = room_center(rooms[i])
             carve_corridor(x1, y1, x2, y2)
 
-        # 3. Put exit in the last normal room
+        # --- 3. Place exit in last normal room ---
         if rooms:
             exit_room = rooms[-1]
             ex, ey = room_center(exit_room)
             grid[ey][ex] = self.EXIT
 
-        spawn_room = None
-        spawn_door_inside = None
-        spawn_door_outside = None
         player_spawn = (1.5, 1.5)
+        spawn_room_rect = None
 
-        # 4. Carve the spawn chamber LAST so it cannot be overwritten
+        # --- 4. Carve 7×7 spawn chamber (5×5 interior) LAST ---
         if force_spawn_room:
-            chamber_total_w = 5
-            chamber_total_h = 5
+            chamber_total_w = 7
+            chamber_total_h = 7
+            interior_w = 5
+            interior_h = 5
 
             cx = width // 2
             cy = height // 2
@@ -114,61 +112,64 @@ class MapGenerator:
             chamber_x = max(1, min(cx - chamber_total_w // 2, width - chamber_total_w - 1))
             chamber_y = max(1, min(cy - chamber_total_h // 2, height - chamber_total_h - 1))
 
-            # rebuild 5x5 as solid walls
+            # Force entire 7×7 as walls
             for iy in range(chamber_y, chamber_y + chamber_total_h):
                 for ix in range(chamber_x, chamber_x + chamber_total_w):
                     grid[iy][ix] = self.WALL
 
-            # carve 3x3 interior
-            for iy in range(chamber_y + 1, chamber_y + 4):
-                for ix in range(chamber_x + 1, chamber_x + 4):
+            # Carve 5×5 interior
+            interior_x = chamber_x + 1
+            interior_y = chamber_y + 1
+            for iy in range(interior_y, interior_y + interior_h):
+                for ix in range(interior_x, interior_x + interior_w):
                     grid[iy][ix] = EMPTY
 
-            # center of 3x3 interior
-            player_spawn = (chamber_x + 2 + 0.5, chamber_y + 2 + 0.5)
+            # Player in center of 5×5 (at 3,3 from top-left of interior)
+            player_spawn = (chamber_x + 3 + 0.5, chamber_y + 3 + 0.5)
 
-            # one exit tile in a random wall
+            # Choose one wall door side
             side = self.rng.choice(["top", "bottom", "left", "right"])
             if side == "top":
-                door_x = chamber_x + 2
+                door_x = chamber_x + 3
                 door_y = chamber_y
                 out_x = door_x
                 out_y = door_y - 1
             elif side == "bottom":
-                door_x = chamber_x + 2
-                door_y = chamber_y + 4
+                door_x = chamber_x + 3
+                door_y = chamber_y + 6
                 out_x = door_x
                 out_y = door_y + 1
             elif side == "left":
                 door_x = chamber_x
-                door_y = chamber_y + 2
+                door_y = chamber_y + 3
                 out_x = door_x - 1
                 out_y = door_y
             else:
-                door_x = chamber_x + 4
-                door_y = chamber_y + 2
+                door_x = chamber_x + 6
+                door_y = chamber_y + 3
                 out_x = door_x + 1
                 out_y = door_y
 
+            # Carve doorway tile (1 tile in the wall)
             grid[door_y][door_x] = EMPTY
+
+            # Carve just outside if in bounds
             if 0 < out_x < width - 1 and 0 < out_y < height - 1:
                 grid[out_y][out_x] = EMPTY
 
-            spawn_room = (chamber_x + 1, chamber_y + 1, 3, 3)
-            spawn_door_inside = (door_x, door_y)
-            spawn_door_outside = (out_x, out_y)
+            spawn_room_rect = (chamber_x, chamber_y, chamber_total_w, chamber_total_h)
 
-            # 5. Connect spawn room to nearest normal room
-            if rooms and spawn_door_outside is not None:
+            # --- 5. Connect spawn to nearest room without carving inside the 7×7 ---
+            if rooms:
                 nearest_room = min(
                     rooms,
-                    key=lambda room: (room_center(room)[0] - spawn_door_outside[0]) ** 2 +
-                                     (room_center(room)[1] - spawn_door_outside[1]) ** 2
+                    key=lambda room: (room_center(room)[0] - out_x) ** 2 +
+                                     (room_center(room)[1] - out_y) ** 2
                 )
                 target_x, target_y = room_center(nearest_room)
-                carve_corridor(spawn_door_outside[0], spawn_door_outside[1], target_x, target_y)
+                carve_corridor(out_x, out_y, target_x, target_y, avoid_rect=spawn_room_rect)
 
-        # 6. Seal borders again
+        # --- 6. Seal borders ---
         for x in range(width):
             grid[0][x] = self.WALL
             grid[height - 1][x] = self.WALL
@@ -177,8 +178,10 @@ class MapGenerator:
             grid[y][0] = self.WALL
             grid[y][width - 1] = self.WALL
 
-        # add spawn room to rooms list only after everything is done
-        if spawn_room is not None:
+        spawn_room = None
+        if force_spawn_room and spawn_room_rect is not None:
+            # 5×5 interior room info
+            spawn_room = (chamber_x + 1, chamber_y + 1, interior_w, interior_h)
             rooms.insert(0, spawn_room)
 
         return {
@@ -202,19 +205,8 @@ class MapGenerator:
 
         return self.rng.sample(candidates, count)
 
-    def pick_position_in_front_of_player(self, grid, player_pos, player_angle, distance_tiles=2):
-        px, py = player_pos
-
-        tx = int(px + math.cos(player_angle) * distance_tiles)
-        ty = int(py + math.sin(player_angle) * distance_tiles)
-
-        if 0 <= ty < len(grid) and 0 <= tx < len(grid[0]) and grid[ty][tx] == 0:
-            return (tx + 0.5, ty + 0.5)
-
-        tx = int(px + math.cos(player_angle) * 1)
-        ty = int(py + math.sin(player_angle) * 1)
-        if 0 <= ty < len(grid) and 0 <= tx < len(grid[0]) and grid[ty][tx] == 0:
-            return (tx + 0.5, ty + 0.5)
+    def pick_spawn_chamber_weapon_pos(self, grid, player_pos):
+        px, py = int(player_pos[0]), int(player_pos[1])
 
         offsets = [
             (1, 0), (-1, 0), (0, 1), (0, -1),
@@ -223,8 +215,8 @@ class MapGenerator:
         ]
 
         for ox, oy in offsets:
-            tx = int(px) + ox
-            ty = int(py) + oy
+            tx = px + ox
+            ty = py + oy
             if 0 <= ty < len(grid) and 0 <= tx < len(grid[0]) and grid[ty][tx] == 0:
                 return (tx + 0.5, ty + 0.5)
 
