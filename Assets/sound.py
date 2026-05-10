@@ -187,7 +187,7 @@ class Sound:
         self.background_music = {
             0: 'track2.wav',
             1: 'track1.wav',
-            2: 'track1.wav',
+            2: 'track5.ogg',
             3: 'Pozadinska3.mp3',
             4: 'Pozadinska4.wav',
             5: 'Pozadinska5.wav'
