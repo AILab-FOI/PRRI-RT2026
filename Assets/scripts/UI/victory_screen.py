@@ -30,12 +30,10 @@ class VictoryScreen:
         self.active = True
         pg.mouse.set_visible(True)
 
-        self.game.sound.stop_music()
         self.game.sound.stop_all_sfx()
-
-        self.game.sound.fadeout_music(400)
         self.game.sound.fadeout_all_sfx(200)
-        self.game.sound.play_sfx('victory', fade_ms=80)
+        
+        self.game.sound.change_music_for_level(99, fade_ms=80)
 
     def handle_events(self):
         if not self.active:
