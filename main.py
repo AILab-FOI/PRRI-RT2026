@@ -82,6 +82,7 @@ class Game:
             self.menu.screen = self.screen
 
     def new_game(self):
+        self.sound.stop_all_sfx()
         # --- 1. ALWAYS create map and then load the current level ---
 
         if not hasattr(self, 'map'):
@@ -250,7 +251,6 @@ class Game:
         pg.event.set_grab(True)
         pg.mouse.set_visible(False)
         pg.mouse.get_rel()
-        self.game_loop()
 
     def transition_to_runtime_level(self):
         seed = int(time.time())
@@ -296,5 +296,6 @@ class Game:
 
 if __name__ == '__main__':
     game = Game()
-    
-    
+    while True:
+        game.game_loop()
+        game.show_menu(play_menu_music=False)

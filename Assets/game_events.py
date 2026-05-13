@@ -19,7 +19,6 @@ class GameEvents:
                 sys.exit()
 
             elif event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE and not self.game.interaction.input_active:
-                self.game.show_menu()
                 return True
 
             elif event.type == self.game.global_event:
