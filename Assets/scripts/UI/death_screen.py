@@ -30,7 +30,7 @@ class DeathScreen:
         self.active = True
         pg.mouse.set_visible(True)
 
-        self.game.sound.change_music_for_level(98, fade_ms=80)
+        self.game.sound.change_music_for_level(50, fade_ms=80)
         pg.mixer.stop()
 
     def handle_events(self):
