@@ -113,11 +113,11 @@ class GameUI:
         if hasattr(self.game, 'interaction') and self.game.interaction.is_showing_indicator:
             return
 
-        viewport_height = HEIGHT - self.hud_height - self.viewport_bottom_gap
         cx = HALF_WIDTH
-        cy = viewport_height // 2 + self.crosshair_y_offset
-        crosshair_pos = (cx - self.crosshair_size // 2, cy - self.crosshair_size // 2)
-        self.screen.blit(self.crosshair, crosshair_pos)
+        cy = HALF_HEIGHT + 40
+
+        crosshair_rect = self.crosshair.get_rect(center=(cx, cy))
+        self.screen.blit(self.crosshair, crosshair_rect)
 
         if pg.time.get_ticks() - self.hit_marker_time < self.hit_marker_duration:
             color = (255, 255, 255)
