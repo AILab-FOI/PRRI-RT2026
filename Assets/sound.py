@@ -1,7 +1,7 @@
 import pygame as pg
 import os
 import sys
-
+import math
 
 def resource_path(relative_path):
     try:
@@ -60,9 +60,9 @@ class Sound:
             'npc_pain': 0.30,
             'npc_death': 0.45,
             'npc_attack': 0.30,
-            'npc_knocked': 0.45,
-            'npc_warning': 0.30,
-            'npc_gone': 0.35,
+            'npc_knocked': 0.95,
+            'npc_warning': 0.8,
+            'npc_gone': 0.8,
 
             # Enemy-specific sounds
             'napad_stakor': 0.35,
@@ -308,6 +308,40 @@ class Sound:
         if sound is None:
             return None
         return sound.play(loops=loops, maxtime=maxtime, fade_ms=fade_ms)
+
+    def play_sfx_at_position(self, sound_name, npc_x, npc_y):
+        sound = self.sounds.get(sound_name)
+        if sound is None:
+            return
+
+        player = self.game.player
+        dx = npc_x - player.x
+        dy = npc_y - player.y
+        dist = max(0.1, (dx ** 2 + dy ** 2) ** 0.5)
+
+        # Volume pada linearno s distancom, tiho izvan max_dist
+        max_dist = 25.0
+        vol = max(0.0, 1.0 - (dist / max_dist))
+        vol *= self.volume_factors.get(sound_name, 1.0) * self.sfx_volume
+
+        # Pan: projekcija smjera NPC-a na playerovu desnu os
+        right_x = math.cos(player.angle + math.pi / 2)
+        right_y = math.sin(player.angle + math.pi / 2)
+        pan = (dx * right_x + dy * right_y) / dist
+        pan = max(-1.0, min(1.0, pan))
+
+        # Stereo split — pygame set_volume(left, right)
+        left_vol  = min(1.0, vol * (1.0 - pan) / 2)
+        right_vol = min(1.0, vol * (1.0 + pan) / 2)
+
+        # Osiguraj da barem jedan kanal nije potpuno tih
+        if left_vol < 0.01 and right_vol < 0.01:
+            left_vol = right_vol = vol * 0.5
+
+        channel = sound.play()
+        if channel:
+            channel.set_volume(left_vol, right_vol)
+
 
     def stop_sfx(self, sound_name):
         sound = self.sounds.get(sound_name)

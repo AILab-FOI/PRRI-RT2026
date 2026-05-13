@@ -202,16 +202,16 @@ class NPC(AnimatedSprite):
                  #npc knocked 150ms nakon smrti
                  if not self.npc_knocked_played and elapsed >= self.npc_knocked_delay:
                         self.npc_knocked_played=True
-                        self.game.sound.play_sfx('npc_knocked')
+                        self.game.sound.play_sfx_at_position('npc_knocked', self.x, self.y)
                  #npc warning 4s nakon smrti ( 1 prije despawna)
                  if not self.npc_warning_played and elapsed >= self.corpse_linger_ms - self.npc_warning_delay:
                         self.npc_warning_played=True
-                        self.game.sound.play_sfx('npc_warning')
+                        self.game.sound.play_sfx_at_position('npc_warning', self.x, self.y)
                  #npc despawn
                  if elapsed >= self.corpse_linger_ms:
                     if not self.npc_gone_played:
                         self.npc_gone_played = True
-                        self.game.sound.play_sfx('npc_gone')
+                        self.game.sound.play_sfx_at_position('npc_gone', self.x, self.y)
                     self.should_remove = True
             return
         self.ray_cast_value = self.ray_cast_player_npc()
