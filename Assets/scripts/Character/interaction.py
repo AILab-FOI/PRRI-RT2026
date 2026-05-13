@@ -50,29 +50,6 @@ class Interaction:
         if self.show_interaction_prompt and not self.input_active:
             self.is_showing_indicator = True
 
-            if hasattr(self.game, 'game_ui') and hasattr(self.game.game_ui, 'crosshair_pos'):
-                crosshair_pos = self.game.game_ui.crosshair_pos
-                crosshair_size = self.game.game_ui.crosshair_size
-
-                center_x = crosshair_pos[0] + crosshair_size // 2
-                center_y = crosshair_pos[1] + crosshair_size // 2
-
-                indicator_size = 15
-                line_width = 2
-                pg.draw.line(self.game.screen, (255, 255, 255),
-                            (center_x - indicator_size, center_y),
-                            (center_x + indicator_size, center_y), line_width)
-                pg.draw.line(self.game.screen, (255, 255, 255),
-                            (center_x, center_y - indicator_size),
-                            (center_x, center_y + indicator_size), line_width)
-            else:
-                pg.draw.line(self.game.screen, (255, 255, 255),
-                            (HALF_WIDTH - 15, HALF_HEIGHT),
-                            (HALF_WIDTH + 15, HALF_HEIGHT), 2)
-                pg.draw.line(self.game.screen, (255, 255, 255),
-                            (HALF_WIDTH, HALF_HEIGHT - 15),
-                            (HALF_WIDTH, HALF_HEIGHT + 15), 2)
-
             if self.active_object.interaction_type == "level_door":
                 if hasattr(self.game, 'level_manager') and self.game.level_manager.current_level == 6:
                     prompt_text = "Press 'E' to finish the game"

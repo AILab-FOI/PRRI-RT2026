@@ -110,14 +110,10 @@ class GameUI:
         self.screen.blit(fps_surface, (10, 10))
 
     def draw_crosshair(self):
-        if hasattr(self.game, 'interaction') and self.game.interaction.is_showing_indicator:
-            return
-
         cx = HALF_WIDTH
-        cy = HALF_HEIGHT + 40
-
-        crosshair_rect = self.crosshair.get_rect(center=(cx, cy))
-        self.screen.blit(self.crosshair, crosshair_rect)
+        cy = HALF_HEIGHT
+        crosshair_pos = (cx - self.crosshair_size // 2, cy - self.crosshair_size // 2)
+        self.screen.blit(self.crosshair, crosshair_pos)
 
         if pg.time.get_ticks() - self.hit_marker_time < self.hit_marker_duration:
             color = (255, 255, 255)

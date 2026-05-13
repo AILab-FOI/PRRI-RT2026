@@ -247,8 +247,8 @@ class Menu:
         button_height = 60
         self.start_mode = 'normal'
 
-        self.main_menu_texts = ["Start Game","Gauntlet", "Settings", "Exit"]
-        self.pause_menu_texts = ["Continue Game", "Reset Level", "Settings", "Exit"]
+        self.main_menu_texts = ["Start Game","Gauntlet", "Level Select", "Settings", "Exit"]
+        self.pause_menu_texts = ["Continue Game", "Reset Level", "Main Menu", "Settings", "Exit"]
         button_widths = []
         all_texts = set(self.main_menu_texts + self.pause_menu_texts)
         for text in all_texts:
@@ -312,6 +312,30 @@ class Menu:
                 Button(self.center_x, y_positions[i], self.max_button_width, self.button_height, text)
             )
 
+    def create_level_buttons(self):
+        self.level_buttons = []
+        num_levels = self.game.level_manager.max_level
+        if num_levels == 0:
+            num_levels = 6
+        
+        cols = 3
+        button_w = 200
+        button_h = 60
+        spacing = 20
+        total_width = cols * button_w + (cols - 1) * spacing
+        start_x = HALF_WIDTH - total_width // 2
+        start_y = HALF_HEIGHT - 100
+        
+        for i in range(num_levels):
+            row = i // cols
+            col = i % cols
+            x = start_x + col * (button_w + spacing)
+            y = start_y + row * (button_h + spacing)
+            self.level_buttons.append(Button(x, y, button_w, button_h, f"Level {i+1}"))
+            
+        back_y = start_y + ((num_levels - 1) // cols + 1) * (button_h + spacing) + 40
+        self.level_buttons.append(Button(HALF_WIDTH - 100, back_y, 200, button_h, "Back"))
+
     def handle_events(self):
         mouse_pos = pg.mouse.get_pos()
         mouse_pressed = pg.mouse.get_pressed()
@@ -347,9 +371,31 @@ class Menu:
                             return True
                         elif button.text == "Settings":
                             self.state = 'settings'
+                        elif button.text == "Level Select":
+                            self.state = 'level_select'
+                            self.create_level_buttons()
+                        elif button.text == "Main Menu":
+                            self.game.game_initialized = False
+                            self.state = 'main'
+                            self.create_menu_buttons()
                         elif button.text == "Exit":
                             pg.quit()
                             sys.exit()
+
+            elif self.state == 'level_select':
+                for button in self.level_buttons:
+                    button.update(mouse_pos, self.game)
+                    if button.is_clicked(event, self.game):
+                        if button.text == "Back":
+                            self.state = 'main'
+                            self.create_menu_buttons()
+                        else:
+                            level_num = int(button.text.split(" ")[1])
+                            self.game.level_manager.current_level = level_num
+                            self.start_mode = 'normal'
+                            self.state = 'game'
+                            pg.mouse.set_visible(False)
+                            return True
 
             elif self.state == 'settings':
                 for button in self.settings_buttons:
@@ -408,6 +454,12 @@ class Menu:
                 slider.draw(self.screen)
 
             for button in self.settings_buttons:
+                button.draw(self.screen)
+
+        elif self.state == 'level_select':
+            self.draw_title("Level Select", 120)
+
+            for button in getattr(self, 'level_buttons', []):
                 button.draw(self.screen)
 
         pg.display.flip()
