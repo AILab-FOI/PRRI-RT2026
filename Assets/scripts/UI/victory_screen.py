@@ -33,7 +33,7 @@ class VictoryScreen:
         self.game.sound.stop_all_sfx()
         self.game.sound.fadeout_all_sfx(200)
         
-        self.game.sound.change_music_for_level(99, fade_ms=80)
+        self.game.sound.change_music_for_level(51, fade_ms=80)
 
     def handle_events(self):
         if not self.active:
