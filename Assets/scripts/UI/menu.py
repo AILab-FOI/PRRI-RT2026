@@ -245,8 +245,9 @@ class Menu:
         self.screen = game.screen
         self.state = 'main'
         button_height = 60
+        self.start_mode = 'normal'
 
-        self.main_menu_texts = ["Start Game", "Settings", "Exit"]
+        self.main_menu_texts = ["Start Game","Gauntlet", "Settings", "Exit"]
         self.pause_menu_texts = ["Continue Game", "Reset Level", "Settings", "Exit"]
         button_widths = []
         all_texts = set(self.main_menu_texts + self.pause_menu_texts)
@@ -328,9 +329,17 @@ class Menu:
                     button.update(mouse_pos, self.game)
                     if button.is_clicked(event, self.game):
                         if button.text == "Start Game" or button.text == "Continue Game":
+                            self.start_mode = 'normal'
                             self.state = 'game'
                             pg.mouse.set_visible(False)
                             return True
+
+                        elif button.text == "Gauntlet":
+                            self.start_mode = 'gauntlet'
+                            self.state = 'game'
+                            pg.mouse.set_visible(False)
+                            return True
+                            
                         elif button.text == "Reset Level":
                             self.state = 'game'
                             pg.mouse.set_visible(False)

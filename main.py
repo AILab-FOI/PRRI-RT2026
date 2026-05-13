@@ -241,8 +241,10 @@ class Game:
         self.menu.run()
 
         if not self.game_initialized:
-            self.new_game() #regular level
-            #self.transition_to_runtime_level() #rng level
+            if self.menu.start_mode == 'gauntlet':
+                self.transition_to_runtime_level()
+            else:
+                self.new_game()
             self.game_initialized = True
 
         pg.event.set_grab(True)

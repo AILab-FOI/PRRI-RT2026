@@ -62,7 +62,7 @@ class LevelTransition:
         self.screen_transitions = ScreenTransitions(game)
 
     def transition_to_next_level(self):
-        self.next_level_num = self.game.level_manager.current_level + 98
+        self.next_level_num = self.game.level_manager.current_level + 1
 
         if (self.next_level_num > self.game.level_manager.max_level) and (self.next_level_num != 99):
             self.screen_transitions.start_fade_in(speed=8, callback=self._show_victory_screen)
