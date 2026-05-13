@@ -248,7 +248,7 @@ class Menu:
         self.start_mode = 'normal'
 
         self.main_menu_texts = ["Start Game","Gauntlet", "Level Select", "Settings", "Exit"]
-        self.pause_menu_texts = ["Continue Game", "Reset Level", "Main Menu", "Settings", "Exit"]
+        self.pause_menu_texts = ["Continue Game", "Reset Level", "Settings", "Main Menu", "Exit"]
         button_widths = []
         all_texts = set(self.main_menu_texts + self.pause_menu_texts)
         for text in all_texts:

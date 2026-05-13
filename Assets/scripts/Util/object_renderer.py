@@ -216,7 +216,7 @@ class ObjectRenderer:
             26: self.get_texture('resources/teksture/level3/zid3.png'), ## sporedni zid za mapu žučkast sa bačvama
             27: self.get_texture('resources/teksture/level3/zid1.png'), ## labaratorijski zid sa najviše detalja alien
             28: self.get_texture('resources/teksture/level3/zid4.png'), ## labaratorijski zid sa manje detalja biljka
-            29: self.get_texture('resources/teksture/level3/vrata2.jpg'), ## žučkasta vrata za mapu lagano otvorena
+            29: self.get_texture('resources/teksture/level3/vrata2.png'), ## žučkasta vrata za mapu lagano otvorena
             32: self.get_texture('resources/teksture/level3/ekstenzije/VrataPrijelaz/0.png'),
             39: self.get_texture('resources/teksture/level3/ekstenzije/VrataPrijelaz/1.png'), #vrata prijelaz na sljedeci level
 
