@@ -5,45 +5,49 @@ cd /d "%~dp0"
 
 set "APPNAME=PRRI-Game"
 
+for /f "tokens=2,*" %%A in (
+    'reg query "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop 2^>nul ^| find /i "Desktop"'
+) do set "DESKTOP_RAW=%%B"
+
+call set "DESKTOP_PATH=%DESKTOP_RAW%"
+if not defined DESKTOP_PATH set "DESKTOP_PATH=%USERPROFILE%\Desktop"
+
+set "DISTPATH=%DESKTOP_PATH%\%APPNAME%-Build"
+set "PROJECT_ROOT=%cd%"
+set "TEMP_WORK=%TEMP%\%APPNAME%_build"
+set "TEMP_SPEC=%TEMP%\%APPNAME%_spec"
+
 echo ========================================
 echo   PyInstaller Windows Build Script
 echo ========================================
 echo.
-
-echo Checking PyInstaller...
-pyinstaller.exe --version >nul 2>nul
-if errorlevel 1 (
-    echo PyInstaller is not installed or not available on PATH.
-    choice /c YN /m "Install PyInstaller now?"
-    if errorlevel 2 (
-        echo.
-        echo Installation declined. Exiting.
-        pause
-        goto :eof
-    )
-
-    echo.
-    echo Installing PyInstaller with pip...
-    py -m pip install -U pyinstaller
-    if errorlevel 1 (
-        echo.
-        echo Failed to install PyInstaller.
-        pause
-        goto :eof
-    )
-)
-
-echo.
 echo Project folder:
-echo %cd%
+echo %PROJECT_ROOT%
+echo Output folder:
+echo %DISTPATH%
 echo.
 
-set /p DISTPATH=Enter output folder for the build: 
-if "%DISTPATH%"=="" (
-    echo.
-    echo No path entered.
+echo Checking Python...
+python --version >nul 2>nul
+if errorlevel 1 (
+    echo Python is not available on PATH.
     pause
     goto :eof
+)
+
+echo Checking required modules...
+python -c "import pygame, PyInstaller; print('OK')" >nul 2>nul
+if errorlevel 1 (
+    echo.
+    echo Installing/updating pygame and pyinstaller...
+    python -m pip install --upgrade pip
+    python -m pip install --upgrade pygame pyinstaller
+    if errorlevel 1 (
+        echo.
+        echo Failed to install required modules.
+        pause
+        goto :eof
+    )
 )
 
 if not exist "%DISTPATH%" mkdir "%DISTPATH%"
@@ -51,7 +55,7 @@ if not exist "%DISTPATH%" mkdir "%DISTPATH%"
 dir /b "%DISTPATH%" >nul 2>nul
 if not errorlevel 1 (
     echo.
-    choice /c YN /m "The folder is not empty. Remove all contents first?"
+    choice /c YN /m "The build folder already contains files. Remove all contents first?"
     if errorlevel 2 (
         echo.
         echo Build cancelled.
@@ -64,9 +68,23 @@ if not errorlevel 1 (
     for /d %%D in ("%DISTPATH%\*") do rmdir /s /q "%%D"
 )
 
+if exist "%TEMP_WORK%" rmdir /s /q "%TEMP_WORK%"
+if exist "%TEMP_SPEC%" rmdir /s /q "%TEMP_SPEC%"
+
 echo.
 echo Running PyInstaller...
-pyinstaller.exe --name "%APPNAME%" --onedir --windowed --distpath "%DISTPATH%" --add-data "assets;assets" --add-data "resources;resources" main.py
+python -m PyInstaller ^
+    --noconfirm ^
+    --onedir ^
+    --windowed ^
+    --name "%APPNAME%" ^
+    --distpath "%DISTPATH%" ^
+    --workpath "%TEMP_WORK%" ^
+    --specpath "%TEMP_SPEC%" ^
+    --contents-directory "." ^
+    --add-data "%PROJECT_ROOT%\assets;assets" ^
+    --add-data "%PROJECT_ROOT%\resources;resources" ^
+    "%PROJECT_ROOT%\main.py"
 
 if errorlevel 1 (
     echo.
@@ -77,6 +95,8 @@ if errorlevel 1 (
 
 echo.
 echo Build finished successfully.
-echo Opening built folder...
+echo Zip and send this folder:
+echo "%DISTPATH%\%APPNAME%"
+echo.
 start "" "%DISTPATH%\%APPNAME%"
 pause
