@@ -172,23 +172,20 @@ class Game:
             return
 
         self.sound.update()
-
         self.player.update()
         self.pathfinding.update()
         self.raycasting.update()
         self.object_handler.update()
+
         if self.weapon:
             self.weapon.update()
+
         self.interaction.update()
         self.dialogue_manager.update()
-
         self.intro_sequence.update()
         self.disorienting_effects.update()
         self.loading_screen.update()
         self.level_transition.update()
-
-        pg.display.flip()
-        self.delta_time = self.clock.tick(FPS)
 
     def draw(self):
         if self.death_screen.active:
@@ -200,16 +197,19 @@ class Game:
             return
 
         self.object_renderer.draw()
+
         if self.weapon:
             self.weapon.draw()
+
         self.game_ui.draw()
         self.interaction.draw()
         self.dialogue_manager.draw()
-
         self.disorienting_effects.draw()
         self.intro_sequence.draw()
         self.loading_screen.draw()
         self.level_transition.draw()
+
+        pg.display.flip()
 
     def check_events(self):
         if self.death_screen.active:
@@ -292,6 +292,7 @@ class Game:
                 return
             self.update()
             self.draw()
+            self.delta_time = self.clock.tick(FPS)
 
 
 if __name__ == '__main__':

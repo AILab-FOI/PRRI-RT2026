@@ -8,11 +8,12 @@ from Assets.scripts.Util.font_manager import resource_path
 
 _GLOBAL_IMAGE_CACHE = {}
 
+
 class SpriteObject:
-    def __init__(self, game, path=None,
-                 pos=(10.5, 3.5), scale=0.7, shift=0.27):
+    def __init__(self, game, path=None, pos=(10.5, 3.5), scale=0.7, shift=0.27):
         if path is None:
             path = 'resources/sprites/static_sprites/ukras1.png'
+
         self.game = game
         self.player = game.player
         self.x, self.y = pos
@@ -28,48 +29,61 @@ class SpriteObject:
 
         self.IMAGE_WIDTH = self.image.get_width()
         self.IMAGE_HALF_WIDTH = self.IMAGE_WIDTH // 2
-        self.IMAGE_RATIO = self.IMAGE_WIDTH / self.image.get_height()
-        self.dx, self.dy, self.theta, self.screen_x, self.dist, self.norm_dist = 0, 0, 0, 0, 1, 1
+        self.IMAGE_RATIO = self.IMAGE_WIDTH / max(1, self.image.get_height())
+
+        self.dx = 0
+        self.dy = 0
+        self.theta = 0
+        self.screen_x = 0
+        self.dist = 1
+        self.norm_dist = 1
         self.sprite_half_width = 0
+
         self.SPRITE_SCALE = scale
         self.SPRITE_HEIGHT_SHIFT = shift
         self._current_image_id = 0
         self._scaled_image_cache = {}
 
+        self._min_sprite_depth = 0.55
+        self._near_cull_distance = 0.35
+        self._max_sprite_height = int(HEIGHT * 0.9)
+        self._max_sprite_width = int(WIDTH * 0.75)
+        self._size_bucket = 16
+        self._max_cache_entries = 24
+
+    def _bucket_size(self, value):
+        value = max(self._size_bucket, int(value))
+        return max(self._size_bucket, round(value / self._size_bucket) * self._size_bucket)
+
     def get_sprite_projection(self):
-        MIN_SPRITE_DEPTH = 0.3
-        MAX_SPRITE_HEIGHT = HEIGHT * 2
-        MAX_SPRITE_WIDTH = WIDTH * 2
-        MAX_CACHE_DIMENSION = 1024
+        if self.dist <= self._near_cull_distance:
+            return
 
-        depth = max(self.norm_dist, MIN_SPRITE_DEPTH)
-
+        depth = max(self.norm_dist, self._min_sprite_depth)
         proj = SCREEN_DIST / depth * self.SPRITE_SCALE
+
         proj_width = round(proj * self.IMAGE_RATIO)
         proj_height = round(proj)
 
         if proj_width <= 0 or proj_height <= 0:
             return
 
-        proj_width = min(proj_width, MAX_SPRITE_WIDTH)
-        proj_height = min(proj_height, MAX_SPRITE_HEIGHT)
+        proj_width = min(proj_width, self._max_sprite_width)
+        proj_height = min(proj_height, self._max_sprite_height)
+
+        proj_width = self._bucket_size(proj_width)
+        proj_height = self._bucket_size(proj_height)
 
         cache_key = (proj_width, proj_height, self._current_image_id)
+        image = self._scaled_image_cache.get(cache_key)
 
-        use_cache = proj_width <= MAX_CACHE_DIMENSION and proj_height <= MAX_CACHE_DIMENSION
+        if image is None:
+            image = pg.transform.scale(self.image, (proj_width, proj_height))
+            self._scaled_image_cache[cache_key] = image
 
-        if use_cache:
-            if cache_key not in self._scaled_image_cache:
-                scaled_image = pg.transform.scale(self.image, (proj_width, proj_height))
-                self._scaled_image_cache[cache_key] = scaled_image
-
-            if len(self._scaled_image_cache) > 10:
+            if len(self._scaled_image_cache) > self._max_cache_entries:
                 oldest_key = next(iter(self._scaled_image_cache))
                 del self._scaled_image_cache[oldest_key]
-
-            image = self._scaled_image_cache[cache_key]
-        else:
-            image = pg.transform.scale(self.image, (proj_width, proj_height))
 
         self.sprite_half_width = proj_width // 2
         height_shift = proj_height * self.SPRITE_HEIGHT_SHIFT
@@ -79,27 +93,6 @@ class SpriteObject:
         )
 
         self.game.raycasting.objects_to_render.append((depth, image, pos))
-
-
-    '''
-    def get_sprite(self):
-        dx = self.x - self.player.x
-        dy = self.y - self.player.y
-        self.dx, self.dy = dx, dy
-        self.theta = math.atan2(dy, dx)
-
-        delta = self.theta - self.player.angle
-        if (dx > 0 and self.player.angle > math.pi) or (dx < 0 and dy < 0):
-            delta += math.tau
-
-        delta_rays = delta / DELTA_ANGLE
-        self.screen_x = (HALF_NUM_RAYS + delta_rays) * SCALE
-
-        self.dist = math.hypot(dx, dy)
-        self.norm_dist = self.dist * math.cos(delta)
-        if -self.IMAGE_HALF_WIDTH < self.screen_x < (WIDTH + self.IMAGE_HALF_WIDTH) and self.norm_dist > 0.5:
-            self.get_sprite_projection()
-    '''
 
     def get_sprite(self):
         dx = self.x - self.player.x
@@ -117,7 +110,7 @@ class SpriteObject:
         self.dist = math.hypot(dx, dy)
         self.norm_dist = self.dist * math.cos(delta)
 
-        if self.norm_dist <= 0.3:
+        if self.norm_dist <= self._min_sprite_depth:
             return
 
         self.screen_x = HALF_WIDTH + math.tan(delta) * SCREEN_DIST
@@ -150,6 +143,9 @@ class AnimatedSprite(SpriteObject):
             self.image = images[0]
             self._current_image_id += 1
             self._scaled_image_cache = {}
+            self.IMAGE_WIDTH = self.image.get_width()
+            self.IMAGE_HALF_WIDTH = self.IMAGE_WIDTH // 2
+            self.IMAGE_RATIO = self.IMAGE_WIDTH / max(1, self.image.get_height())
 
     def check_animation_time(self):
         self.animation_trigger = False
@@ -162,7 +158,7 @@ class AnimatedSprite(SpriteObject):
         real_path = resource_path(path)
         if real_path in _GLOBAL_IMAGE_CACHE:
             return deque(_GLOBAL_IMAGE_CACHE[real_path])
-            
+
         images_list = []
         try:
             if os.path.isdir(real_path):
@@ -182,7 +178,6 @@ class AnimatedSprite(SpriteObject):
             blank_img = pg.Surface((32, 32), pg.SRCALPHA)
             blank_img.fill((0, 0, 0, 0))
             images_list.append(blank_img)
-            
-        _GLOBAL_IMAGE_CACHE[real_path] = images_list
 
+        _GLOBAL_IMAGE_CACHE[real_path] = images_list
         return deque(images_list)
