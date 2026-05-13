@@ -31,10 +31,9 @@ class GameUI:
         self.dash_indicator_height = 24
         self.dash_chamfer_size = 6
 
-        self.digit_size = 90
         self.current_level = 1
-        self.digit_images = self.load_digit_images()
-        self.tinted_digits = {} 
+        self.hud_number_font = load_custom_font(48)
+        self.hud_big_font = load_custom_font(64)
 
         self.powerup_icon = self.load_texture('resources/teksture/level1/powerup.png', (100, 100))
         self.item_icon = self.load_texture('resources/teksture/heal_item.png',(128,128))
@@ -68,71 +67,6 @@ class GameUI:
         texture = pg.image.load(texture_path).convert_alpha()
         return pg.transform.scale(texture, res)
 
-    def load_digit_images(self):
-        """Load base digit images (number of digits determined by files in base_path)"""
-        digits = {}
-        base_path = resource_path('resources/teksture/numbers')
-
-        # List all files in base_path and filter PNGs
-        try:
-            file_list = os.listdir(base_path)
-        # Keep only *.png files that look like digit names: 0.png, 1.png, ...
-            digit_files = [
-                f for f in file_list
-                if f.endswith('.png') and f[:-4].isdigit()
-            ]
-        # Sort by parsed number (0, 1, 2, ...)
-            digit_files.sort(key=lambda x: int(x[:-4]))
-        except (OSError, FileNotFoundError):
-            digit_files = []
-
-    # Load each digit file, indexed by its number
-        for i, filename in enumerate(digit_files):
-            digit_key = os.path.splitext(filename)[0]  # "0", "1", etc.
-            digit_file = os.path.join(base_path, filename)
-            img = self.load_texture(digit_file, [self.digit_size] * 2)
-            digits[digit_key] = img
-
-        return digits
-        """
-        level_digit_path = f'resources/teksture/level{self.current_level}/brojevi'
-        fallback_digit_path = 'resources/teksture/level1/brojevi'
-        level_digit_path_abs = resource_path(level_digit_path)
-
-        if os.path.exists(level_digit_path_abs) and os.path.isdir(level_digit_path_abs):
-            for i in range(12):
-                digit_file = f'{level_digit_path}/{i}.png'
-                digit_file_abs = resource_path(digit_file)
-
-                if os.path.exists(digit_file_abs) and os.path.isfile(digit_file_abs):
-                    img = self.load_texture(digit_file, [self.digit_size] * 2)
-                    digits[str(i)] = img
-                else:
-                    fallback_digit = f'{fallback_digit_path}/{i}.png'
-                    img = self.load_texture(fallback_digit, [self.digit_size] * 2)
-                    digits[str(i)] = img
-        else:
-            for i in range(12):
-                img = self.load_texture(f'{fallback_digit_path}/{i}.png', [self.digit_size] * 2)
-                digits[str(i)] = img
-
-        return digits
-        """
-
-    def get_tinted_digit(self, digit_key, color):
-        """Get cached tinted version of digit"""
-        cache_key = f"{digit_key}_{color}"
-        if cache_key not in self.tinted_digits:
-            base_img = self.digit_images[digit_key]
-            tinted = self.tint_surface(base_img, color)
-            self.tinted_digits[cache_key] = tinted
-        return self.tinted_digits[cache_key]
-
-    def tint_surface(self, surf, color):
-        """Tint a surface with an RGB color."""
-        result = surf.copy()
-        result.fill(color, special_flags=pg.BLEND_RGB_ADD)
-        return result
 
     def draw(self):
         self.draw_player_health()
@@ -206,35 +140,30 @@ class GameUI:
         self.screen.blit(text_surface, text_rect)
 
     def draw_player_health(self):
-        health = str(max(0, self.game.player.health))
+        health = max(0,self.game.player.health)
         tint_color = self.get_level_tint_color()
 
-        for i, char in enumerate(health):
-            digit = self.get_tinted_digit(char, tint_color)
-            self.screen.blit(digit, (self.margin_x + i * self.digit_size, self.margin_y))
-
-        slash = self.get_tinted_digit('10', tint_color)
-        self.screen.blit(slash, (self.margin_x + len(health) * self.digit_size, self.margin_y))
+        health_text = f"{health}/100"
+        text_surface = self.hud_big_font.render(health_text,True,tint_color)
+        text_rect = text_surface.get_rect(topleft=(self.margin_x, self.margin_y))
+        self.screen.blit(text_surface, text_rect)
 
     def draw_weapon_ammo(self):
         if not self.game.weapon:
             return
         
         weapon = self.game.weapon
-        current = str(weapon.currentMagAmmount)
-        bag = str(weapon.bagAmount)
-        ammo_text = list(current) + ['11'] + list(bag)  # e.g. "12 10 45" but '10' is slash!
-
-        total_width = len(ammo_text) * self.digit_size
-        x = self.screen.get_width() - self.margin_x - total_width
-        y = self.screen.get_height() - self.margin_y - self.digit_size
-    
         tint_color = self.get_level_tint_color()
+        ammo_text =   f"{weapon.currentMagAmmount}/{weapon.bagAmount}"
 
-        for i, char in enumerate(ammo_text):
-            digit = self.get_tinted_digit(char, tint_color)
-            self.screen.blit(digit, (x + i * self.digit_size, y))
-
+        text_surface = self.hud_big_font.render(ammo_text, True, tint_color)
+        text_rect = text_surface.get_rect(
+            bottomright=(
+                self.screen.get_width() - self.margin_x,
+                self.screen.get_height() - self.margin_y
+                )
+        )
+        self.screen.blit(text_surface, text_rect)
 
     def draw_invulnerability_indicator(self):
         if not self.game.player.is_invulnerable:
@@ -252,23 +181,15 @@ class GameUI:
         icon_rect = self.powerup_icon.get_rect(center=(center_x, indicator_y + 80))
         self.screen.blit(self.powerup_icon, icon_rect)
 
-        # Draw timer with tinted digits instead of text
-        number_text = str(seconds_left)
-        total_width = len(number_text) * self.digit_size
-        x = center_x - total_width // 2
-        y = indicator_y + 120  # visually centered, adjust as needed
-
         tint_color = self.get_level_tint_color()
+        timer_surface = self.hud_big_font.render(str(seconds_left), True, tint_color)
+        timer_rect = timer_surface.get_rect(center=(center_x, indicator_y + 155))
+        self.screen.blit(timer_surface, timer_rect)
 
-        for i, digit_char in enumerate(number_text):
-            digit = self.get_tinted_digit(digit_char, tint_color)
-            self.screen.blit(digit, (x + i * self.digit_size, y))
-
-        # Optional: small "s" text below or next to the digits
         sec_text = self.invulnerability_timer_font.render("s", True, self.blue_color)
-        sec_rect = sec_text.get_rect(center=(center_x, indicator_y + 160))
+        sec_rect = sec_text.get_rect(midleft=(timer_rect.right + 8, timer_rect.centery))
         self.screen.blit(sec_text, sec_rect)
-
+    
     def draw_enemy_counter(self):
         npc_list = self.game.object_handler.npc_list
         total_enemies = 0
@@ -297,10 +218,8 @@ class GameUI:
         self.screen.blit(text_surface, text_rect)
 
     def update_level(self, level_number):
-        """Update UI elements when the level changes"""
         if self.current_level != level_number:
             self.current_level = level_number
-            self.digit_images = self.load_digit_images()
     
     def get_level_tint_color(self):
         return self.tint_color_map.get(self.current_level, self.tint_color_map["default"])
