@@ -308,9 +308,33 @@ class GameUI:
         self.screen.blit(pickup_label, pickup_label.get_rect(midtop=(pickup_rect.centerx, pickup_rect.y + 6)))
 
         has_item = getattr(player, 'heal_item_count', 0) > 0
-        icon = self.item_icon if has_item else self.item_icon_gray
-        icon_rect = icon.get_rect(center=(pickup_rect.centerx, pickup_rect.y + 54))
-        self.screen.blit(icon, icon_rect)
+        current_time = pg.time.get_ticks()
+        heal_cooldown = getattr(player, 'heal_cooldown', 5000)
+        last_heal = getattr(player, 'last_heal_time', 0)
+        time_since_heal = current_time - getattr(player, 'last_heal_time', 0)
+        on_cooldown = last_heal > 0 and time_since_heal < heal_cooldown
+
+        if on_cooldown:
+            progress = min(1.0, time_since_heal / heal_cooldown)
+            time_left = max(0.0, (heal_cooldown - time_since_heal) / 1000)
+            time_surf = self.dash_font.render(f'{time_left:.1f}s', True, self.orange_color)
+            self.screen.blit(time_surf, time_surf.get_rect(center=(pickup_rect.centerx, pickup_rect.centery - 4)))
+
+            bar_w = pickup_rect.width - 28
+            bar_h = 10
+            bar_x = pickup_rect.x + 14
+            bar_y = pickup_rect.bottom - 24
+            bar_bg = pg.Rect(bar_x, bar_y, bar_w, bar_h)
+            pg.draw.rect(self.screen, self.health_bg, bar_bg)
+            fill_w = int(bar_w * progress)
+            if fill_w > 0:
+                pg.draw.rect(self.screen, self.orange_color, (bar_x, bar_y, fill_w, bar_h))
+            pg.draw.rect(self.screen, self.white, bar_bg, 1)
+        else:
+            icon = self.item_icon if has_item else self.item_icon_gray
+            icon_rect = icon.get_rect(center=(pickup_rect.centerx, pickup_rect.y + 54))
+            self.screen.blit(icon, icon_rect)
+        
 
     def draw_invulnerability_indicator(self):
         if not self.game.player.is_invulnerable:
