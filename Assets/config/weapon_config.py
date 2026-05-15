@@ -10,6 +10,7 @@ PISTOL_CONFIG = {
     'accuracy': 0.95,
     'auto_fire': False,
     'sound': 'pistolj',
+    'reload_sound': 'reload_pistolj',
     'description': 'Standard issue sidearm. Reliable and accurate.'
 }
 

@@ -21,8 +21,8 @@ class Ammo_item(SpriteObject):
             if self.game.player.try_addAmmo(99):
                 self.picked = True
 
-                if hasattr(self.game.sound, 'powerup_pickup') and self.game.sound.powerup_pickup:
-                    self.game.sound.powerup_pickup.play()
+                if hasattr(self.game.sound, 'ammo_pickup') and self.game.sound.ammo_pickup:
+                    self.game.sound.ammo_pickup.play()
 
                 if self in self.game.object_handler.sprite_list:
                     self.game.object_handler.sprite_list.remove(self)

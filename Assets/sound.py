@@ -47,6 +47,7 @@ class Sound:
             'plasmagun': 0.35,
             'weapon_pickup': 0.35,
             'reload_smg': 0.30,
+            'reload_pistolj': 0.30,
 
             # Player sounds
             'igrac_damage': 0.35,
@@ -91,6 +92,7 @@ class Sound:
             # Interaction sounds
             'terminal_beep': 0.25,
             'door_open': 0.30,
+            'ammo_pickup': 0.10,
 
             # Powerup sounds
             'powerup_pickup': 0.35,
@@ -120,6 +122,7 @@ class Sound:
             'smg': 'Puska.mp3',
             'plasmagun': 'plasmaGun.wav',
             'weapon_pickup': 'podizanje_oruzja.wav',
+            'reload_pistolj': 'reload_pistolj.wav',
             'reload_smg': 'reload_smg.mp3',
 
             # Player sounds
@@ -161,6 +164,7 @@ class Sound:
             # Interaction sounds
             'terminal_beep': 'terminal.wav',
             'door_open': 'vrata.wav',
+            'ammo_pickup': 'ammo_pickup.wav',
 
             # Powerup sounds
             'powerup_pickup': 'powerup_pickup.wav',
