@@ -10,10 +10,13 @@ class GameUI:
         self.game = game
         self.screen = game.screen
         self.metallic_renderer = MetallicUIRenderer(self.screen)
+        self.wave_manager = game.wave_manager
 
         self.green_color = (0, 180, 80)
         self.orange_color = (255, 100, 0)
         self.blue_color = (0, 180, 255)
+        self.red_color = (220, 60, 60)
+        self.yellow_color = (255, 215, 0)
         self.dark_gray = (50, 50, 50)
         self.white = (235, 235, 245)
         self.black = (10, 10, 14)
@@ -63,6 +66,9 @@ class GameUI:
         self.hud_gap = 10
         self.viewport_bottom_gap = 6
 
+    def bind_wave_manager(self):
+        self.wave_manager = self.game.wave_manager
+
     def load_texture(self, path, res):
         texture_path = resource_path(path)
         texture = pg.image.load(texture_path).convert_alpha()
@@ -84,9 +90,12 @@ class GameUI:
     def update_screen_reference(self):
         self.screen = self.game.screen
         self.metallic_renderer.screen = self.screen
+        if self.wave_manager is not self.game.wave_manager:
+            self.bind_wave_manager()
 
     def update_level(self, level_number):
         self.current_level = level_number
+        self.bind_wave_manager()
 
     def get_level_tint_color(self):
         return self.tint_color_map.get(self.current_level, self.tint_color_map['default'])
@@ -97,17 +106,37 @@ class GameUI:
     def show_hit_marker(self):
         self.hit_marker_time = pg.time.get_ticks()
 
+    def get_enemies_left(self):
+        return self.wave_manager.get_enemies_left()
+
+    def get_score(self):
+        return self.wave_manager.get_score()
+
+    def get_survival_seconds(self):
+        return self.wave_manager.get_survival_seconds()
+
     def draw(self):
         self.update_screen_reference()
+        self.draw_top_stats()
         self.draw_bottom_hud()
         self.draw_crosshair()
         self.draw_invulnerability_indicator()
         self.draw_fps()
 
+    def draw_top_stats(self):
+        score_rect = pg.Rect(18, 18, 180, 64)
+        time_rect = pg.Rect(210, 18, 180, 64)
+
+        self._draw_panel(score_rect)
+        self._draw_panel(time_rect)
+
+        self._draw_label_value(score_rect, 'SCORE', self.get_score(), self.yellow_color)
+        self._draw_label_value(time_rect, 'TIME', f'{self.get_survival_seconds()}s', self.get_level_tint_color())
+
     def draw_fps(self):
         fps = str(int(self.game.clock.get_fps()))
         fps_surface = self.fps_font.render(f'FPS: {fps}', True, (0, 255, 0))
-        self.screen.blit(fps_surface, (10, 10))
+        self.screen.blit(fps_surface, (10, 92))
 
     def draw_crosshair(self):
         cx = HALF_WIDTH
@@ -157,13 +186,14 @@ class GameUI:
 
         level_w = 90
         dash_w = 100
+        enemy_w = 110
         health_w = 300
 
         pickup_w = 110
         ammo_w = 150
         weapon_w = 110
 
-        left_total_w = level_w + dash_w + health_w + gap * 2
+        left_total_w = level_w + dash_w + enemy_w + health_w + gap * 3
         right_total_w = pickup_w + ammo_w + weapon_w + gap * 2
 
         left_outer = pg.Rect(
@@ -192,7 +222,8 @@ class GameUI:
 
         level_rect = pg.Rect(left_x, panel_y, level_w, panel_h)
         dash_rect = pg.Rect(level_rect.right + gap, panel_y, dash_w, panel_h)
-        health_rect = pg.Rect(dash_rect.right + gap, panel_y, health_w, panel_h)
+        enemy_rect = pg.Rect(dash_rect.right + gap, panel_y, enemy_w, panel_h)
+        health_rect = pg.Rect(enemy_rect.right + gap, panel_y, health_w, panel_h)
 
         pickup_rect = pg.Rect(right_x, panel_y, pickup_w, panel_h)
         ammo_rect = pg.Rect(pickup_rect.right + gap, panel_y, ammo_w, panel_h)
@@ -200,16 +231,17 @@ class GameUI:
 
         self._draw_panel(level_rect)
         self._draw_panel(dash_rect)
+        self._draw_panel(enemy_rect)
         self._draw_panel(health_rect)
 
         self._draw_panel(pickup_rect)
         self._draw_panel(ammo_rect)
         self._draw_panel(weapon_rect)
 
-        self._draw_side_left(level_rect, dash_rect, health_rect)
+        self._draw_side_left(level_rect, dash_rect, enemy_rect, health_rect)
         self._draw_side_right(pickup_rect, ammo_rect, weapon_rect)
 
-    def _draw_side_left(self, level_rect, dash_rect, health_rect):
+    def _draw_side_left(self, level_rect, dash_rect, enemy_rect, health_rect):
         current_level = getattr(self.game.level_manager, 'current_level', self.current_level)
         self._draw_label_value(level_rect, 'LEVEL', current_level)
 
@@ -227,9 +259,12 @@ class GameUI:
         dash_color = self.green_color if dash_ready else self.orange_color
         label_surf = self.label_font.render('DASH', True, self.white)
         self.screen.blit(label_surf, label_surf.get_rect(midtop=(dash_rect.centerx, dash_rect.y + 6)))
-        dash_font = self.dash_font
-        dash_surf = dash_font.render(str(dash_value), True, dash_color)
+        dash_surf = self.dash_font.render(str(dash_value), True, dash_color)
         self.screen.blit(dash_surf, dash_surf.get_rect(center=(dash_rect.centerx, dash_rect.centery + 12)))
+
+        enemies_left = self.get_enemies_left()
+        enemy_color = self.green_color if enemies_left == 0 else self.red_color
+        self._draw_label_value(enemy_rect, 'ENEMIES', enemies_left, enemy_color)
 
         current_health = max(0, getattr(player, 'health', 100))
         max_health = max(1, getattr(player, 'max_health', 100))
@@ -286,14 +321,7 @@ class GameUI:
         indicator_y = 18
         panel = pg.Rect(indicator_x, indicator_y, 220, 170)
 
-        self.metallic_renderer.draw_metallic_panel(
-            panel, 10,
-            color=(20, 24, 40),
-            border_color=self.blue_color,
-            with_bevel=True,
-            border_alpha=220,
-            bg_alpha=180
-        )
+        self.metallic_renderer.draw_panel(panel, 10)
 
         title_surface = self.invulnerability_title_font.render('INVINCIBILITY', True, self.white)
         title_rect = title_surface.get_rect(center=(panel.centerx, panel.y + 22))

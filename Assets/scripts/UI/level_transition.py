@@ -1,6 +1,7 @@
 import pygame as pg
 from Assets.settings import *
 
+
 class ScreenTransitions:
     def __init__(self, game):
         self.game = game
@@ -35,15 +36,17 @@ class ScreenTransitions:
         if self.fade_alpha >= 255 and self.fade_direction > 0:
             self.fade_alpha = 255
             if self.fade_complete_callback:
-                self.fade_complete_callback()
+                callback = self.fade_complete_callback
                 self.fade_complete_callback = None
+                callback()
 
         elif self.fade_alpha <= 0 and self.fade_direction < 0:
             self.fade_alpha = 0
             self.active = False
             if self.fade_complete_callback:
-                self.fade_complete_callback()
+                callback = self.fade_complete_callback
                 self.fade_complete_callback = None
+                callback()
 
     def draw(self):
         if not self.active and self.fade_alpha <= 0:
@@ -59,6 +62,7 @@ class LevelTransition:
         self.transition_state = None
         self.next_level_num = None
         self.loading_duration = 2000
+        self.loading_start_time = 0
         self.screen_transitions = ScreenTransitions(game)
 
     def transition_to_next_level(self):
@@ -70,7 +74,6 @@ class LevelTransition:
 
         self.transition_state = "fade_out"
         self.screen_transitions.start_fade_in(speed=8, callback=self._show_loading_screen)
-
         return True
 
     def _show_victory_screen(self):
@@ -83,7 +86,6 @@ class LevelTransition:
         self.transition_state = "loading"
         self.loading_start_time = pg.time.get_ticks()
         self.screen_transitions.start_fade_out(speed=5)
-
         pg.time.set_timer(pg.USEREVENT + 1, 16)
 
     def update_loading_screen(self):
@@ -94,7 +96,42 @@ class LevelTransition:
         if current_time - self.loading_start_time >= self.loading_duration:
             self._load_next_level()
 
+    def _reset_wave_related_state(self):
+        wave_manager = getattr(self.game, 'wave_manager', None)
+        if wave_manager is not None:
+            if hasattr(wave_manager, 'current_wave_remaining_to_spawn'):
+                wave_manager.current_wave_remaining_to_spawn = 0
+            if hasattr(wave_manager, 'current_wave_index'):
+                wave_manager.current_wave_index = 0
+            if hasattr(wave_manager, 'waves_config'):
+                wave_manager.waves_config = []
+            if hasattr(wave_manager, 'is_waiting_for_wave'):
+                wave_manager.is_waiting_for_wave = False
+            if hasattr(wave_manager, 'wave_spawn_time'):
+                wave_manager.wave_spawn_time = 0
+            if hasattr(wave_manager, 'spawn_wave'):
+                try:
+                    wave_manager.spawn_wave()
+                except Exception:
+                    pass
+            elif hasattr(wave_manager, 'reset'):
+                try:
+                    wave_manager.reset()
+                except Exception:
+                    pass
+
+        object_handler = getattr(self.game, 'object_handler', None)
+        if object_handler is not None:
+            if hasattr(object_handler, 'all_enemies_defeated'):
+                object_handler.all_enemies_defeated = False
+            if hasattr(object_handler, 'win_message_shown'):
+                object_handler.win_message_shown = False
+
     def _load_next_level(self):
+        if self.transition_state != "loading":
+            return
+
+        pg.time.set_timer(pg.USEREVENT + 1, 0)
         self.game.loading_screen.set_custom_message("LOADING LEVEL...")
         pg.display.flip()
 
@@ -104,6 +141,11 @@ class LevelTransition:
         self.game.level_manager.current_level = self.next_level_num
         self.game.map.load_level(self.next_level_num)
         self.game.new_game()
+        self._reset_wave_related_state()
+
+        if hasattr(self.game, 'game_ui'):
+            self.game.game_ui.update_level(self.next_level_num)
+
         self.screen_transitions.start_fade_in(speed=8, callback=self._finish_transition)
         self.transition_state = "fading_to_game"
 

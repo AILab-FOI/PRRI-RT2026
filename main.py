@@ -1,4 +1,3 @@
-
 import pygame as pg
 import gc
 import time
@@ -6,9 +5,8 @@ import math
 import random
 
 
-# Reduce GC frequency to avoid periodic FPS drops.
-# Default (700, 10, 10) causes frequent pauses in game loops.
 gc.set_threshold(25000, 50, 50)
+
 
 from Assets.settings import *
 from Assets.Levels.map import *
@@ -35,6 +33,7 @@ from Assets.scripts.Effects.visual_effects import DisorientingEffects
 from Assets.scripts.Util.font_manager import resource_path
 from Assets.scripts.MapGenerator.runtime_level import build_runtime_level
 
+
 class Game:
     def __init__(self):
         pg.init()
@@ -45,8 +44,8 @@ class Game:
         pg.display.set_icon(icon)
 
         pg.mouse.set_visible(False)
-        pg.event.set_grab(True)  # lock mouse inside window
-        pg.mouse.get_rel()       # reset cursor to center
+        pg.event.set_grab(True)
+        pg.mouse.get_rel()
         self.is_fullscreen = False
         self.update_display_mode()
         self.screen = pg.display.set_mode(RES)
@@ -68,6 +67,7 @@ class Game:
         self.weapon_slot_count = len(self.weapon_classes)
 
         self.level_manager = LevelManager(self)
+        self.wave_manager = None
 
         self.game_initialized = False
         self.show_menu(play_menu_music=True)
@@ -83,14 +83,10 @@ class Game:
 
     def new_game(self):
         self.sound.stop_all_sfx()
-        # --- 1. ALWAYS create map and then load the current level ---
 
         if not hasattr(self, 'map'):
             self.map = Map(self)
-
         self.map.load_level(self.level_manager.current_level)
-
-        # --- 2. Core objects (only create once, otherwise reset) ---
 
         if not hasattr(self, 'player'):
             self.player = Player(self)
@@ -106,32 +102,33 @@ class Game:
         if not hasattr(self, 'raycasting'):
             self.raycasting = RayCasting(self)
 
-        if not hasattr(self, 'object_handler'):
-            self.object_handler = ObjectHandler(self)
-        else:
-            self.object_handler.reset()
-
         if not hasattr(self, 'pathfinding'):
             self.pathfinding = PathFinding(self)
 
         if not hasattr(self, 'interaction'):
             self.interaction = Interaction(self)
+        else:
+            self.interaction.interaction_objects.clear()
 
         if not hasattr(self, 'dialogue_manager'):
             self.dialogue_manager = DialogueManager(self)
+
+        if not hasattr(self, 'object_handler'):
+            self.object_handler = ObjectHandler(self)
+        else:
+            self.object_handler.reset()
+
+        self.wave_manager = self.object_handler.wave_manager
 
         if not hasattr(self, 'game_ui'):
             self.game_ui = GameUI(self)
         else:
             self.game_ui.update_level(self.level_manager.current_level)
-
-        # --- 3. Setup world data on top of the loaded map ---
+            self.game_ui.bind_wave_manager()
 
         self.level_manager.setup_dialogue_npcs()
         self.level_manager.setup_interactive_objects()
         self.pathfinding.update_graph()
-
-        # --- 4. Spawn player ---
 
         current_level_data = self.level_manager.get_current_level_data()
         spawn = current_level_data.get('player_spawn') if current_level_data else None
@@ -153,12 +150,9 @@ class Game:
         elif self.level_manager.current_level == 6:
             self.player.x, self.player.y = PLAYER_POS_LEVEL6
 
-        # --- 5. Audio and UI ---
-
         self.object_renderer.update_sky_image()
         self.sound.change_music_for_level(self.level_manager.current_level)
 
-        #print("[DEBUG] Current Level:", self.level_manager.current_level)
         if self.level_manager.current_level == 1:
             self.intro_sequence.start()
 
@@ -266,7 +260,7 @@ class Game:
             print(row)
 
         self.new_game()
-        
+
     def spawn_npc_drop(self, pos):
         if not NPC_DROP_SETTINGS.get('enabled', False):
             return
@@ -283,8 +277,6 @@ class Game:
             self.object_handler.add_ammo_item(pos=pos)
         elif chosen == 'powerups':
             self.object_handler.add_powerup(pos=pos)
-        
-    
 
     def game_loop(self):
         while True:

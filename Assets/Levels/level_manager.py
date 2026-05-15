@@ -7,20 +7,20 @@ from Assets.scripts.Character.interaction import InteractiveObject
 from Assets.npcs.enemy_npcs import KlonoviNPC, StakorNPC, TosterNPC, ParazitNPC, JazavacNPC
 from Assets.npcs.dialogue_npc import create_dialogue_npcs
 
+
 class LevelManager:
     def __init__(self, game):
         self.game = game
         self.current_level = 1
         self.level_data = {}
-        self.max_level = 0 #deprecated trebalo bi biti automatic
+        self.max_level = 0
         self.current_weapon_type = 'pistol'
         self.initialize_levels()
-        
 
     def initialize_levels(self):
         try:
             import Assets.Levels as levels_pkg
-        
+
             levels_paths = list(levels_pkg.__path__)
             if not levels_paths:
                 raise RuntimeError("Assets.Levels package path not found")
@@ -49,31 +49,23 @@ class LevelManager:
 
             self.max_level = max(self.level_data.keys(), default=0)
             print(f"Loaded {len(self.level_data)} levels. Max level: {self.max_level}")
-            
+
         except Exception as e:
             print(f"Critical error during level initialization: {e}")
             self.level_data = {}
             self.max_level = 0
-           
 
     def load_level(self, level_number):
-        # 1. If it's a known handcrafted level (1-6)
         if level_number in self.level_data:
             self.current_level = level_number
             return self.level_data[level_number]
-            
-        # 2. If it's Level 99 (Procedural Endless/Arena)
         elif level_number == 99:
             import time
             seed = int(time.time())
-            
-            # Generate the level and register it so it behaves like a normal level
             print(f"Generating Procedural Level {level_number}...")
-            evel_data = self.create_and_register_runtime_level(level_number, seed)
-            
+            level_data = self.create_and_register_runtime_level(level_number, seed)
             self.current_level = level_number
-            return self.level_data
-            
+            return level_data
         return None
 
     def get_current_level_data(self):
@@ -88,7 +80,9 @@ class LevelManager:
             'types': [KlonoviNPC, StakorNPC, TosterNPC, ParazitNPC, JazavacNPC],
             'weights': [20, 20, 20, 20, 20],
             'restricted_area': {(i, j) for i in range(10) for j in range(10)},
-            'fixed_positions': []
+            'fixed_positions': [],
+            'max_enemies_on_map': 5,
+            'wave_delay': 3000,
         }
 
     def get_sprite_data(self):
@@ -144,7 +138,7 @@ class LevelManager:
 
                 if self.game.player.weapon_unlocked[weapon_index]:
                     continue
-            
+
                 weapon_pickup = InteractiveObject(
                     self.game,
                     path=weapon_data['path'],
@@ -162,20 +156,17 @@ class LevelManager:
                     powerup_type=powerup_data['powerup_type']
                 )
 
-        if 'heal_item' in level_data:#heal_item
+        if 'heal_item' in level_data:
             for heal_item_data in level_data['heal_item']:
                 self.game.object_handler.add_heal_item(
                     pos=heal_item_data['position']
                 )
-                    
-                #self.game.object_handler.add_sprite(heal_item)
-               #self.game.interaction.add_object(heal_item)
 
         if 'ammo_pickup' in level_data:
             for ammo_item in level_data['ammo_pickup']:
-                    self.game.object_handler.add_ammo_item(
-                        pos = ammo_item['position']
-                    )
+                self.game.object_handler.add_ammo_item(
+                    pos=ammo_item['position']
+                )
 
         exit_positions = {
             1: (14.5, 3.5),
@@ -188,14 +179,13 @@ class LevelManager:
 
         if self.current_level in exit_positions:
             exit_pos = exit_positions[self.current_level]
-            
-            # Postavljanje koda za 2. level (kod je '8332' kao na terminalu)
+
             req_code = False
             exit_code = None
             if self.current_level == 2:
                 req_code = True
                 exit_code = '8332'
-                
+
             level_exit = InteractiveObject(
                 self.game,
                 path=level_door_path,
@@ -205,8 +195,6 @@ class LevelManager:
                 requires_code=req_code,
                 code=exit_code
             )
-            # Ne dodajemo u sprite_list jer user koristi zidnu teksturu na mapi
-            # self.game.object_handler.add_sprite(level_exit)
             self.game.interaction.add_object(level_exit)
 
     def auto_detect_interactive_objects(self):
@@ -247,7 +235,7 @@ class LevelManager:
                 pos=pos,
                 interaction_type="terminal",
                 code=default_code,
-                unlocks_door_id=i+1
+                unlocks_door_id=i + 1
             )
             self.game.object_handler.add_sprite(terminal)
             self.game.interaction.add_object(terminal)
@@ -258,7 +246,7 @@ class LevelManager:
                 path=door_path,
                 pos=pos,
                 interaction_type="door",
-                door_id=i+1,
+                door_id=i + 1,
                 requires_code=True,
                 code=default_code,
                 requires_door_id=i if i > 0 else None
@@ -285,12 +273,10 @@ class LevelManager:
         if level_data and 'dialogue_npcs' in level_data:
             create_dialogue_npcs(self.game, level_data['dialogue_npcs'])
 
-        # Auto-dijalog pri ulasku na razinu
         if level_data and 'intro_dialogue' in level_data:
             dialogue_id = level_data['intro_dialogue']
             pg.time.set_timer(pg.USEREVENT + 10, 5250, loops=1)
             self.game._pending_intro_dialogue = dialogue_id
-        
 
     def prepare_next_level(self):
         next_level = self.current_level + 1
@@ -332,17 +318,14 @@ class LevelManager:
         elif next_level > self.max_level:
             return False
         return False
-    
+
     def register_runtime_level(self, level_number, level_data):
         self.level_data[level_number] = level_data
         self.max_level = max(self.max_level, level_number)
 
     def create_and_register_runtime_level(self, level_number, seed):
-        # Updated to import from your actual path (make sure this path matches your files!)
         from Assets.scripts.MapGenerator.runtime_level import build_runtime_level
-        
-        # Pass the level_number so settings.py knows which rules to apply
-        level_data = build_runtime_level(seed, level_id=level_number) 
-        
+
+        level_data = build_runtime_level(seed, level_id=level_number)
         self.register_runtime_level(level_number, level_data)
         return level_data

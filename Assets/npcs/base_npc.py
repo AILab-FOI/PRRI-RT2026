@@ -28,7 +28,6 @@ class StaticNPC(AnimatedSprite):
             self.image = self.static_image
 
     def get_distance_to_player(self):
-        """Calculate the direct distance to the player (no ray casting)"""
         return ((self.game.player.x - self.x) ** 2 + (self.game.player.y - self.y) ** 2) ** 0.5
 
     @property
@@ -62,6 +61,7 @@ class NPC(AnimatedSprite):
         self.speed = self.config['speed']
         self.size = self.config['size']
         self.health = self.config['health']
+        self.max_health = self.config['health']
         self.attack_damage = self.config['attack_damage']
         self.accuracy = self.config['accuracy']
         self.death_height_shift = self.config['death_height_shift']
@@ -73,16 +73,17 @@ class NPC(AnimatedSprite):
         self.player_search_trigger = False
         self.play_death_sound = False
         self.death_sound_delay = 0
-        # Corpse removal timer
         self.should_remove = False
         self.death_anim_done = False
         self.death_done_time = 0
-        self.corpse_linger_ms = 5000  # remove body 5s after death anim ends
-        self.npc_knocked_played=False
-        self.npc_warning_played=False
-        self.npc_gone_played=False
-        self.npc_knocked_delay=150
-        self.npc_warning_delay=1000 #prije despawna se aktivira "portal opening sfx"
+        self.corpse_linger_ms = 5000
+        self.npc_knocked_played = False
+        self.npc_warning_played = False
+        self.npc_gone_played = False
+        self.npc_knocked_delay = 150
+        self.npc_warning_delay = 1000
+        self.original_speed = self.speed
+        self.original_height_shift = self.SPRITE_HEIGHT_SHIFT
 
     def _update_config_recursive(self, target, source):
         for key, value in source.items():
@@ -97,6 +98,60 @@ class NPC(AnimatedSprite):
         self.idle_images = self.get_images(self.path + '/idle')
         self.pain_images = self.get_images(self.path + '/pain')
         self.walk_images = self.get_images(self.path + '/walk')
+
+    def reset_for_spawn(self, pos):
+        self.x, self.y = pos
+        self.alive = True
+        self.pain = False
+        self.ray_cast_value = False
+        self.death_frame = 0
+        self.player_search_trigger = False
+        self.play_death_sound = False
+        self.death_sound_delay = 0
+        self.should_remove = False
+        self.death_anim_done = False
+        self.death_done_time = 0
+        self.npc_knocked_played = False
+        self.npc_warning_played = False
+        self.npc_gone_played = False
+        self.health = self.max_health
+        self.speed = self.original_speed
+        self.SPRITE_HEIGHT_SHIFT = self.original_height_shift
+        if self.idle_images:
+            self.image = self.idle_images[0]
+        if hasattr(self, '_current_image_id'):
+            self._current_image_id += 1
+        else:
+            self._current_image_id = 0
+        if hasattr(self, '_scaled_image_cache'):
+            self._scaled_image_cache = {}
+
+    def reset_for_pool(self):
+        self.alive = False
+        self.pain = False
+        self.ray_cast_value = False
+        self.death_frame = 0
+        self.player_search_trigger = False
+        self.play_death_sound = False
+        self.death_sound_delay = 0
+        self.should_remove = False
+        self.death_anim_done = False
+        self.death_done_time = 0
+        self.npc_knocked_played = False
+        self.npc_warning_played = False
+        self.npc_gone_played = False
+        self.health = self.max_health
+        self.speed = self.original_speed
+        self.SPRITE_HEIGHT_SHIFT = self.original_height_shift
+        self.x, self.y = (-1000.5, -1000.5)
+        if self.idle_images:
+            self.image = self.idle_images[0]
+        if hasattr(self, '_current_image_id'):
+            self._current_image_id += 1
+        else:
+            self._current_image_id = 0
+        if hasattr(self, '_scaled_image_cache'):
+            self._scaled_image_cache = {}
 
     def update(self):
         self.check_animation_time()
@@ -152,7 +207,6 @@ class NPC(AnimatedSprite):
                 self.death_anim_done = True
                 self.death_done_time = pg.time.get_ticks()
 
-
     def animate_pain(self):
         self.animate(self.pain_images)
         if self.animation_trigger:
@@ -167,10 +221,10 @@ class NPC(AnimatedSprite):
                 self.game.player.shot = False
                 self.pain = True
                 self.health -= self.game.weapon.damage
-                
+
                 if hasattr(self.game, 'game_ui'):
                     self.game.game_ui.show_hit_marker()
-                    
+
                 self.check_health()
 
     def check_health(self):
@@ -188,27 +242,23 @@ class NPC(AnimatedSprite):
                 self._current_image_id = 0
             if hasattr(self, '_scaled_image_cache'):
                 self._scaled_image_cache = {}
-            
+
             if hasattr(self.game, 'spawn_npc_drop'):
                 self.game.spawn_npc_drop((int(self.x) + 0.5, int(self.y) + 0.5))
 
     def run_logic(self):
         if not self.alive:
             self.animate_death()
-            # Mark for removal after corpse linger time
             if self.death_anim_done:
-                 elapsed=pg.time.get_ticks() - self.death_done_time
+                elapsed = pg.time.get_ticks() - self.death_done_time
 
-                 #npc knocked 150ms nakon smrti
-                 if not self.npc_knocked_played and elapsed >= self.npc_knocked_delay:
-                        self.npc_knocked_played=True
-                        self.game.sound.play_sfx_at_position('npc_knocked', self.x, self.y)
-                 #npc warning 4s nakon smrti ( 1 prije despawna)
-                 if not self.npc_warning_played and elapsed >= self.corpse_linger_ms - self.npc_warning_delay:
-                        self.npc_warning_played=True
-                        self.game.sound.play_sfx_at_position('npc_warning', self.x, self.y)
-                 #npc despawn
-                 if elapsed >= self.corpse_linger_ms:
+                if not self.npc_knocked_played and elapsed >= self.npc_knocked_delay:
+                    self.npc_knocked_played = True
+                    self.game.sound.play_sfx_at_position('npc_knocked', self.x, self.y)
+                if not self.npc_warning_played and elapsed >= self.corpse_linger_ms - self.npc_warning_delay:
+                    self.npc_warning_played = True
+                    self.game.sound.play_sfx_at_position('npc_warning', self.x, self.y)
+                if elapsed >= self.corpse_linger_ms:
                     if not self.npc_gone_played:
                         self.npc_gone_played = True
                         self.game.sound.play_sfx_at_position('npc_gone', self.x, self.y)
@@ -295,7 +345,6 @@ class NPC(AnimatedSprite):
 
         ox, oy = self.game.player.pos
         x_map, y_map = self.game.player.map_pos
-
         ray_angle = self.theta
 
         sin_a = math.sin(ray_angle)
@@ -305,7 +354,6 @@ class NPC(AnimatedSprite):
         sin_a = sin_a if abs(sin_a) > EPSILON else EPSILON * (1 if sin_a >= 0 else -1)
         cos_a = cos_a if abs(cos_a) > EPSILON else EPSILON * (1 if cos_a >= 0 else -1)
 
-        # Check horizontal lines
         y_hor, dy = (y_map + 1, 1) if sin_a > 0 else (y_map - 1e-6, -1)
         depth_hor = (y_hor - oy) / sin_a
         x_hor = ox + depth_hor * cos_a
@@ -324,7 +372,6 @@ class NPC(AnimatedSprite):
             y_hor += dy
             depth_hor += delta_depth
 
-        # Check vertical lines
         x_vert, dx = (x_map + 1, 1) if cos_a > 0 else (x_map - 1e-6, -1)
         depth_vert = (x_vert - ox) / cos_a
         y_vert = oy + depth_vert * sin_a

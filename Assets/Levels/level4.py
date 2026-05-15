@@ -4,6 +4,7 @@ Level 4 configuration: The Keycard Hunt
 from Assets.npcs.enemy_npcs import MadracNPC, ParazitNPC, TosterNPC, KlonoviNPC
 from Assets.Levels.base_level import create_base_level_structure
 
+
 def get_level_data():
     """Return the complete level 4 data"""
     level_data = create_base_level_structure()
@@ -21,7 +22,6 @@ def get_level_data():
         {'position': (3.5, 3.5), 'powerup_type': 'invulnerability'},
     ]
 
-    # Doors
     level_data['doors'] = [
         {'position': (9, 12), 'door_id': 1, 'requires_code': False, 'code': None, 'requires_door_id': None},
         {'position': (6, 15), 'door_id': 2, 'requires_code': False, 'code': None, 'requires_door_id': None},
@@ -46,27 +46,31 @@ def get_level_data():
 
     level_data['sprites'] = []
 
-    # Enemy configuration
     level_data['enemies'] = {
-        'count': 6,
-        'types': [ParazitNPC, MadracNPC, KlonoviNPC],
-        'weights': [40, 40, 20],
+        'waves': [
+            {
+                'count': 6,
+                'types': [ParazitNPC, MadracNPC, KlonoviNPC],
+                'weights': [40, 40, 20],
+                'fixed_positions': [
+                    {'type': MadracNPC, 'position': (3, 15)},
+                    {'type': ParazitNPC, 'position': (15, 15)},
+                    {'type': TosterNPC, 'position': (3, 7)},
+                    {'type': MadracNPC, 'position': (15, 5)},
+                    {'type': ParazitNPC, 'position': (2, 2)},
+                    {'type': MadracNPC, 'position': (4, 2)},
+                    {'type': KlonoviNPC, 'position': (2, 4)},
+                    {'type': MadracNPC, 'position': (4, 4)},
+                ],
+                'max_enemies_on_map': 10
+            }
+        ],
         'restricted_area': {
-            (i, j) for i in range(7, 12) for j in range(7, 12) # Keep random spawns out of the hub
+            (i, j) for i in range(7, 12) for j in range(7, 12)
         } | {
-            (i, j) for i in range(7, 12) for j in range(13, 19) # Keep random spawns out of the spawn room
+            (i, j) for i in range(7, 12) for j in range(13, 19)
         },
-        'fixed_positions': [
-            {'type': MadracNPC, 'position': (3, 15)}, # Guarding SW terminal
-            {'type': ParazitNPC, 'position': (15, 15)}, # Guarding SE terminal
-            {'type': TosterNPC, 'position': (3, 7)}, # Guarding CW terminal
-            {'type': MadracNPC, 'position': (15, 5)}, # Guarding NE terminal
-            # Ambush in NW room
-            {'type': ParazitNPC, 'position': (2, 2)},
-            {'type': MadracNPC, 'position': (4, 2)},
-            {'type': KlonoviNPC, 'position': (2, 4)},
-            {'type': MadracNPC, 'position': (4, 4)},
-        ]
+        'wave_delay': 3000
     }
 
     return level_data

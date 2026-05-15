@@ -4,6 +4,7 @@ Level 3 configuration
 from Assets.npcs.enemy_npcs import KlonoviNPC, JazavacNPC
 from Assets.Levels.base_level import create_base_level_structure
 
+
 def get_level_data():
     """Return the complete level 3 data"""
     level_data = create_base_level_structure()
@@ -11,28 +12,29 @@ def get_level_data():
     level_data['enemies'] = {
         'waves': [
             {
-                # Wave 1
-                'count': 0, # Privremeno isključeno zbog testiranja tekstura
+                'count': 100,
                 'types': [KlonoviNPC],
                 'weights': [100],
-                'fixed_positions': []
+                'fixed_positions': [],
+                'max_enemies_on_map': 15
             },
             {
-                # Wave 2
-                'count': 0,
+                'count': 60,
                 'types': [KlonoviNPC, JazavacNPC],
                 'weights': [70, 30],
-                'fixed_positions': []
+                'fixed_positions': [],
+                'max_enemies_on_map': 15
             },
             {
-                # Wave 3
-                'count': 0,
+                'count': 40,
                 'types': [JazavacNPC],
                 'weights': [100],
-                'fixed_positions': []
+                'fixed_positions': [],
+                'max_enemies_on_map': 10
             }
         ],
-        'restricted_area': {(i, j) for i in range(5) for j in range(5)}
+        'restricted_area': {(i, j) for i in range(5) for j in range(5)},
+        'wave_delay': 3000
     }
 
     level_data['powerups'] = [
@@ -42,11 +44,11 @@ def get_level_data():
     ]
 
     level_data['dialogue_npcs'] = [
-       {
+        {
             'pos': (30.8, 12.3),
             'dialogue_id': 'level2_puzzle',
             'path': 'resources/sprites/npc/dialogue_npc/0.png'
-       }
+        }
     ]
 
     return level_data

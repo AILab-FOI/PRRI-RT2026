@@ -5,6 +5,7 @@ from Assets.scripts.Util.sprite_object import SpriteObject
 from Assets.scripts.Weapons.weapon import Pistol, SMG, PlasmaGun
 from Assets.scripts.Util.font_manager import load_custom_font
 
+
 class Interaction:
     def __init__(self, game):
         self.game = game
@@ -72,7 +73,7 @@ class Interaction:
 
         if self.input_active:
             bg_width, bg_height = 600, 300
-            bg_rect = (HALF_WIDTH - bg_width//2, HALF_HEIGHT - bg_height//2, bg_width, bg_height)
+            bg_rect = (HALF_WIDTH - bg_width // 2, HALF_HEIGHT - bg_height // 2, bg_width, bg_height)
 
             bg_surface = pg.Surface((bg_width, bg_height), pg.SRCALPHA)
             bg_surface.fill((0, 0, 0, 180))
@@ -89,7 +90,7 @@ class Interaction:
             code_bg_width, code_bg_height = 300, 80
             code_bg = pg.Surface((code_bg_width, code_bg_height), pg.SRCALPHA)
             code_bg.fill((0, 0, 0, 120))
-            self.game.screen.blit(code_bg, (HALF_WIDTH - code_bg_width//2, HALF_HEIGHT - code_bg_height//2))
+            self.game.screen.blit(code_bg, (HALF_WIDTH - code_bg_width // 2, HALF_HEIGHT - code_bg_height // 2))
 
             input_surface = large_font.render(input_text, True, (255, 255, 255))
             input_rect = input_surface.get_rect(center=(HALF_WIDTH, HALF_HEIGHT))
@@ -126,6 +127,22 @@ class Interaction:
                 elif event.unicode.isdigit() and len(self.input_code) < 4:
                     self.input_code += event.unicode
 
+    def are_all_wave_enemies_cleared(self):
+        if not hasattr(self.game, 'object_handler'):
+            return False
+
+        wave_manager = getattr(self.game.object_handler, 'wave_manager', None)
+        if wave_manager is None:
+            return getattr(self.game.object_handler, 'all_enemies_defeated', False)
+
+        if hasattr(wave_manager, 'finished_all_waves') and hasattr(wave_manager, 'get_alive_hostile_count'):
+            return wave_manager.finished_all_waves and wave_manager.get_alive_hostile_count() <= 0
+
+        if hasattr(wave_manager, 'all_waves_completed'):
+            return wave_manager.all_waves_completed()
+
+        return getattr(self.game.object_handler, 'all_enemies_defeated', False)
+
     def interact(self):
         if self.active_object:
             if self.active_object.interaction_type == "terminal":
@@ -145,7 +162,7 @@ class Interaction:
                     self.open_door()
             elif self.active_object.interaction_type == "level_door":
                 if self.active_object.is_level_exit:
-                    if hasattr(self.game.object_handler, 'all_enemies_defeated') and self.game.object_handler.all_enemies_defeated:
+                    if self.are_all_wave_enemies_cleared():
                         if self.active_object.is_enabled:
                             if self.active_object.requires_code and not self.active_object.is_unlocked:
                                 self.input_active = True
@@ -203,46 +220,17 @@ class Interaction:
 
             self.active_object = None
             self.show_interaction_prompt = False
-    '''
-    def pickup_weapon(self):
-        weapon_type = self.active_object.weapon_type
 
-        if weapon_type == "smg":
-            new_weapon = SMG(self.game)
-        elif weapon_type == "plasmagun":
-            new_weapon = PlasmaGun(self.game)
-        else:
-            new_weapon = Pistol(self.game)
-            weapon_type = "pistol"
-
-        self.game.level_manager.current_weapon_type = weapon_type
-        self.game.weapon = new_weapon
-        self.game.sound.weapon_pickup.play()
-
-        self.message = f"Picked up {weapon_type}!"
-        self.message_time = pg.time.get_ticks()
-
-        if self.active_object in self.game.object_handler.sprite_list:
-            self.game.object_handler.sprite_list.remove(self.active_object)
-
-        if self.active_object in self.interaction_objects:
-            self.interaction_objects.remove(self.active_object)
-
-        self.active_object = None
-        self.show_interaction_prompt = False
-    '''
     def pickup_weapon(self):
         weapon_index = self.active_object.weapon_index
 
         is_new = self.game.player.give_weapon(weapon_index, auto_equip=True)
-
         weapon = self.game.player.weapon_inventory[weapon_index]
 
         if is_new:
             self.message = f"Picked up {weapon.name}!"
         else:
             self.message = f"Already have {weapon.name}!"
-            # or give ammo here instead
 
         self.game.sound.weapon_pickup.play()
         self.message_time = pg.time.get_ticks()
@@ -255,6 +243,7 @@ class Interaction:
 
         self.active_object = None
         self.show_interaction_prompt = False
+
 
 class InteractiveObject(SpriteObject):
     def __init__(self, game, path, pos, interaction_type, door_id=None, code=None,
