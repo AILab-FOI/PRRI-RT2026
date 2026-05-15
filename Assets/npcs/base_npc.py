@@ -3,6 +3,7 @@ from random import randint, random
 import math
 import pygame as pg
 from Assets.settings import *
+from Assets.config.weapon_config import get_weapon_config
 
 
 class StaticNPC(AnimatedSprite):
@@ -215,6 +216,11 @@ class NPC(AnimatedSprite):
     def check_hit_in_npc(self):
         if self.ray_cast_value and self.game.player.shot:
             if HALF_WIDTH - self.sprite_half_width < self.screen_x < HALF_WIDTH + self.sprite_half_width:
+                if self.game.weapon: #provjera za in range enemie
+                    cfg = get_weapon_config(self.game.weapon.name)
+                    max_range = cfg.get('max_range') if cfg else None
+                    if max_range is not None and self.dist > max_range:    
+                        return
                 sound_name = self.config['sounds']['pain']
                 if hasattr(self.game.sound, sound_name):
                     getattr(self.game.sound, sound_name).play()

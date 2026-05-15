@@ -20,6 +20,7 @@ SMG_CONFIG = {
     'scale': 0.4,
     'animation_time': 70,
     'fire_cooldown': 120,
+    'max_range': 4,
     'damage': 15,
     'magSize': 30, #ammo in weapon
     'bagSize': 300, #ammon in the reload pool

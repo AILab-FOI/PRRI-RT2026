@@ -100,8 +100,8 @@ class Sound:
             'powerup_end': 0.25,
 
             # Menu sounds
-            'menu_hover': 0.30,
-            'menu_click': 0.36,
+            'menu_hover': 0.50,
+            'menu_click': 0.66,
 
             # Dialogue
             'dialogue_line': 0.26,
@@ -172,7 +172,7 @@ class Sound:
             'powerup_end': 'powerup_gasenje.wav',
 
             # Menu sounds
-            'menu_hover': 'menu_hover.mp3',
+            'menu_hover': 'menu_hover.wav',
             'menu_click': 'menu_klik.wav',
 
             # Game state sounds
@@ -242,6 +242,7 @@ class Sound:
         try:
             return pg.mixer.Sound(self._full_sound_path(filename))
         except Exception:
+            print(f"[DEBUG:]FAILED TO LOAD: {filename}")
             return None
 
     def _load_all_sounds(self):
@@ -324,7 +325,7 @@ class Sound:
         dist = max(0.1, (dx ** 2 + dy ** 2) ** 0.5)
 
         # Volume pada linearno s distancom, tiho izvan max_dist
-        max_dist = 25.0
+        max_dist = 17.0
         vol = max(0.0, 1.0 - (dist / max_dist))
         vol *= self.volume_factors.get(sound_name, 1.0) * self.sfx_volume
 
