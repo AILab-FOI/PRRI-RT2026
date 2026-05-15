@@ -283,7 +283,7 @@ class Menu:
 
     def _refresh_screen_refs(self):
         self.screen = self.game.screen
-        self.ui_renderer = PixelUIRenderer(self.screen)
+        self.ui_renderer = MetallicUIRenderer(self.screen)
         self.bg_image = pg.transform.scale(self.bg_image, self.screen.get_size())
         self.bg_overlay = pg.Surface(self.screen.get_size(), pg.SRCALPHA)
         self.bg_overlay.fill((0, 0, 0, 120))
