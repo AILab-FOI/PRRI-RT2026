@@ -53,7 +53,7 @@ class ObjectRenderer:
 
         self.damage_max_alpha = 224
         self.heal_max_alpha = 196
-        self.damage_frame_count = 18
+        self.damage_frame_count = 30
         self.heal_frame_count = 20
 
         self.damage_frames = self._build_overlay_frames(
