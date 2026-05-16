@@ -49,6 +49,8 @@ class Sound:
             'reload_smg': 0.30,
             'reload_pistolj': 0.30,
             'bat_swing': 0.40,
+            'bat_pickup': 0.35,
+            'bat_break': 0.45,
 
             # Player sounds
             'igrac_damage': 0.35,
@@ -126,6 +128,7 @@ class Sound:
             'reload_pistolj': 'reload_pistolj.wav',
             'reload_smg': 'reload_smg.mp3',
             'bat_swing': 'bat_swing.wav',
+            'bat_break': 'bat_break.wav',
 
             # Player sounds
             'igrac_damage': 'Igrac_damage.wav',

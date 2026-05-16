@@ -36,7 +36,7 @@ class Bat_item(SpriteObject):
         if bat is not None:
             bat.uses_left = bat.max_uses#nova palica ima max uses
 
-        self.game.sound.play_sfx('weapon_pickup')
+        self.game.sound.play_sfx('bat_pickup')
         self.picked = True
 
         if self in self.game.object_handler.sprite_list:

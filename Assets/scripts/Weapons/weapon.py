@@ -273,3 +273,4 @@ class Bat(Weapon):
 
         
         self.game.bat_consumed_time = pg.time.get_ticks() #negira spawnanje novih palica iducih 5 sec
+        self.game.sound.play_sfx('bat_break')
