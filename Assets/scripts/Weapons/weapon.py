@@ -183,3 +183,93 @@ class PlasmaGun(Weapon):
         right_offset = config.get('right_offset', 200)
         self.weapon_pos = (HALF_WIDTH - self.images[0].get_width() // 2 + right_offset,
                           HEIGHT - self.images[0].get_height())
+
+class Bat(Weapon):
+
+    """
+    Palica koja je kao meele weapon koji ce bit rare kada smanjimo spawn u settings.py
+    4 udarca, zatim palica pukne odnosno nestane dok je ne pokupi opet, one shot je za sve enemyie
+    fora je da odjednom moze ubit 3 enemia ako su u rangeu od bat_range koji je trenutno - 3
+    """
+
+
+    def __init__(self, game):
+        config = get_weapon_config('bat')
+
+        super().__init__(
+            game=game,
+            path=config['path'],
+            scale=config['scale'],
+            animation_time=config['animation_time'],
+            damage=config['damage'],
+            magAmount=config['magSize'],
+            bagAmount=config['bagSize'],
+            name=config['name'],
+            fire_cooldown=config['fire_cooldown'],
+        )
+
+        self.accuracy  = config['accuracy']
+        self.auto_fire = config['auto_fire']
+        self.max_uses  = config['max_uses']       # 4 udarca pa pukne
+        self.uses_left = self.max_uses
+        self.bat_range = config['bat_range']      # 1.0 tile
+        self.max_targets = config['max_targets']  # 3 odjednom
+
+        
+        self.weapon_pos = (
+            HALF_WIDTH - self.images[0].get_width() // 2,
+            HEIGHT - self.images[0].get_height()
+        )
+
+    
+    def can_fire(self):
+        if self.uses_left <= 0:
+            return False
+        return pg.time.get_ticks() - self.last_fire_time >= self.fire_cooldown
+
+    def register_fire(self):
+        super().register_fire()
+        self.uses_left -= 1
+        if self.uses_left <= 0:
+            self._consume()
+
+   
+    def do_melee_hit(self):
+        hits = 0
+        for npc in list(self.game.object_handler.npc_list):
+            if not npc.alive:
+                continue
+            if hits >= self.max_targets:
+                break
+            dx = npc.x - self.game.player.x
+            dy = npc.y - self.game.player.y
+            dist = (dx**2 + dy**2) ** 0.5
+            if dist <= self.bat_range:
+                npc.health = 0
+                npc.pain   = True
+                if hasattr(self.game, 'game_ui'):
+                    self.game.game_ui.show_hit_marker()
+                npc.check_health()
+                hits += 1
+
+    
+    def _consume(self):
+        """Remove bat from player inventory and start spawn lockout."""
+        bat_slot = 3
+        player = self.game.player
+
+        # Un-equip: switch to any other available weapon
+        player.weapon_unlocked[bat_slot] = False
+        if player.current_weapon_index == bat_slot:
+            switched = False
+            for i, w in enumerate(player.weapon_inventory):
+                if i != bat_slot and w is not None and player.weapon_unlocked[i]:
+                    player.equip_weapon_by_index(i)
+                    switched = True
+                    break
+            if not switched:
+                player.current_weapon_index = -1
+                self.game.weapon = None
+
+        
+        self.game.bat_consumed_time = pg.time.get_ticks() #negira spawnanje novih palica iducih 5 sec

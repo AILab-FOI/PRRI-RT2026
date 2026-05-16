@@ -50,10 +50,30 @@ PLASMA_GUN_CONFIG = {
     'description': 'Advanced plasma weapon with devastating firepower.'
 }
 
+BAT_CONFIG = {
+    'name': 'bat',
+    'path': 'resources/sprites/weapon/bat/0.png',
+    'scale': 0.45,
+    'animation_time': 120,
+    'fire_cooldown': 400,       
+    'damage': 9999,             
+    'magSize': 1,               
+    'bagSize': 0,
+    'accuracy': 1.0,
+    'auto_fire': False,
+    'bat_range': 3,           
+    'max_uses': 4,              
+    'max_targets': 3,           
+    'sound': 'bat_swing',       
+    'description': 'A trusty bat. Four swings, then it breaks.',
+}
+
+
 WEAPON_CONFIGS = {
     'pistol': PISTOL_CONFIG,
     'smg': SMG_CONFIG,
     'plasmagun': PLASMA_GUN_CONFIG,
+    'bat': BAT_CONFIG
 }
 
 def get_weapon_config(weapon_name):

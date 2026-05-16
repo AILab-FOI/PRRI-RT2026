@@ -115,6 +115,17 @@ class Player:
         if not self.game.weapon.can_fire():
             return
 
+
+
+        if self.game.weapon.name == 'bat':
+            bat = self.game.weapon          
+            bat.register_fire()            
+            bat.do_melee_hit()              
+            self.game.sound.play_sfx('bat_swing')
+            self.last_auto_fire_time = pg.time.get_ticks()
+            return
+
+
         if self.game.weapon.currentMagAmmount <= 0:
             return
 

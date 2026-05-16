@@ -15,7 +15,8 @@ from Assets.scripts.Util.raycasting import *
 from Assets.scripts.Util.object_renderer import *
 from Assets.scripts.Util.sprite_object import *
 from Assets.scripts.Util.object_handler import *
-from Assets.scripts.Weapons.weapon import Pistol, SMG, PlasmaGun
+from Assets.scripts.Weapons.weapon import Pistol, SMG, PlasmaGun, Bat
+from Assets.scripts.Weapons.bat_item import Bat_item
 from Assets.sound import *
 from Assets.scripts.Util.pathfinding import *
 from Assets.scripts.Character.interaction import Interaction
@@ -63,7 +64,7 @@ class Game:
         self.victory_screen = VictoryScreen(self)
         self.game_events = GameEvents(self)
         self.disorienting_effects = DisorientingEffects(self)
-        self.weapon_classes = [Pistol, SMG, PlasmaGun]
+        self.weapon_classes = [Pistol, SMG, PlasmaGun, Bat]
         self.weapon_slot_count = len(self.weapon_classes)
 
         self.level_manager = LevelManager(self)
@@ -71,6 +72,7 @@ class Game:
 
         self.game_initialized = False
         self.show_menu(play_menu_music=True)
+        self.bat_consumed_time=0;
 
     def update_display_mode(self):
         if self.is_fullscreen:
@@ -277,6 +279,21 @@ class Game:
             self.object_handler.add_ammo_item(pos=pos)
         elif chosen == 'powerups':
             self.object_handler.add_powerup(pos=pos)
+        elif chosen == 'bat':
+            import pygame as pg
+            BAT_LOCKOUT_MS = 5000
+            bat_slot = 3
+            player = self.player
+            player_has_bat = (
+                player.weapon_inventory[bat_slot] is not None and
+                player.weapon_unlocked[bat_slot]
+            )
+            bat_on_cooldown = (
+                pg.time.get_ticks() - self.bat_consumed_time < BAT_LOCKOUT_MS
+            )
+            if not player_has_bat and not bat_on_cooldown:
+                bat_item = Bat_item(self, pos=pos)
+                self.object_handler.add_sprite(bat_item)
 
     def game_loop(self):
         while True:

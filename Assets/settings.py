@@ -121,6 +121,7 @@ NPC_DROP_SETTINGS = {
     'item_weights': {
         'heal': 5,
         'ammo': 20,
-        'powerups': 10
+        'powerups': 10,
+        'bat': 50  #postotak za palicu spawn, treba smanjit na rare
     }
 }

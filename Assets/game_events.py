@@ -79,6 +79,8 @@ class GameEvents:
                 self.game.player.equip_weapon_by_index(1)
             case pg.K_3:
                 self.game.player.equip_weapon_by_index(2)
+            case pg.K_4:
+                self.game.player.equip_weapon_by_index(3)
         
             case _:
                 pass

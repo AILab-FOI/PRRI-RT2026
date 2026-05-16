@@ -48,6 +48,7 @@ class Sound:
             'weapon_pickup': 0.35,
             'reload_smg': 0.30,
             'reload_pistolj': 0.30,
+            'bat_swing': 0.40,
 
             # Player sounds
             'igrac_damage': 0.35,
@@ -124,6 +125,7 @@ class Sound:
             'weapon_pickup': 'podizanje_oruzja.wav',
             'reload_pistolj': 'reload_pistolj.wav',
             'reload_smg': 'reload_smg.mp3',
+            'bat_swing': 'bat_swing.wav',
 
             # Player sounds
             'igrac_damage': 'Igrac_damage.wav',
