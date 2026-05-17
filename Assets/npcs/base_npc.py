@@ -269,6 +269,7 @@ class NPC(AnimatedSprite):
                         self.npc_gone_played = True
                         self.game.sound.play_sfx_at_position('npc_gone', self.x, self.y)
                     self.should_remove = True
+                    print(f"[DEBUG][NPC] should_remove=True for {self.__class__.__name__}")
             return
         self.ray_cast_value = self.ray_cast_player_npc()
         self.check_hit_in_npc()

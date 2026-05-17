@@ -102,6 +102,7 @@ class WaveManager:
         else:
             for wave in self.waves:
                 max_on_map = wave.get('max_enemies_on_map', wave.get('count', 0))
+                wave_count= wave.get('count', 0);
                 types = wave.get('types', [])
                 fixed_positions = wave.get('fixed_positions', [])
 
@@ -112,7 +113,8 @@ class WaveManager:
                         dict_counts[npc_class] = dict_counts.get(npc_class, 0) + 1
 
                 for npc_class in types:
-                    required_per_type[npc_class] = max(required_per_type.get(npc_class, 0), max_on_map)
+                    #required_per_type[npc_class] = max(required_per_type.get(npc_class, 0), max_on_map)//staro
+                    required_per_type[npc_class] = max(required_per_type.get(npc_class, 0), wave_count)
 
                 for npc_class, fixed_count in dict_counts.items():
                     required_per_type[npc_class] = max(required_per_type.get(npc_class, 0), fixed_count)
@@ -212,10 +214,10 @@ class WaveManager:
         self.spawn_until_limit()
 
     def update(self):
+        self.collect_recyclable_dead()
+
         if self.finished_all_waves:
             return
-
-        self.collect_recyclable_dead()
 
         if self.is_waiting_for_next_wave:
             if pg.time.get_ticks() >= self.next_wave_time:
@@ -329,16 +331,28 @@ class WaveManager:
     def collect_recyclable_dead(self):
         for enemy in self.active_enemies[:]:
             if getattr(enemy, 'should_remove', False):
+                print(f"[DEBUG][WAVE] recycling {enemy.__class__.__name__}, killed={self.current_wave_killed_total+1}, remaining={self.current_wave_remaining_to_spawn}")
                 self.recycle_enemy(enemy)
                 self.current_wave_killed_total += 1
                 self.score += self.points_per_kill
 
     def recycle_enemy(self, enemy):
+        try:
+            self.active_enemies.remove(enemy)
+        except ValueError:
+            print(f"[ERROR] enemy {id(enemy)} NOT in active_enemies! len={len(self.active_enemies)}")
+        if enemy in self.object_handler.npc_list:
+            self.object_handler.npc_list.remove(enemy)
+        self.return_to_pool(enemy)
+                
+                
+                
+        """def recycle_enemy(self, enemy):
         if enemy in self.active_enemies:
             self.active_enemies.remove(enemy)
         if enemy in self.object_handler.npc_list:
             self.object_handler.npc_list.remove(enemy)
-        self.return_to_pool(enemy)
+        self.return_to_pool(enemy)"""
 
     def return_to_pool(self, enemy):
         enemy_class = enemy.__class__
@@ -355,7 +369,11 @@ class WaveManager:
             self.recycle_enemy(enemy)
 
     def is_current_wave_complete(self):
-        return self.current_wave_remaining_to_spawn <= 0 and self.get_alive_hostile_count() <= 0
+        result = self.current_wave_remaining_to_spawn <= 0 and self.get_alive_hostile_count() <= 0
+        if result:
+            print(f"[WAVE] COMPLETE: remaining={self.current_wave_remaining_to_spawn}, alive={self.get_alive_hostile_count()}, active={len(self.active_enemies)}")
+        return result
+        #return self.current_wave_remaining_to_spawn <= 0 and self.get_alive_hostile_count() <= 0
 
     def get_alive_hostile_count(self):
         return len([
