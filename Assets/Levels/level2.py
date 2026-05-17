@@ -44,13 +44,7 @@ def get_level_data():
         'wave_delay': 3000
     }
 
-    level_data['dialogue_npcs'] = [
-        {
-            'pos': (3.5, 2.5),
-            'dialogue_id': 'marvin_intro',
-            'path': 'resources/sprites/npc/dialogue_npc/0.png'
-        }
-    ]
+    
 
     level_data['heal_item'] = [
         {'position': (5.5, 5.5)},
