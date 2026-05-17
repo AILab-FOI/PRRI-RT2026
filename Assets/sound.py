@@ -197,12 +197,13 @@ class Sound:
             0: 'track2.wav',
             1: 'track1.wav',
             2: 'track5.ogg',
-            3: 'Pozadinska3.mp3',
-            4: 'Pozadinska4.wav',
-            5: 'Pozadinska5.wav',
+            3: 'track4.ogg',
+            4: 'track6.ogg',
+            5: 'track4.ogg',
+            6: 'track6.ogg',
             50: 'death.wav',
             51: 'end.wav',
-            99: 'track5.ogg'
+            99: 'track4.ogg'
         }
 
         self.sounds = {}
