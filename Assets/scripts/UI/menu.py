@@ -242,10 +242,28 @@ class Menu:
         self.button_height = 54
         self.button_gap = 16
 
+<<<<<<< Updated upstream
         self.action_panel = pg.Rect(64, 220, 360, 300)
         self.utility_panel = pg.Rect(64, 512, 360, 150)
         self.settings_panel = pg.Rect(HALF_WIDTH - 260, HALF_HEIGHT - 170, 520, 360)
+=======
+        panel_width = 360
+        action_h = 300
+        utility_h = 150
+        panel_gap = 22
+>>>>>>> Stashed changes
 
+        total_h = action_h + panel_gap + utility_h
+        start_y = HALF_HEIGHT - total_h // 2
+
+        self.action_panel = pg.Rect(0, start_y, panel_width, action_h)
+        self.action_panel.centerx = HALF_WIDTH
+
+        self.utility_panel = pg.Rect(0, self.action_panel.bottom + panel_gap, panel_width, utility_h)
+        self.utility_panel.centerx = HALF_WIDTH
+
+        self.settings_panel = pg.Rect(0, 0, 520, 360)
+        self.settings_panel.center = (HALF_WIDTH, HALF_HEIGHT)
     def _setup_settings_ui(self):
         bx = self.settings_panel.x + 100
         by = self.settings_panel.y + 220
