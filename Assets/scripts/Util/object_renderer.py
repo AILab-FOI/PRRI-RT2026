@@ -35,12 +35,16 @@ class ObjectRenderer:
         }
         self.sky_image = self.sky_images[1]
 
-        self._unfolded_width = int(WIDTH * math.tau / FOV)
+        self._unfolded_width = WIDTH
         self._sky_unfolded = {}
         for lvl, sky_img in self.sky_images.items():
-            self._sky_unfolded[lvl] = pg.transform.scale(
-                sky_img, (self._unfolded_width, HALF_HEIGHT)
-            ).convert()
+            scaled = pg.transform.scale(sky_img, (WIDTH, HALF_HEIGHT)).convert()
+            # Create a seamless texture by mirroring the image horizontally
+            seamless = pg.Surface((WIDTH * 2, HALF_HEIGHT)).convert()
+            seamless.blit(scaled, (0, 0))
+            seamless.blit(pg.transform.flip(scaled, True, False), (WIDTH, 0))
+            self._sky_unfolded[lvl] = seamless
+            
         self._sky_current = self._sky_unfolded[1]
 
         self.blood_screen = self.get_texture('resources/teksture/blood_screen.png', RES, alpha=True)
@@ -194,15 +198,15 @@ class ObjectRenderer:
         self.update_sky_image()
 
         sky = self._sky_current
-        sky_w = self._unfolded_width
-
+        
         current_level = 1
         if hasattr(self.game, 'level_manager'):
             current_level = self.game.level_manager.current_level
 
+        sky_w = sky.get_width()
         level_rotation = LEVEL_ROTATION.get(current_level, 0.0)
-        left_angle = (self.game.player.angle - HALF_FOV + level_rotation) % math.tau
-        start_x = int((left_angle / math.tau) * sky_w) % sky_w
+        angle = self.game.player.angle + level_rotation
+        start_x = int((angle / math.tau) * (2 * WIDTH)) % sky_w
 
         if start_x + WIDTH <= sky_w:
             self.screen.blit(sky, (0, 0), (start_x, 0, WIDTH, HALF_HEIGHT))

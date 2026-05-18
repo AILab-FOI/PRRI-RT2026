@@ -242,7 +242,7 @@ class Menu:
         self.button_height = 54
         self.button_gap = 16
 
-        self.action_panel = pg.Rect(64, 190, 360, 300)
+        self.action_panel = pg.Rect(64, 220, 360, 300)
         self.utility_panel = pg.Rect(64, 512, 360, 150)
         self.settings_panel = pg.Rect(HALF_WIDTH - 260, HALF_HEIGHT - 170, 520, 360)
 
@@ -300,6 +300,13 @@ class Menu:
         else:
             action_texts = ["Start Game", "Gauntlet", "Level Select"]
             utility_texts = self.utility_texts
+
+        action_h = 28 + len(action_texts) * self.button_height + max(0, len(action_texts) - 1) * self.button_gap + 16
+        self.action_panel.height = action_h
+        
+        self.utility_panel.y = self.action_panel.bottom + 32
+        utility_h = 24 + len(utility_texts) * self.button_height + max(0, len(utility_texts) - 1) * self.button_gap + 16
+        self.utility_panel.height = utility_h
 
         start_y = self.action_panel.y + 28
         for i, text in enumerate(action_texts):

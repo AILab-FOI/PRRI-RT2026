@@ -21,7 +21,7 @@ def get_level_data():
 
     level_data['weapons'] = [
         {
-            'position': (1.5, 4.5),
+            'position': (2.5, 5),
             'weapon_index': 1,
             'path': 'resources/sprites/weapon/puska_stand.png'
         },
