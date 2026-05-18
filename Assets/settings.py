@@ -38,6 +38,8 @@ MOUSE_MAX_REL = 40
 MOUSE_BORDER_LEFT = 100
 MOUSE_BORDER_RIGHT = WIDTH - MOUSE_BORDER_LEFT
 
+AMMO_DROP_COUNT = 30
+
 # Default floor color
 FLOOR_COLOR = (30, 30, 30)
 
@@ -122,6 +124,6 @@ NPC_DROP_SETTINGS = {
         'heal': 5,
         'ammo': 20,
         'powerups': 10,
-        'bat': 50  #postotak za palicu spawn, treba smanjit na rare
+        'bat': 20  #postotak za palicu spawn, treba smanjit na rare
     }
 }

@@ -1,5 +1,6 @@
 import math
 from Assets.scripts.Util.sprite_object import SpriteObject
+from Assets.settings import *
 
 
 class Ammo_item(SpriteObject):
@@ -18,7 +19,7 @@ class Ammo_item(SpriteObject):
         distance = math.hypot(dx, dy)
 
         if distance <= self.pickup_distance:
-            if self.game.player.try_addAmmo(99):
+            if self.game.player.try_addAmmo(AMMO_DROP_COUNT):
                 self.picked = True
 
                 if hasattr(self.game.sound, 'ammo_pickup') and self.game.sound.ammo_pickup:
