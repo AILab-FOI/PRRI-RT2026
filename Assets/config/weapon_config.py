@@ -1,3 +1,4 @@
+from Assets.settings import *
 PISTOL_CONFIG = {
     'name': 'pistol',
     'path': 'resources/sprites/weapon/pistol/0.png',
@@ -6,7 +7,7 @@ PISTOL_CONFIG = {
     'fire_cooldown': 420,
     'damage': 25,
     'magSize': 7, #ammo in weapon
-    'bagSize': 21, #ammon in the reload pool
+    'bagSize': AMMO_PISTOL_STARTING_BAG, #ammon in the reload pool
     'accuracy': 0.95,
     'auto_fire': False,
     'sound': 'pistolj',
@@ -23,7 +24,7 @@ SMG_CONFIG = {
     'max_range': 4,
     'damage': 15,
     'magSize': 30, #ammo in weapon
-    'bagSize': 300, #ammon in the reload pool
+    'bagSize': AMMO_SMG_STARTING_BAG, #ammon in the reload pool
     'accuracy': 0.75,
     'auto_fire': True,
     'auto_fire_delay': 70,
