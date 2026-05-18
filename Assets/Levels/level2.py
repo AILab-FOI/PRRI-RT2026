@@ -33,11 +33,11 @@ def get_level_data():
     level_data['enemies'] = {
         'waves': [
             {
-                'count': 22,
+                'count': 15,
                 'types': [StakorNPC, TosterNPC],
                 'weights': [60, 40],
                 'fixed_positions': [],
-                'max_enemies_on_map': 8
+                'max_enemies_on_map': 15
             }
         ],
         'restricted_area': {(i, j) for i in range(10) for j in range(10)},

@@ -12,21 +12,21 @@ def get_level_data():
     level_data['enemies'] = {
         'waves': [
             {
-                'count': 100,
+                'count': 10,
                 'types': [KlonoviNPC],
                 'weights': [100],
                 'fixed_positions': [],
-                'max_enemies_on_map': 15
+                'max_enemies_on_map': 5
             },
             {
-                'count': 60,
+                'count': 13,
                 'types': [KlonoviNPC, JazavacNPC],
                 'weights': [70, 30],
                 'fixed_positions': [],
-                'max_enemies_on_map': 15
+                'max_enemies_on_map': 10
             },
             {
-                'count': 40,
+                'count': 15,
                 'types': [JazavacNPC],
                 'weights': [100],
                 'fixed_positions': [],
