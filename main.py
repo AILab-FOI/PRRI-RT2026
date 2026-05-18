@@ -92,8 +92,8 @@ class Game:
 
         if not hasattr(self, 'player'):
             self.player = Player(self)
-        else:
-            self.player.reset()
+        #else:
+        #   self.player.reset()
 
         if not hasattr(self, 'weapon'):
             self.weapon = None
@@ -224,8 +224,12 @@ class Game:
         self.sound.current_music_level = -1
         self.map.load_level(current_level)
         self.new_game()
+        self.respawn_player()
         pg.mouse.set_visible(False)
 
+    def respawn_player(self):
+        self.player.reset()
+    
     def show_menu(self, play_menu_music=False):
         pg.mouse.set_pos([HALF_WIDTH, HALF_HEIGHT])
         pg.event.set_grab(False)

@@ -64,7 +64,7 @@ class Player:
         self.heal_item_count = 1
         for weapon in self.weapon_inventory:
             if weapon is not None:
-                weapon.bagAmount = 999
+                weapon.bagAmount = weapon.bagAmount
                 weapon.currentMagAmmount = weapon.maxMagAmount
 
     def check_game_over(self):
