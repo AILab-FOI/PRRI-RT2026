@@ -111,15 +111,6 @@ class Game:
         if not hasattr(self, 'player') or self.player is None:
             self.player = Player(self)
         else:
-            if self._last_snapshot_level != self.level_manager.current_level:
-                self._last_snapshot_level = self.level_manager.current_level
-                self.player_level_start_ammo = {}
-                for i, weapon in enumerate(self.player.weapon_inventory):
-                    if weapon is not None and self.player.weapon_unlocked[i]:
-                        self.player_level_start_ammo[i] = {
-                            'bag': weapon.bagAmount,
-                            'mag': weapon.currentMagAmmount
-                        }
             saved = self.player_level_start_ammo
             self.player.reset()
             for i, data in saved.items():
@@ -162,7 +153,7 @@ class Game:
             self.game_ui.bind_wave_manager()
 
         self.level_manager.setup_dialogue_npcs()
-        self.level_manager.setup_interactive_objects()
+        self.level_manager.setup_interactive_objects()  
         self.pathfinding.update_graph()
 
         current_level_data = self.level_manager.get_current_level_data()
@@ -187,6 +178,30 @@ class Game:
 
         self.object_renderer.update_sky_image()
         self.sound.change_music_for_level(self.level_manager.current_level)
+
+    
+        if self._last_snapshot_level != self.level_manager.current_level:
+            self._last_snapshot_level = self.level_manager.current_level
+
+            
+            LEVEL_ENTRY_AMMO_BONUS = {
+                'pistol': 15,
+                'smg':    35,
+            }
+            for i, weapon in enumerate(self.player.weapon_inventory):
+                if weapon is None or not self.player.weapon_unlocked[i]:
+                    continue
+                bonus = LEVEL_ENTRY_AMMO_BONUS.get(weapon.name, 0)
+                if bonus > 0:
+                    weapon.bagAmount = min(999, weapon.bagAmount + bonus)
+
+            self.player_level_start_ammo = {}
+            for i, weapon in enumerate(self.player.weapon_inventory):
+                if weapon is not None and self.player.weapon_unlocked[i]:
+                    self.player_level_start_ammo[i] = {
+                        'bag': weapon.bagAmount,
+                        'mag': weapon.currentMagAmmount
+                    }
 
     def _background_load_worker(self, level_number):
         try:
