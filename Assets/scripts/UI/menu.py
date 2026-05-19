@@ -1,3 +1,4 @@
+from multiprocessing import Value
 import pygame as pg
 import sys
 from Assets.settings import *
@@ -256,11 +257,12 @@ class Menu:
         self.utility_panel = pg.Rect(0, self.action_panel.bottom + panel_gap, panel_width, utility_h)
         self.utility_panel.centerx = HALF_WIDTH
 
-        self.settings_panel = pg.Rect(0, 0, 520, 360)
+        self.settings_panel = pg.Rect(HALF_WIDTH -260, HALF_HEIGHT -200, 520, 430)
         self.settings_panel.center = (HALF_WIDTH, HALF_HEIGHT)
+
     def _setup_settings_ui(self):
         bx = self.settings_panel.x + 100
-        by = self.settings_panel.y + 220
+        by = self.settings_panel.y + 290
         bw = self.settings_panel.width - 200
         bh = 48
 
@@ -272,11 +274,16 @@ class Menu:
 
         slider_w = self.settings_panel.width - 120
         slider_x = self.settings_panel.x + 60
+
+        sens_percent = (MOUSE_SENSITIVITY - MOUSE_SENSITIVITY_MIN) / \
+                   (MOUSE_SENSITIVITY_MAX - MOUSE_SENSITIVITY_MIN) * 100
+
         self.sliders = [
             Slider(slider_x, self.settings_panel.y + 80, slider_w, 14, 0, 100,
                    self.game.sound.music_slider_percent, "Music Volume"),
             Slider(slider_x, self.settings_panel.y + 150, slider_w, 14, 0, 100,
-                   self.game.sound.sfx_slider_percent, "SFX Volume")
+                   self.game.sound.sfx_slider_percent, "SFX Volume"),
+            Slider(slider_x, self.settings_panel.y + 220, slider_w, 14, 0, 100, sens_percent, "Mouse Sensitivity"),
         ]
 
     def _load_background(self):
@@ -445,8 +452,12 @@ class Menu:
         if self.state == 'settings':
             self.sliders[0].update(mouse_pos, mouse_pressed)
             self.sliders[1].update(mouse_pos, mouse_pressed)
+            self.sliders[2].update(mouse_pos, mouse_pressed)
             self.game.sound.set_music_slider(self.sliders[0].value)
             self.game.sound.set_sfx_slider(self.sliders[1].value)
+
+            import Assets.settings as _s
+            _s.MOUSE_SENSITIVITY = _s.MOUSE_SENSITIVITY_MIN + (self.sliders[2].value / 100) * (MOUSE_SENSITIVITY_MAX - MOUSE_SENSITIVITY_MIN)
 
         elif self.state == 'main':
             for button in self.main_buttons + self.utility_buttons:

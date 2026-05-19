@@ -34,6 +34,8 @@ UI_MARGIN_PERCENT_X = 0.03
 UI_MARGIN_PERCENT_Y = 0.03
 
 MOUSE_SENSITIVITY = 0.0003
+MOUSE_SENSITIVITY_MIN=0.00005
+MOUSE_SENSITIVITY_MAX=0.0010
 MOUSE_MAX_REL = 40
 MOUSE_BORDER_LEFT = 100
 MOUSE_BORDER_RIGHT = WIDTH - MOUSE_BORDER_LEFT
@@ -124,11 +126,11 @@ PROCEDURAL_ROOM_SETTINGS = {
 
 NPC_DROP_SETTINGS = {
     'enabled': True,
-    'drop_chance': 15,
+    'drop_chance': 30,
     'item_weights': {
-        'heal': 5,
-        'ammo': 20,
+        'heal': 20,
+        'ammo': 40,
         'powerups': 10,
-        'bat': 20  #postotak za palicu spawn, treba smanjit na rare
+        'bat': 12  #postotak za palicu spawn, treba smanjit na rare
     }
 }

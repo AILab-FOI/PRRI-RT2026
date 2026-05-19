@@ -3,6 +3,7 @@ import pygame as pg
 import math
 from Assets.config.weapon_config import get_weapon_config
 from Assets.scripts.Weapons.weapon import Pistol, SMG, PlasmaGun
+import Assets.settings as _settings
 
 
 class Player:
@@ -255,7 +256,7 @@ class Player:
 
         rel_x = pg.mouse.get_rel()[0]
         rel_x = max(-MOUSE_MAX_REL, min(MOUSE_MAX_REL, rel_x))
-        self.angle += rel_x * MOUSE_SENSITIVITY * self.game.delta_time
+        self.angle += rel_x * _settings.MOUSE_SENSITIVITY * self.game.delta_time
 
     def get_dash_direction(self):
         keys = pg.key.get_pressed()
