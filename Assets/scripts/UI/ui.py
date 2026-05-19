@@ -52,6 +52,7 @@ class GameUI:
             self.load_texture_fixed_height('resources/sprites/weapon/pistol_stand.png', self.weapon_icon_height),
             self.load_texture_fixed_height('resources/sprites/weapon/puska_stand.png', self.weapon_icon_height),
             self.load_texture_fixed_height('resources/sprites/weapon/plasma_stand.png', self.weapon_icon_height),
+            self.load_texture_fixed_height('resources/sprites/weapon/bat/bat_stand.png', self.weapon_icon_height),
         ]
         self.weapon_icons_gray = [self.make_gray_icon(icon) for icon in self.weapon_icons]
 
@@ -299,10 +300,15 @@ class GameUI:
             self.screen.blit(weapon_icon, icon_rect)
 
         weapon = getattr(self.game, 'weapon', None)
-        ammo_value = '--/--'
-        if weapon:
-            ammo_value = f'{weapon.currentMagAmmount}/{weapon.bagAmount}'
-        self._draw_label_value(ammo_rect, 'AMMO', ammo_value, self.get_level_tint_color())
+
+        if weapon and weapon.name == 'bat':
+            uses = getattr(weapon, 'uses_left', 0)
+            self._draw_label_value(ammo_rect, 'USES', str(uses), self.get_level_tint_color())
+        else:
+            ammo_value = '--/--'
+            if weapon:
+                ammo_value = f'{weapon.currentMagAmmount}/{weapon.bagAmount}'
+            self._draw_label_value(ammo_rect, 'AMMO', ammo_value, self.get_level_tint_color())
 
         pickup_label = self.label_font.render('PICKUP', True, self.white)
         self.screen.blit(pickup_label, pickup_label.get_rect(midtop=(pickup_rect.centerx, pickup_rect.y + 6)))
