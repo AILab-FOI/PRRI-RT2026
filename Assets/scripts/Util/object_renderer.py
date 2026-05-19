@@ -29,7 +29,7 @@ class ObjectRenderer:
         self.sky_images = {
             1: self.get_sky_texture('resources/teksture/level2/sky2.png'),
             2: self.get_sky_texture('resources/teksture/level1/sky1.png'),
-            3: self.get_sky_texture('resources/teksture/level2/sky2.png'),
+            3: self.get_sky_texture('resources/teksture/level1/sky1.png'),
             4: self.get_sky_texture('resources/teksture/level4/sky_level4.png'),
             5: self.get_sky_texture('resources/teksture/level4/sky1.png')
         }
