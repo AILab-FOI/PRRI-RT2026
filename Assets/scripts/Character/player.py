@@ -385,6 +385,9 @@ class Player:
 
         self.weapon_unlocked[index] = True
 
+        if hasattr(self.game, 'update_ammo_snapshot_for_slot'):
+            self.game.update_ammo_snapshot_for_slot(index)
+
         if auto_equip:
             self.equip_weapon_by_index(index)
 

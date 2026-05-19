@@ -78,9 +78,16 @@ class Game:
         self.loading_exception = None
         self.loading_target_level = None
 
+        self.bat_consumed_time = 0
+
+        self._loading_in_progress=False
+
+        self.player_level_start_ammo = {}
+        self._last_snapshot_level = -1
+
         self.game_initialized = False
         self.show_menu(play_menu_music=True)
-        self.bat_consumed_time = 0
+        
 
     def update_display_mode(self):
         if self.is_fullscreen:
@@ -101,8 +108,25 @@ class Game:
             self.map = Map(self)
         self.map.load_level(self.level_manager.current_level)
 
-        if not hasattr(self, 'player'):
+        if not hasattr(self, 'player') or self.player is None:
             self.player = Player(self)
+        else:
+            if self._last_snapshot_level != self.level_manager.current_level:
+                self._last_snapshot_level = self.level_manager.current_level
+                self.player_level_start_ammo = {}
+                for i, weapon in enumerate(self.player.weapon_inventory):
+                    if weapon is not None and self.player.weapon_unlocked[i]:
+                        self.player_level_start_ammo[i] = {
+                            'bag': weapon.bagAmount,
+                            'mag': weapon.currentMagAmmount
+                        }
+            saved = self.player_level_start_ammo
+            self.player.reset()
+            for i, data in saved.items():
+                weapon = self.player.weapon_inventory[i]
+                if weapon is not None:
+                    weapon.bagAmount = data['bag']
+                    weapon.currentMagAmmount = data['mag']
 
         if not hasattr(self, 'weapon'):
             self.weapon = None
@@ -286,7 +310,6 @@ class Game:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return True
-
             if event.type == self.level_load_done_event:
                 if self.loading_target_level == 1:
                     self.loading_screen.mark_loading_complete()
@@ -296,20 +319,20 @@ class Game:
                     self.loading_screen.mark_loading_complete("Loading complete")
                     self.loading_screen.start_time = time.time() - max(0, self.loading_screen.duration - 0.15)
                 continue
-
+            
             if event.type == self.level_load_failed_event:
                 self.loading_screen.mark_loading_complete("Loading failed")
                 print(self.loading_exception)
                 continue
-
+ 
             if self.loading_screen.active and self.loading_screen.handle_continue_key(event):
                 continue
-
+ 
             buffered_events.append(event)
-
+ 
         for event in buffered_events:
             pg.event.post(event)
-
+ 
         return self.game_events.process_events()
 
     def next_level(self):
@@ -394,6 +417,16 @@ class Game:
                 bat_item = Bat_item(self, pos=pos)
                 self.object_handler.add_sprite(bat_item)
 
+    def update_ammo_snapshot_for_slot(self, slot_index):
+        weapon = self.player.weapon_inventory[slot_index]
+        if weapon is None:
+            return
+        if slot_index not in self.player_level_start_ammo:
+            self.player_level_start_ammo[slot_index] = {
+                'bag': weapon.bagAmount,
+                'mag': weapon.currentMagAmmount
+            }
+
     def game_loop(self):
         while True:
             if self.check_events():
@@ -402,6 +435,8 @@ class Game:
             self.draw()
             self.delta_time = self.clock.tick(FPS)
 
+    
+    
 
 if __name__ == '__main__':
     game = Game()
