@@ -40,7 +40,7 @@ from Assets.scripts.MapGenerator.runtime_level import build_runtime_level
 class Game:
     def __init__(self):
         pg.init()
-        pg.display.set_caption("*INSERT NEW GAME NAME HERE*")
+        pg.display.set_caption("PEST CONTROL")
 
         icon_path = resource_path('resources/icons/game_icon.ico')
         icon = pg.image.load(icon_path)
