@@ -203,7 +203,7 @@ class Sound:
             6: 'track6.ogg',
             50: 'death.wav',
             51: 'end.wav',
-            99: 'track4.ogg'
+            99: 'track7.ogg'
         }
 
         self.sounds = {}
