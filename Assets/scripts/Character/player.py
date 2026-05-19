@@ -3,6 +3,7 @@ import pygame as pg
 import math
 from Assets.config.weapon_config import get_weapon_config
 from Assets.scripts.Weapons.weapon import Pistol, SMG, PlasmaGun
+import Assets.settings as _settings
 
 
 class Player:
@@ -67,7 +68,7 @@ class Player:
         self.pickup_item_count = 0
         for weapon in self.weapon_inventory:
             if weapon is not None:
-                weapon.bagAmount = 999
+                weapon.bagAmount = weapon.bagAmount
                 weapon.currentMagAmmount = weapon.maxMagAmount
 
     def check_game_over(self):
@@ -118,6 +119,17 @@ class Player:
         if not self.game.weapon.can_fire():
             return
 
+
+
+        if self.game.weapon.name == 'bat':
+            bat = self.game.weapon          
+            bat.register_fire()            
+            bat.do_melee_hit()              
+            self.game.sound.play_sfx('bat_swing')
+            self.last_auto_fire_time = pg.time.get_ticks()
+            return
+
+
         if self.game.weapon.currentMagAmmount <= 0:
             return
 
@@ -149,6 +161,10 @@ class Player:
 
         self.game.weapon.is_reloading = True
         self.game.weapon.reload_start_time = pg.time.get_ticks()
+
+        weapon_config=get_weapon_config(self.game.weapon.name)
+        if weapon_config and 'reload_sound' in weapon_config:
+                self.game.sound.play_sfx(weapon_config['reload_sound'])
 
         self.game.weapon.currentMagAmmount += ammo_to_reload
         self.game.weapon.bagAmount -= ammo_to_reload
@@ -243,7 +259,7 @@ class Player:
 
         rel_x = pg.mouse.get_rel()[0]
         rel_x = max(-MOUSE_MAX_REL, min(MOUSE_MAX_REL, rel_x))
-        self.angle += rel_x * MOUSE_SENSITIVITY * self.game.delta_time
+        self.angle += rel_x * _settings.MOUSE_SENSITIVITY * self.game.delta_time
 
     def get_dash_direction(self):
         keys = pg.key.get_pressed()

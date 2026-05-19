@@ -79,9 +79,9 @@ class DisorientingEffects:
         self._update_distortion(intensity_factor)
         self._update_tilt(intensity_factor)
         self._update_flash(elapsed, intensity_factor)
-        self._update_pulse(elapsed, intensity_factor)
-        self._update_blur(intensity_factor)
-        self._update_double_vision(elapsed, intensity_factor)
+        #self._update_pulse(elapsed, intensity_factor)
+        #self._update_blur(intensity_factor)
+        #self._update_double_vision(elapsed, intensity_factor)
 
     def _update_distortion(self, intensity):
         """Update the distortion effect"""

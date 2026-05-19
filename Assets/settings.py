@@ -34,9 +34,18 @@ UI_MARGIN_PERCENT_X = 0.03
 UI_MARGIN_PERCENT_Y = 0.03
 
 MOUSE_SENSITIVITY = 0.0003
+MOUSE_SENSITIVITY_MIN=0.00005
+MOUSE_SENSITIVITY_MAX=0.0010
 MOUSE_MAX_REL = 40
 MOUSE_BORDER_LEFT = 100
 MOUSE_BORDER_RIGHT = WIDTH - MOUSE_BORDER_LEFT
+
+#Weapon Data
+AMMO_SMG_STARTING_BAG = 60
+AMMO_PISTOL_STARTING_BAG = 21
+
+AMMO_SMG_DROP_COUNT = 30
+AMMO_PISTOL_DROP_COUNT = 14
 
 # Default floor color
 FLOOR_COLOR = (30, 30, 30)
@@ -81,3 +90,47 @@ SCALE = WIDTH // NUM_RAYS
 
 TEXTURE_SIZE = 256
 HALF_TEXTURE_SIZE = TEXTURE_SIZE // 2
+
+
+PROCEDURAL_MAP_SIZE = {
+    99: (40, 40)  # Massive map!
+}
+
+PROCEDURAL_TILE_SET = {
+    99: {'wall': 9, 'exit': 30}
+}
+
+PROCEDURAL_WAVES = {
+    99: {
+        'total_waves': 999, 
+        'start_enemies': 25, 
+        'wave_multiplier': 1.5, 
+        'types': ['StakorNPC', 'KlonoviNPC'], 
+        'weights': [70, 30],
+        'safe_spawn_radius': 15  # Enemies cannot spawn within 12 tiles of the player
+    }
+}
+
+PROCEDURAL_ITEMS = {
+    99: {'weapons': 2, 'heals': 5, 'ammo': 6}
+}
+
+PROCEDURAL_ROOM_SETTINGS = {
+    99: {
+        'size_multiplier': 1.5,
+        'room_count': 15,
+        'corridor_thickness': 2,
+        'force_spawn_room': True
+    }
+}
+
+NPC_DROP_SETTINGS = {
+    'enabled': True,
+    'drop_chance': 30,
+    'item_weights': {
+        'heal': 20,
+        'ammo': 40,
+        'powerups': 10,
+        'bat': 12  #postotak za palicu spawn, treba smanjit na rare
+    }
+}

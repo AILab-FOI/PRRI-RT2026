@@ -4,18 +4,16 @@ Level 5 configuration
 from Assets.npcs.enemy_npcs import BossNPC, KlonoviNPC
 from Assets.Levels.base_level import create_base_level_structure
 
+
 def get_level_data():
     """Return the complete level 5 data"""
     level_data = create_base_level_structure()
 
     level_data['doors'] = []
 
-
     level_data['weapons'] = [
         {
-
             'position': (16.5, 3.5),
-
             'weapon_index': 2,
             'path': 'resources/sprites/weapon/plasma_stand.png'
         }
@@ -38,28 +36,28 @@ def get_level_data():
             'position': (15, 6),
             'powerup_type': 'invulnerability'
         },
-
     ]
 
-    # Decorative sprites - unique to level 4
-    level_data['sprites'] = [
+    level_data['sprites'] = []
 
-    ]
-
-    # Enemy configuration
     level_data['enemies'] = {
-        'count': 5,
-        'types': [KlonoviNPC],
-        'weights': [100],
+        'waves': [
+            {
+                'count': 5,
+                'types': [KlonoviNPC],
+                'weights': [100],
+                'fixed_positions': [
+                    {'type': BossNPC, 'position': (13, 17)},
+                    {'type': KlonoviNPC, 'position': (11, 15)},
+                    {'type': KlonoviNPC, 'position': (15, 15)},
+                ],
+                'max_enemies_on_map': 5
+            }
+        ],
         'restricted_area': {(i, j) for i in range(10, 17) for j in range(6)},
-        'fixed_positions': [
-            {'type': BossNPC, 'position': (13, 17)},  # Boss
-            {'type': KlonoviNPC, 'position': (11, 15)},
-            {'type': KlonoviNPC, 'position': (15, 15)},
-        ]
+        'wave_delay': 3000
     }
 
-    # Dialogue NPCs
     level_data['dialogue_npcs'] = [
         {
             'pos': (13.5, 22.5),

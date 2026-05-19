@@ -1,163 +1,161 @@
+from multiprocessing import Value
 import pygame as pg
 import sys
 from Assets.settings import *
 from Assets.scripts.Util.font_manager import load_custom_font, resource_path
 
+
 class MetallicUIRenderer:
     def __init__(self, screen):
         self.screen = screen
-        self.accent_color = (255, 140, 0)
-        self.bg_color = (40, 40, 45)
-        self.hover_color = (60, 60, 65)
-        self.border_color = (80, 80, 85)
-        self.bevel_size = 3
-        self.bevel_light = (70, 70, 75)
-        self.bevel_dark = (30, 30, 35)
+        self.bg = (16, 24, 32)
+        self.panel_fill = (34, 49, 63)
+        self.panel_fill_2 = (26, 38, 49)
+        self.panel_border_light = (112, 145, 171)
+        self.panel_border_dark = (8, 12, 18)
 
-    def _get_chamfer_points(self, rect, chamfer_size):
-        return [
-            (rect.left + chamfer_size, rect.top),
-            (rect.right - chamfer_size, rect.top),
-            (rect.right, rect.top + chamfer_size),
-            (rect.right, rect.bottom - chamfer_size),
-            (rect.right - chamfer_size, rect.bottom),
-            (rect.left + chamfer_size, rect.bottom),
-            (rect.left, rect.bottom - chamfer_size),
-            (rect.left, rect.top + chamfer_size)
-        ]
+        self.button_fill = (58, 92, 128)
+        self.button_hover = (82, 128, 179)
+        self.button_pressed = (43, 73, 107)
+        self.button_border_light = (173, 216, 255)
+        self.button_border_dark = (18, 31, 46)
 
-    def draw_chamfered_rect(self, color, rect, chamfer_size, border_width=0):
-        points = self._get_chamfer_points(rect, chamfer_size)
+        self.utility_button_fill = (92, 58, 64)
+        self.utility_button_hover = (128, 79, 88)
+        self.utility_button_pressed = (76, 45, 52)
+        self.utility_border_light = (224, 170, 180)
+        self.utility_border_dark = (40, 18, 22)
 
-        if border_width == 0:
-            pg.draw.polygon(self.screen, color, points)
+        self.text = (240, 248, 255)
+        self.text_shadow = (0, 0, 0)
+        self.title_color = (255, 214, 102)
+        self.title_shadow = (84, 48, 0)
+
+        self.slider_track = (42, 52, 62)
+        self.slider_fill = (255, 170, 60)
+        self.slider_handle = (230, 236, 240)
+        self.slider_handle_dark = (90, 96, 104)
+
+        self.pixel = 4
+
+    def _rect(self, rect):
+        return rect if isinstance(rect, pg.Rect) else pg.Rect(rect)
+
+    def draw_panel(self, rect, fill=None):
+        rect = self._rect(rect)
+        fill = fill or self.panel_fill
+        pg.draw.rect(self.screen, fill, rect)
+
+        inner = rect.inflate(-self.pixel * 2, -self.pixel * 2)
+        if inner.width > 0 and inner.height > 0:
+            pg.draw.rect(self.screen, self.panel_fill_2, inner, self.pixel)
+
+        pg.draw.line(self.screen, self.panel_border_light, rect.topleft, (rect.right - 1, rect.top), self.pixel)
+        pg.draw.line(self.screen, self.panel_border_light, rect.topleft, (rect.left, rect.bottom - 1), self.pixel)
+        pg.draw.line(self.screen, self.panel_border_dark, (rect.left, rect.bottom - 1), (rect.right - 1, rect.bottom - 1), self.pixel)
+        pg.draw.line(self.screen, self.panel_border_dark, (rect.right - 1, rect.top), (rect.right - 1, rect.bottom - 1), self.pixel)
+        return rect
+
+    def draw_button(self, rect, hovered=False, pressed=False, utility=False):
+        rect = self._rect(rect)
+
+        if utility:
+            base = self.utility_button_pressed if pressed else self.utility_button_hover if hovered else self.utility_button_fill
+            light = self.utility_border_light
+            dark = self.utility_border_dark
         else:
-            pg.draw.polygon(self.screen, color, points, border_width)
+            base = self.button_pressed if pressed else self.button_hover if hovered else self.button_fill
+            light = self.button_border_light
+            dark = self.button_border_dark
 
-        return points
+        pg.draw.rect(self.screen, base, rect)
+        pg.draw.line(self.screen, light, rect.topleft, (rect.right - 1, rect.top), self.pixel)
+        pg.draw.line(self.screen, light, rect.topleft, (rect.left, rect.bottom - 1), self.pixel)
+        pg.draw.line(self.screen, dark, (rect.left, rect.bottom - 1), (rect.right - 1, rect.bottom - 1), self.pixel)
+        pg.draw.line(self.screen, dark, (rect.right - 1, rect.top), (rect.right - 1, rect.bottom - 1), self.pixel)
 
-    def draw_bevel_effect(self, rect, chamfer_size):
-        bevel_top_left = [
-            (rect.left + chamfer_size, rect.top),
-            (rect.left, rect.top + chamfer_size),
-            (rect.left, rect.bottom - chamfer_size),
-            (rect.left + chamfer_size, rect.bottom),
-            (rect.left + self.bevel_size + chamfer_size, rect.bottom - self.bevel_size),
-            (rect.left + self.bevel_size, rect.bottom - chamfer_size - self.bevel_size),
-            (rect.left + self.bevel_size, rect.top + chamfer_size + self.bevel_size),
-            (rect.left + self.bevel_size + chamfer_size, rect.top + self.bevel_size)
-        ]
-        pg.draw.polygon(self.screen, self.bevel_dark, bevel_top_left)
+        inner = rect.inflate(-self.pixel * 2, -self.pixel * 2)
+        if inner.width > 0 and inner.height > 0:
+            pg.draw.rect(self.screen, (255, 255, 255), inner, 1)
 
-        bevel_bottom_right = [
-            (rect.right - chamfer_size, rect.top),
-            (rect.right, rect.top + chamfer_size),
-            (rect.right, rect.bottom - chamfer_size),
-            (rect.right - chamfer_size, rect.bottom),
-            (rect.right - self.bevel_size - chamfer_size, rect.bottom - self.bevel_size),
-            (rect.right - self.bevel_size, rect.bottom - chamfer_size - self.bevel_size),
-            (rect.right - self.bevel_size, rect.top + chamfer_size + self.bevel_size),
-            (rect.right - self.bevel_size - chamfer_size, rect.top + self.bevel_size)
-        ]
-        pg.draw.polygon(self.screen, self.bevel_light, bevel_bottom_right)
+    def draw_text(self, text, font, center, color=None, shadow_color=None, shadow_offset=3):
+        color = color or self.text
+        shadow_color = shadow_color or self.text_shadow
 
-    def draw_chamfered_rect_alpha(self, color, rect, chamfer_size, border_width=0, alpha=255):
-        points = self._get_chamfer_points(rect, chamfer_size)
+        shadow = font.render(text, False, shadow_color)
+        surf = font.render(text, False, color)
 
-        temp_surface = pg.Surface((rect.width + 8, rect.height + 8), pg.SRCALPHA)
+        shadow_rect = shadow.get_rect(center=(center[0] + shadow_offset, center[1] + shadow_offset))
+        rect = surf.get_rect(center=center)
 
-        if border_width == 0:
-            pg.draw.polygon(temp_surface, (*color, alpha), [(p[0] - rect.left + 4, p[1] - rect.top + 4) for p in points])
-        else:
-            pg.draw.polygon(temp_surface, (*color, alpha), [(p[0] - rect.left + 4, p[1] - rect.top + 4) for p in points], border_width)
-        self.screen.blit(temp_surface, (rect.left - 4, rect.top - 4))
+        self.screen.blit(shadow, shadow_rect)
+        self.screen.blit(surf, rect)
+        return rect
 
-        return points
+    def draw_title_banner(self, text, font, center_x, y):
+        title_surface = font.render(text, False, self.title_color)
+        title_rect = title_surface.get_rect(midtop=(center_x, y))
+        banner = pg.Rect(title_rect.left - 24, title_rect.top - 16, title_rect.width + 48, title_rect.height + 24)
+        self.draw_panel(banner, (46, 38, 72))
+        self.draw_text(text, font, title_rect.center, self.title_color, self.title_shadow, 4)
+        return banner
 
-    def draw_metallic_panel(self, rect, chamfer_size, color=None, border_color=None, with_bevel=True, border_alpha=255, bg_alpha=255):
-        color = color or self.bg_color
-        border_color = border_color or self.border_color
+    def draw_slider_track(self, rect):
+        pg.draw.rect(self.screen, self.slider_track, rect)
+        pg.draw.line(self.screen, self.panel_border_light, rect.topleft, (rect.right - 1, rect.top), 2)
+        pg.draw.line(self.screen, self.panel_border_light, rect.topleft, (rect.left, rect.bottom - 1), 2)
+        pg.draw.line(self.screen, self.panel_border_dark, (rect.left, rect.bottom - 1), (rect.right - 1, rect.bottom - 1), 2)
+        pg.draw.line(self.screen, self.panel_border_dark, (rect.right - 1, rect.top), (rect.right - 1, rect.bottom - 1), 2)
 
-        if bg_alpha < 255:
-            self.draw_chamfered_rect_alpha(color, rect, chamfer_size, 0, bg_alpha)
-        else:
-            self.draw_chamfered_rect(color, rect, chamfer_size)
+    def draw_slider_fill(self, rect):
+        pg.draw.rect(self.screen, self.slider_fill, rect)
 
-        if with_bevel:
-            self.draw_bevel_effect(rect, chamfer_size)
+    def draw_slider_handle(self, rect, dragging=False):
+        fill = self.slider_fill if dragging else self.slider_handle
+        pg.draw.rect(self.screen, fill, rect)
+        pg.draw.line(self.screen, (255, 255, 255), rect.topleft, (rect.right - 1, rect.top), 2)
+        pg.draw.line(self.screen, (255, 255, 255), rect.topleft, (rect.left, rect.bottom - 1), 2)
+        pg.draw.line(self.screen, self.slider_handle_dark, (rect.left, rect.bottom - 1), (rect.right - 1, rect.bottom - 1), 2)
+        pg.draw.line(self.screen, self.slider_handle_dark, (rect.right - 1, rect.top), (rect.right - 1, rect.bottom - 1), 2)
 
-        border_rect = rect.inflate(4, 4)
-        if border_alpha < 255:
-            self.draw_chamfered_rect_alpha(border_color, border_rect, chamfer_size, 2, border_alpha)
-        else:
-            self.draw_chamfered_rect(border_color, border_rect, chamfer_size, 2)
-
-    def draw_metallic_text(self, text, font, pos, padding=(20, 15), chamfer_size=10, border_color=None, border_alpha=255, bg_alpha=255):
-        text_surface = font.render(text, True, (220, 220, 255))
-        text_rect = text_surface.get_rect(center=pos)
-
-        bg_rect = text_rect.inflate(padding[0] * 2, padding[1] * 2)
-
-        border_color = border_color if border_color is not None else self.accent_color
-        self.draw_metallic_panel(bg_rect, chamfer_size, border_color=border_color, border_alpha=border_alpha, bg_alpha=bg_alpha)
-        self.screen.blit(text_surface, text_rect)
-
-        return bg_rect
-
-    def draw_glow_effect(self, rect, chamfer_size, color=None, alpha=100):
-        color = color or self.accent_color
-        glow_rect = rect.inflate(16, 16)
-        glow_color = (*color, alpha)
-        glow_surf = pg.Surface((glow_rect.width, glow_rect.height), pg.SRCALPHA)
-        pg.draw.rect(glow_surf, glow_color, glow_surf.get_rect(), border_radius=chamfer_size)
-        self.screen.blit(glow_surf, glow_rect.topleft)
 
 class Button:
-    def __init__(self, x, y, width, height, text, font_size=36, text_color=(220, 220, 255),
-                 bg_color=(40, 40, 45), hover_color=(60, 60, 65)):
+    def __init__(self, x, y, width, height, text, font_size=24, text_color=(240, 248, 255), utility=False):
         self.rect = pg.Rect(x, y, width, height)
         self.text = text
         self.font_size = font_size
         self.text_color = text_color
-        self.bg_color = bg_color
-        self.hover_color = hover_color
         self.hovered = False
         self.was_hovered = False
-        self.glow_size = 0
-        self.chamfer_size = 8
+        self.pressed = False
         self.font = load_custom_font(self.font_size)
-        self.update_text(text)
+        self.utility = utility
         self.renderer = None
+        self.update_text(text)
 
     def update_text(self, new_text):
         self.text = new_text
-        self.text_surface = self.font.render(self.text, True, self.text_color)
+        self.text_surface = self.font.render(self.text, False, self.text_color)
         self.text_rect = self.text_surface.get_rect(center=self.rect.center)
 
     def update(self, mouse_pos, game=None):
         self.was_hovered = self.hovered
         self.hovered = self.rect.collidepoint(mouse_pos)
+        self.pressed = pg.mouse.get_pressed()[0] and self.hovered
 
         if game and self.hovered and not self.was_hovered:
             game.sound.play_sfx('menu_hover')
 
-        if self.hovered:
-            self.glow_size = min(self.glow_size + 0.5, 8)
-        else:
-            self.glow_size = max(self.glow_size - 0.5, 0)
-
     def draw(self, screen):
         renderer = getattr(self, 'renderer', None) or MetallicUIRenderer(screen)
         self.renderer = renderer
+        renderer.draw_button(self.rect, self.hovered, self.pressed, self.utility)
 
-        color = self.hover_color if self.hovered else self.bg_color
-        border_color = self.renderer.accent_color if self.hovered else self.renderer.border_color
+        text_center = self.rect.center
+        if self.pressed:
+            text_center = (text_center[0] + 2, text_center[1] + 2)
 
-        self.renderer.draw_metallic_panel(self.rect, self.chamfer_size, color, border_color)
-
-        screen.blit(self.text_surface, self.text_rect)
-        if self.hovered:
-            self.renderer.draw_glow_effect(self.rect, self.chamfer_size)
+        renderer.draw_text(self.text, self.font, text_center, self.text_color, (0, 0, 0), 2)
 
     def is_clicked(self, event, game=None):
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1 and self.hovered:
@@ -166,8 +164,9 @@ class Button:
             return True
         return False
 
+
 class Slider:
-    def __init__(self, x, y, width, height, min_val, max_val, initial_val, text, font_size=24):
+    def __init__(self, x, y, width, height, min_val, max_val, initial_val, text, font_size=18):
         self.rect = pg.Rect(x, y, width, height)
         self.min_val = min_val
         self.max_val = max_val
@@ -176,30 +175,29 @@ class Slider:
         self.font_size = font_size
         self.dragging = False
         self.font = load_custom_font(self.font_size)
-        self.update_text()
-        self.chamfer_size = 4
-        self.handle_rect = pg.Rect(0, 0, 16, height + 14)
-        self.update_handle_position()
+        self.handle_rect = pg.Rect(0, 0, 20, height + 16)
         self.renderer = None
+        self.update_handle_position()
+        self.update_text()
 
     def update_text(self):
-        self.text_surface = self.font.render(f"{self.text}: {int(self.value)}%", True, (220, 220, 255))
-        self.text_rect = self.text_surface.get_rect(center=(self.rect.centerx, self.rect.y - 15))
+        self.text_surface = self.font.render(f"{self.text}: {int(self.value)}%", False, (240, 248, 255))
+        self.text_rect = self.text_surface.get_rect(midbottom=(self.rect.centerx, self.rect.y - 10))
 
     def update_handle_position(self):
-        normalized_value = (self.value - self.min_val) / (self.max_val - self.min_val)
-        handle_x = self.rect.x + (self.rect.width - self.handle_rect.width) * normalized_value
-        self.handle_rect.x = int(handle_x)
-        self.handle_rect.y = self.rect.y - 7
+        normalized = (self.value - self.min_val) / (self.max_val - self.min_val)
+        handle_x = self.rect.x + int((self.rect.width - self.handle_rect.width) * normalized)
+        self.handle_rect.x = handle_x
+        self.handle_rect.y = self.rect.y - 8
 
     def update(self, mouse_pos, mouse_pressed):
         if mouse_pressed[0]:
             if self.handle_rect.collidepoint(mouse_pos):
                 self.dragging = True
-            elif self.dragging:
-                normalized_pos = (mouse_pos[0] - self.rect.x) / self.rect.width
-                normalized_pos = max(0, min(1, normalized_pos))
-                self.value = self.min_val + normalized_pos * (self.max_val - self.min_val)
+            if self.dragging:
+                normalized = (mouse_pos[0] - self.rect.x) / self.rect.width
+                normalized = max(0, min(1, normalized))
+                self.value = self.min_val + normalized * (self.max_val - self.min_val)
                 self.update_handle_position()
                 self.update_text()
         else:
@@ -208,114 +206,171 @@ class Slider:
     def draw(self, screen):
         renderer = getattr(self, 'renderer', None) or MetallicUIRenderer(screen)
         self.renderer = renderer
+        renderer.draw_text(self.text, self.font, self.text_rect.center, (240, 248, 255), (0, 0, 0), 2)
 
-        self.renderer.draw_chamfered_rect((30, 30, 35), self.rect, self.chamfer_size)
+        renderer.draw_slider_track(self.rect)
 
         fill_width = int((self.value - self.min_val) / (self.max_val - self.min_val) * self.rect.width)
         if fill_width > 0:
             fill_rect = pg.Rect(self.rect.x, self.rect.y, fill_width, self.rect.height)
-            self.renderer.draw_chamfered_rect(self.renderer.accent_color, fill_rect, self.chamfer_size)
+            renderer.draw_slider_fill(fill_rect)
 
-        border_rect = self.rect.inflate(2, 2)
-        self.renderer.draw_chamfered_rect(self.renderer.border_color, border_rect, self.chamfer_size, 1)
+        renderer.draw_slider_handle(self.handle_rect, self.dragging)
 
-        handle_color = (80, 80, 85) if self.dragging else (60, 60, 65)
-        pg.draw.rect(screen, handle_color, self.handle_rect, border_radius=4)
-
-        pg.draw.line(screen, (100, 100, 105),
-                    (self.handle_rect.left + 1, self.handle_rect.top + 1),
-                    (self.handle_rect.right - 1, self.handle_rect.top + 1), 1)
-        pg.draw.line(screen, (100, 100, 105),
-                    (self.handle_rect.left + 1, self.handle_rect.top + 1),
-                    (self.handle_rect.left + 1, self.handle_rect.bottom - 1), 1)
-
-        pg.draw.line(screen, (40, 40, 45),
-                    (self.handle_rect.left + 1, self.handle_rect.bottom - 1),
-                    (self.handle_rect.right - 1, self.handle_rect.bottom - 1), 1)
-        pg.draw.line(screen, (40, 40, 45),
-                    (self.handle_rect.right - 1, self.handle_rect.top + 1),
-                    (self.handle_rect.right - 1, self.handle_rect.bottom - 1), 1)
-
-        pg.draw.rect(screen, (100, 100, 105), self.handle_rect, 1, border_radius=4)
-        screen.blit(self.text_surface, self.text_rect)
 
 class Menu:
     def __init__(self, game):
         self.game = game
         self.screen = game.screen
         self.state = 'main'
-        button_height = 60
+        self.start_mode = 'normal'
+        self.ui_renderer = MetallicUIRenderer(self.screen)
 
-        self.main_menu_texts = ["Start Game", "Settings", "Exit"]
-        self.pause_menu_texts = ["Continue Game", "Reset Level", "Settings", "Exit"]
-        button_widths = []
-        all_texts = set(self.main_menu_texts + self.pause_menu_texts)
-        for text in all_texts:
-            font = load_custom_font(36)
-            text_width = font.size(text)[0]
-            button_width = max(300, text_width + 100)
-            button_widths.append(button_width)
-
-        max_button_width = max(button_widths)
-        #center_x = HALF_WIDTH - max_button_width // 2
-        center_x = 80
-        self.max_button_width = max_button_width
-        self.button_height = button_height
-        self.center_x = center_x
+        self.utility_texts = ["Settings", "Exit"]
+        self.pause_utility_texts = ["Settings", "Main Menu", "Exit"]
 
         self.main_buttons = []
+        self.utility_buttons = []
+        self.level_buttons = []
+
+        self._setup_layout()
+        self._setup_settings_ui()
+        self._load_background()
+        self._setup_text()
+
+    def _setup_layout(self):
+        self.button_width = 320
+        self.button_height = 54
+        self.button_gap = 16
+
+        panel_width = 360
+        action_h = 300
+        utility_h = 150
+        panel_gap = 22
+
+        total_h = action_h + panel_gap + utility_h
+        start_y = HALF_HEIGHT - total_h // 2
+
+        self.action_panel = pg.Rect(0, start_y, panel_width, action_h)
+        self.action_panel.centerx = HALF_WIDTH
+
+        self.utility_panel = pg.Rect(0, self.action_panel.bottom + panel_gap, panel_width, utility_h)
+        self.utility_panel.centerx = HALF_WIDTH
+
+        self.settings_panel = pg.Rect(HALF_WIDTH -260, HALF_HEIGHT -200, 520, 430)
+        self.settings_panel.center = (HALF_WIDTH, HALF_HEIGHT)
+
+    def _setup_settings_ui(self):
+        bx = self.settings_panel.x + 100
+        by = self.settings_panel.y + 290
+        bw = self.settings_panel.width - 200
+        bh = 48
 
         self.settings_buttons = [
-            Button(center_x, HALF_HEIGHT + 40, max_button_width, button_height, "Windowed"),
-            Button(center_x, HALF_HEIGHT + 120, max_button_width, button_height, "Fullscreen"),
-            Button(center_x, HALF_HEIGHT + 200, max_button_width, button_height, "Back")
-
+            Button(bx, by, bw, bh, "Windowed", utility=True),
+            Button(bx, by + 64, bw, bh, "Fullscreen", utility=True),
+            Button(bx, by + 128, bw, bh, "Back", utility=True),
         ]
 
-        slider_width = max_button_width
-        slider_center_x = HALF_WIDTH - slider_width // 2
+        slider_w = self.settings_panel.width - 120
+        slider_x = self.settings_panel.x + 60
+
+        sens_percent = (MOUSE_SENSITIVITY - MOUSE_SENSITIVITY_MIN) / \
+                   (MOUSE_SENSITIVITY_MAX - MOUSE_SENSITIVITY_MIN) * 100
+
         self.sliders = [
-            Slider(slider_center_x, HALF_HEIGHT - 100, slider_width, 10, 0, 100,
-                self.game.sound.music_slider_percent, "Music Volume"),
-            Slider(slider_center_x, HALF_HEIGHT, slider_width, 10, 0, 100,
-                self.game.sound.sfx_slider_percent, "SFX Volume")
+            Slider(slider_x, self.settings_panel.y + 80, slider_w, 14, 0, 100,
+                   self.game.sound.music_slider_percent, "Music Volume"),
+            Slider(slider_x, self.settings_panel.y + 150, slider_w, 14, 0, 100,
+                   self.game.sound.sfx_slider_percent, "SFX Volume"),
+            Slider(slider_x, self.settings_panel.y + 220, slider_w, 14, 0, 100, sens_percent, "Mouse Sensitivity"),
         ]
 
+    def _load_background(self):
         bg_image_path = resource_path('resources/teksture/pocetna.png')
-        self.bg_image = pg.image.load(bg_image_path)
-        #self.bg_image = pg.transform.scale(self.bg_image, RES)
+        self.bg_image = pg.image.load(bg_image_path).convert()
         self.bg_image = pg.transform.scale(self.bg_image, self.screen.get_size())
 
-        self.title_font = load_custom_font(72)
+        self.bg_overlay = pg.Surface(self.screen.get_size(), pg.SRCALPHA)
+        self.bg_overlay.fill((0, 0, 0, 120))
+
+    def _setup_text(self):
+        self.title_font = load_custom_font(56)
+        self.small_font = load_custom_font(14)
         self.version = "v0.1"
         self.credits = "2026 PRRI-RT Team"
-        self.small_font = load_custom_font(16)
-        self.version_text = self.small_font.render(self.version, True, (180, 180, 220))
-        self.version_rect = self.version_text.get_rect(topright=(WIDTH - 40, 20))
-        self.credits_text = self.small_font.render(self.credits, True, (180, 180, 220))
-        self.credits_rect = self.credits_text.get_rect(topleft=(40, 20))
+
+    def _refresh_screen_refs(self):
+        self.screen = self.game.screen
+        self.ui_renderer = MetallicUIRenderer(self.screen)
+        self.bg_image = pg.transform.scale(self.bg_image, self.screen.get_size())
+        self.bg_overlay = pg.Surface(self.screen.get_size(), pg.SRCALPHA)
+        self.bg_overlay.fill((0, 0, 0, 120))
 
     def create_menu_buttons(self):
         self.main_buttons = []
+        self.utility_buttons = []
+
         is_game_running = hasattr(self.game, 'game_initialized') and self.game.game_initialized
-        button_texts = self.pause_menu_texts if is_game_running else self.main_menu_texts
 
-        y_positions = []
-        num_buttons = len(button_texts)
-        start_y = HALF_HEIGHT - (num_buttons * self.button_height + (num_buttons - 1) * 20) // 2
-        for i in range(num_buttons):
-            y_positions.append(start_y + i * (self.button_height + 20))
+        if is_game_running:
+            action_texts = ["Continue Game", "Reset Level", "Gauntlet", "Level Select"]
+            utility_texts = self.pause_utility_texts
+        else:
+            action_texts = ["Start Game", "Gauntlet", "Level Select"]
+            utility_texts = self.utility_texts
 
-        for i, text in enumerate(button_texts):
+        action_h = 28 + len(action_texts) * self.button_height + max(0, len(action_texts) - 1) * self.button_gap + 16
+        self.action_panel.height = action_h
+        
+        self.utility_panel.y = self.action_panel.bottom + 32
+        utility_h = 24 + len(utility_texts) * self.button_height + max(0, len(utility_texts) - 1) * self.button_gap + 16
+        self.utility_panel.height = utility_h
+
+        start_y = self.action_panel.y + 28
+        for i, text in enumerate(action_texts):
+            y = start_y + i * (self.button_height + self.button_gap)
             self.main_buttons.append(
-                Button(self.center_x, y_positions[i], self.max_button_width, self.button_height, text)
+                Button(self.action_panel.x + 20, y, self.button_width, self.button_height, text, utility=False)
             )
+
+        util_start_y = self.utility_panel.y + 24
+        for i, text in enumerate(utility_texts):
+            y = util_start_y + i * (self.button_height + self.button_gap)
+            self.utility_buttons.append(
+                Button(self.utility_panel.x + 20, y, self.button_width, self.button_height, text, utility=True)
+            )
+
+    def create_level_buttons(self):
+        self.level_buttons = []
+        num_levels = self.game.level_manager.max_level or 6
+
+        cols = 3
+        button_w = 180
+        button_h = 50
+        spacing = 16
+        panel = pg.Rect(HALF_WIDTH - 320, 220, 640, 300)
+        self.level_panel = panel
+
+        total_width = cols * button_w + (cols - 1) * spacing
+        start_x = panel.x + (panel.width - total_width) // 2
+        start_y = panel.y + 34
+
+        for i in range(num_levels):
+            row = i // cols
+            col = i % cols
+            x = start_x + col * (button_w + spacing)
+            y = start_y + row * (button_h + spacing)
+            self.level_buttons.append(Button(x, y, button_w, button_h, f"Level {i+1}", font_size=20))
+
+        back_y = start_y + ((num_levels - 1) // cols + 1) * (button_h + spacing) + 24
+        self.level_buttons.append(Button(HALF_WIDTH - 90, back_y, 180, button_h, "Back", font_size=20, utility=True))
 
     def handle_events(self):
         mouse_pos = pg.mouse.get_pos()
         mouse_pressed = pg.mouse.get_pressed()
 
-        if not self.main_buttons:
+        if not self.main_buttons and self.state == 'main':
             self.create_menu_buttons()
 
         for event in pg.event.get():
@@ -324,23 +379,57 @@ class Menu:
                 sys.exit()
 
             if self.state == 'main':
-                for button in self.main_buttons:
+                for button in self.main_buttons + self.utility_buttons:
                     button.update(mouse_pos, self.game)
                     if button.is_clicked(event, self.game):
-                        if button.text == "Start Game" or button.text == "Continue Game":
+                        if button.text in ("Start Game", "Continue Game"):
+                            self.start_mode = 'normal'
                             self.state = 'game'
                             pg.mouse.set_visible(False)
                             return True
+
+                        elif button.text == "Gauntlet":
+                            self.start_mode = 'gauntlet'
+                            self.state = 'game'
+                            pg.mouse.set_visible(False)
+                            return True
+
                         elif button.text == "Reset Level":
                             self.state = 'game'
                             pg.mouse.set_visible(False)
                             self.game.reset_current_level()
                             return True
+
                         elif button.text == "Settings":
                             self.state = 'settings'
+
+                        elif button.text == "Level Select":
+                            self.state = 'level_select'
+                            self.create_level_buttons()
+
+                        elif button.text == "Main Menu":
+                            self.game.game_initialized = False
+                            self.state = 'main'
+                            self.create_menu_buttons()
+
                         elif button.text == "Exit":
                             pg.quit()
                             sys.exit()
+
+            elif self.state == 'level_select':
+                for button in self.level_buttons:
+                    button.update(mouse_pos, self.game)
+                    if button.is_clicked(event, self.game):
+                        if button.text == "Back":
+                            self.state = 'main'
+                            self.create_menu_buttons()
+                        else:
+                            level_num = int(button.text.split(" ")[1])
+                            self.game.level_manager.current_level = level_num
+                            self.start_mode = 'normal'
+                            self.state = 'game'
+                            pg.mouse.set_visible(False)
+                            return True
 
             elif self.state == 'settings':
                 for button in self.settings_buttons:
@@ -349,23 +438,34 @@ class Menu:
                         if button.text == "Back":
                             self.state = 'main'
                             self.apply_settings()
+
                         elif button.text == "Windowed":
-                                self.game.is_fullscreen = False
-                                self.game.update_display_mode()
-                                self.screen = self.game.screen
-                                self.by_image=pg.transform.scale(self.bg_image, self.screen.get_size())
+                            self.game.is_fullscreen = False
+                            self.game.update_display_mode()
+                            self._refresh_screen_refs()
+
                         elif button.text == "Fullscreen":
-                                self.game.is_fullscreen = True
-                                self.game.update_display_mode()
-                                self.screen = self.game.screen
-                                self.by_image=pg.transform.scale(self.bg_image, self.screen.get_size())
+                            self.game.is_fullscreen = True
+                            self.game.update_display_mode()
+                            self._refresh_screen_refs()
 
         if self.state == 'settings':
             self.sliders[0].update(mouse_pos, mouse_pressed)
             self.sliders[1].update(mouse_pos, mouse_pressed)
-
+            self.sliders[2].update(mouse_pos, mouse_pressed)
             self.game.sound.set_music_slider(self.sliders[0].value)
             self.game.sound.set_sfx_slider(self.sliders[1].value)
+
+            import Assets.settings as _s
+            _s.MOUSE_SENSITIVITY = _s.MOUSE_SENSITIVITY_MIN + (self.sliders[2].value / 100) * (MOUSE_SENSITIVITY_MAX - MOUSE_SENSITIVITY_MIN)
+
+        elif self.state == 'main':
+            for button in self.main_buttons + self.utility_buttons:
+                button.update(mouse_pos, self.game)
+
+        elif self.state == 'level_select':
+            for button in self.level_buttons:
+                button.update(mouse_pos, self.game)
 
         return False
 
@@ -373,33 +473,63 @@ class Menu:
         self.game.sound.set_music_slider(self.sliders[0].value)
         self.game.sound.set_sfx_slider(self.sliders[1].value)
 
-    def draw_title(self, title_text, y_pos=100):
-        if not hasattr(self, 'ui_renderer'):
-            self.ui_renderer = MetallicUIRenderer(self.screen)
+    def draw_main_menu(self):
+        self.ui_renderer.draw_title_banner("PEST CONTROL", self.title_font, HALF_WIDTH, 56)
 
-        border_color = self.ui_renderer.bg_color
-        return self.ui_renderer.draw_metallic_text(title_text, self.title_font, (HALF_WIDTH, y_pos), border_color=border_color, bg_alpha=128)
+        self.ui_renderer.draw_panel(self.action_panel)
+        self.ui_renderer.draw_text(
+            "GAME",
+            self.small_font,
+            (self.action_panel.centerx, self.action_panel.y + 14),
+            self.ui_renderer.title_color,
+            (0, 0, 0),
+            2
+        )
+        for button in self.main_buttons:
+            button.draw(self.screen)
+
+        self.ui_renderer.draw_panel(self.utility_panel, (54, 38, 46))
+        self.ui_renderer.draw_text(
+            "SYSTEM",
+            self.small_font,
+            (self.utility_panel.centerx, self.utility_panel.y + 14),
+            self.ui_renderer.title_color,
+            (0, 0, 0),
+            2
+        )
+        for button in self.utility_buttons:
+            button.draw(self.screen)
+
+        self.ui_renderer.draw_text(self.version, self.small_font, (WIDTH - 64, 22), (220, 220, 220), (0, 0, 0), 2)
+        self.ui_renderer.draw_text(self.credits, self.small_font, (96, 22), (220, 220, 220), (0, 0, 0), 2)
+
+    def draw_settings(self):
+        self.ui_renderer.draw_title_banner("SETTINGS", self.title_font, HALF_WIDTH, 56)
+        self.ui_renderer.draw_panel(self.settings_panel, (34, 42, 52))
+
+        for slider in self.sliders:
+            slider.draw(self.screen)
+
+        for button in self.settings_buttons:
+            button.draw(self.screen)
+
+    def draw_level_select(self):
+        self.ui_renderer.draw_title_banner("LEVEL SELECT", self.title_font, HALF_WIDTH, 56)
+        self.ui_renderer.draw_panel(self.level_panel, (34, 42, 52))
+
+        for button in self.level_buttons:
+            button.draw(self.screen)
 
     def draw(self):
         self.screen.blit(self.bg_image, (0, 0))
+        self.screen.blit(self.bg_overlay, (0, 0))
 
         if self.state == 'main':
-            self.draw_title("INSERT NAME HERE", 120)
-
-            for button in self.main_buttons:
-                button.draw(self.screen)
-
-            self.screen.blit(self.version_text, self.version_rect)
-            self.screen.blit(self.credits_text, self.credits_rect)
-
+            self.draw_main_menu()
         elif self.state == 'settings':
-            self.draw_title("Settings")
-
-            for slider in self.sliders:
-                slider.draw(self.screen)
-
-            for button in self.settings_buttons:
-                button.draw(self.screen)
+            self.draw_settings()
+        elif self.state == 'level_select':
+            self.draw_level_select()
 
         pg.display.flip()
 

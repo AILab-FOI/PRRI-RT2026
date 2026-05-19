@@ -1,7 +1,7 @@
 import pygame as pg
 import os
 import sys
-
+import math
 
 def resource_path(relative_path):
     try:
@@ -46,6 +46,11 @@ class Sound:
             'smg': 0.28,
             'plasmagun': 0.35,
             'weapon_pickup': 0.35,
+            'reload_smg': 0.30,
+            'reload_pistolj': 0.30,
+            'bat_swing': 0.40,
+            'bat_pickup': 0.35,
+            'bat_break': 0.45,
 
             # Player sounds
             'igrac_damage': 0.35,
@@ -59,6 +64,9 @@ class Sound:
             'npc_pain': 0.30,
             'npc_death': 0.45,
             'npc_attack': 0.30,
+            'npc_knocked': 0.95,
+            'npc_warning': 0.8,
+            'npc_gone': 0.8,
 
             # Enemy-specific sounds
             'napad_stakor': 0.35,
@@ -87,6 +95,7 @@ class Sound:
             # Interaction sounds
             'terminal_beep': 0.25,
             'door_open': 0.30,
+            'ammo_pickup': 0.10,
 
             # Powerup sounds
             'powerup_pickup': 0.35,
@@ -94,8 +103,8 @@ class Sound:
             'powerup_end': 0.25,
 
             # Menu sounds
-            'menu_hover': 0.30,
-            'menu_click': 0.36,
+            'menu_hover': 0.50,
+            'menu_click': 0.66,
 
             # Dialogue
             'dialogue_line': 0.26,
@@ -112,10 +121,14 @@ class Sound:
 
         self.sound_files = {
             # Weapon sounds
-            'pistolj': 'Pistolj.wav',
-            'smg': 'Puska.wav',
+            'pistolj': 'Pistolj_wportalsfx.mp3',
+            'smg': 'Puska.mp3',
             'plasmagun': 'plasmaGun.wav',
             'weapon_pickup': 'podizanje_oruzja.wav',
+            'reload_pistolj': 'reload_pistolj.wav',
+            'reload_smg': 'reload_smg.mp3',
+            'bat_swing': 'bat_swing.wav',
+            'bat_break': 'bat_break.wav',
 
             # Player sounds
             'igrac_damage': 'Igrac_damage.wav',
@@ -125,6 +138,9 @@ class Sound:
             'npc_pain': 'npc_pain.wav',
             'npc_death': 'npc_death.wav',
             'npc_attack': 'npc_attack.wav',
+            'npc_knocked': 'npc_knocked.wav',
+            'npc_warning': 'npc_warning.wav',
+            'npc_gone': 'npc_gone.wav',
 
             # Enemy-specific sounds
             'napad_stakor': 'stakor_napad.mp3',
@@ -153,6 +169,7 @@ class Sound:
             # Interaction sounds
             'terminal_beep': 'terminal.wav',
             'door_open': 'vrata.wav',
+            'ammo_pickup': 'ammo_pickup.wav',
 
             # Powerup sounds
             'powerup_pickup': 'powerup_pickup.wav',
@@ -160,7 +177,7 @@ class Sound:
             'powerup_end': 'powerup_gasenje.wav',
 
             # Menu sounds
-            'menu_hover': 'menu_hover.mp3',
+            'menu_hover': 'menu_hover.wav',
             'menu_click': 'menu_klik.wav',
 
             # Game state sounds
@@ -177,11 +194,16 @@ class Sound:
         }
 
         self.background_music = {
-            1: 'Pozadinska1.mp3',
-            2: 'Pozadinska2.wav',
-            3: 'Pozadinska3.mp3',
-            4: 'Pozadinska4.wav',
-            5: 'Pozadinska5.wav'
+            0: 'track2.wav',
+            1: 'track1.wav',
+            2: 'track5.ogg',
+            3: 'track4.ogg',
+            4: 'track6.ogg',
+            5: 'track8.ogg',
+            6: 'track8.ogg',
+            50: 'death.wav',
+            51: 'end.wav',
+            99: 'track7.ogg'
         }
 
         self.sounds = {}
@@ -226,6 +248,7 @@ class Sound:
         try:
             return pg.mixer.Sound(self._full_sound_path(filename))
         except Exception:
+            print(f"[DEBUG:]FAILED TO LOAD: {filename}")
             return None
 
     def _load_all_sounds(self):
@@ -296,6 +319,40 @@ class Sound:
         if sound is None:
             return None
         return sound.play(loops=loops, maxtime=maxtime, fade_ms=fade_ms)
+
+    def play_sfx_at_position(self, sound_name, npc_x, npc_y):
+        sound = self.sounds.get(sound_name)
+        if sound is None:
+            return
+
+        player = self.game.player
+        dx = npc_x - player.x
+        dy = npc_y - player.y
+        dist = max(0.1, (dx ** 2 + dy ** 2) ** 0.5)
+
+        # Volume pada linearno s distancom, tiho izvan max_dist
+        max_dist = 17.0
+        vol = max(0.0, 1.0 - (dist / max_dist))
+        vol *= self.volume_factors.get(sound_name, 1.0) * self.sfx_volume
+
+        # Pan: projekcija smjera NPC-a na playerovu desnu os
+        right_x = math.cos(player.angle + math.pi / 2)
+        right_y = math.sin(player.angle + math.pi / 2)
+        pan = (dx * right_x + dy * right_y) / dist
+        pan = max(-1.0, min(1.0, pan))
+
+        # Stereo split — pygame set_volume(left, right)
+        left_vol  = min(1.0, vol * (1.0 - pan) / 2)
+        right_vol = min(1.0, vol * (1.0 + pan) / 2)
+
+        # Osiguraj da barem jedan kanal nije potpuno tih
+        if left_vol < 0.01 and right_vol < 0.01:
+            left_vol = right_vol = vol * 0.5
+
+        channel = sound.play()
+        if channel:
+            channel.set_volume(left_vol, right_vol)
+
 
     def stop_sfx(self, sound_name):
         sound = self.sounds.get(sound_name)

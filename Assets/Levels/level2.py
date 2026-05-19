@@ -1,8 +1,9 @@
 """
 Level 2 configuration
 """
-from Assets.npcs.enemy_npcs import StakorNPC, TosterNPC, KlonoviNPC, ParazitNPC, JazavacNPC
+from Assets.npcs.enemy_npcs import StakorNPC, TosterNPC
 from Assets.Levels.base_level import create_base_level_structure
+
 
 def get_level_data():
     """Return the complete level 2 data"""
@@ -20,40 +21,37 @@ def get_level_data():
 
     level_data['weapons'] = [
         {
-            'position': (1.5, 4.5),
+            'position': (2.5, 5),
             'weapon_index': 1,
             'path': 'resources/sprites/weapon/puska_stand.png'
         },
-
     ]
     level_data['powerups'] = []
 
     level_data['sprites'] = []
 
     level_data['enemies'] = {
-        'count': 22,
-        'types': [StakorNPC, TosterNPC],
-        'weights': [60, 40],
+        'waves': [
+            {
+                'count': 15,
+                'types': [StakorNPC, TosterNPC],
+                'weights': [60, 40],
+                'fixed_positions': [],
+                'max_enemies_on_map': 15
+            }
+        ],
         'restricted_area': {(i, j) for i in range(10) for j in range(10)},
-        'fixed_positions': []
+        'wave_delay': 3000
     }
 
-    level_data['dialogue_npcs'] = [
-        {
-            'pos': (3.5, 2.5),
-            'dialogue_id': 'marvin_intro',
-            'path': 'resources/sprites/npc/dialogue_npc/0.png'
-        }
-    ]
-
-    level_data['heal_item']=[#pozicija za heal item
+    level_data['heal_item'] = [
         {'position': (5.5, 5.5)},
         {'position': (5.5, 1.5)},
         {'position': (8.5, 3.5)},
-        ]
+    ]
 
     level_data['ammo_pickup'] = [
-        {'position':(5.5,2.5)}
+        {'position': (5.5, 2.5)}
     ]
 
     return level_data

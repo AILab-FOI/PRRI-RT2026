@@ -1,5 +1,4 @@
 import pygame as pg
-import os
 from Assets.settings import *
 from Assets.scripts.UI.ui_level_colors import *
 from Assets.scripts.Util.font_manager import load_custom_font, resource_path
@@ -11,340 +10,362 @@ class GameUI:
         self.game = game
         self.screen = game.screen
         self.metallic_renderer = MetallicUIRenderer(self.screen)
+        self.wave_manager = game.wave_manager
 
         self.green_color = (0, 180, 80)
         self.orange_color = (255, 100, 0)
         self.blue_color = (0, 180, 255)
+        self.red_color = (220, 60, 60)
+        self.yellow_color = (255, 215, 0)
         self.dark_gray = (50, 50, 50)
+        self.white = (235, 235, 245)
+        self.black = (10, 10, 14)
+        self.hud_bg_outer = (8, 55, 60)
+        self.hud_bg_main = (14, 18, 34)
+        self.hud_panel = (12, 18, 135)
+        self.hud_inner = (20, 28, 180)
+        self.hud_border = (115, 190, 210)
+        self.health_bg = (45, 45, 52)
+        self.health_low = (200, 45, 45)
+        self.health_mid = (220, 150, 0)
 
         self.tint_color_map = UI_TINT_COLORS
+        self.current_level = 1
 
-        self.dash_font = load_custom_font(18)
-        self.enemy_counter_font = load_custom_font(20)
+        self.label_font = load_custom_font(18)
+        self.value_font = load_custom_font(26)
+        self.dash_font = load_custom_font(20)
+        self.small_font = load_custom_font(16)
+        self.fps_font = load_custom_font(18)
         self.invulnerability_title_font = load_custom_font(24)
         self.invulnerability_timer_font = load_custom_font(40)
 
         self.margin_x = int(WIDTH * UI_MARGIN_PERCENT_X)
         self.margin_y = int(HEIGHT * UI_MARGIN_PERCENT_Y)
 
-        self.dash_indicator_width = 180
-        self.dash_indicator_height = 24
-        self.dash_chamfer_size = 6
-
-        self.digit_size = 90
-        self.current_level = 1
-        self.digit_images = self.load_digit_images()
-        self.tinted_digits = {} 
-
         self.powerup_icon = self.load_texture('resources/teksture/level1/powerup.png', (100, 100))
-        self.item_icon = self.load_texture('resources/teksture/heal_item.png',(128,128))
+        self.item_icon = self.load_texture('resources/teksture/heal_item.png', (72, 72))
         self.item_icon_gray = self.make_gray_icon(self.item_icon)
         self.pickup_item_icon = self.load_texture('resources/teksture/pickup_item1.png', (48, 48))
 
-        self.weapon_icon_size = (96, 96)
-
+        self.weapon_icon_height = 72
         self.weapon_icons = [
-        self.load_texture('resources/sprites/weapon/pistol_stand.png', self.weapon_icon_size),
-        self.load_texture('resources/sprites/weapon/puska_stand.png', self.weapon_icon_size),
-        self.load_texture('resources/sprites/weapon/plasma_stand.png', self.weapon_icon_size),
-        
+            self.load_texture_fixed_height('resources/sprites/weapon/pistol_stand.png', self.weapon_icon_height),
+            self.load_texture_fixed_height('resources/sprites/weapon/puska_stand.png', self.weapon_icon_height),
+            self.load_texture_fixed_height('resources/sprites/weapon/plasma_stand.png', self.weapon_icon_height),
+            self.load_texture_fixed_height('resources/sprites/weapon/bat/bat_stand.png', self.weapon_icon_height),
         ]
         self.weapon_icons_gray = [self.make_gray_icon(icon) for icon in self.weapon_icons]
 
-
         self.crosshair_size = 48
         self.crosshair = self.load_texture('resources/teksture/Blue-crosshair.png', (self.crosshair_size, self.crosshair_size))
-        self.crosshair_y_offset = 40
-        self.crosshair_pos = (
-            HALF_WIDTH - self.crosshair_size // 2,
-            HALF_HEIGHT - self.crosshair_size // 2 + self.crosshair_y_offset
-        )
-        
+        self.crosshair_y_offset = 10
         self.hit_marker_time = 0
         self.hit_marker_duration = 150
 
+        self.hud_height = 118
+        self.hud_padding = 12
+        self.hud_gap = 10
+        self.viewport_bottom_gap = 6
+
+    def bind_wave_manager(self):
+        self.wave_manager = self.game.wave_manager
 
     def load_texture(self, path, res):
         texture_path = resource_path(path)
         texture = pg.image.load(texture_path).convert_alpha()
         return pg.transform.scale(texture, res)
 
-    def load_digit_images(self):
-        """Load base digit images (number of digits determined by files in base_path)"""
-        digits = {}
-        base_path = resource_path('resources/teksture/numbers')
+    def load_texture_fixed_height(self, path, target_height):
+        texture_path = resource_path(path)
+        texture = pg.image.load(texture_path).convert_alpha()
 
-        # List all files in base_path and filter PNGs
-        try:
-            file_list = os.listdir(base_path)
-        # Keep only *.png files that look like digit names: 0.png, 1.png, ...
-            digit_files = [
-                f for f in file_list
-                if f.endswith('.png') and f[:-4].isdigit()
-            ]
-        # Sort by parsed number (0, 1, 2, ...)
-            digit_files.sort(key=lambda x: int(x[:-4]))
-        except (OSError, FileNotFoundError):
-            digit_files = []
+        orig_w = texture.get_width()
+        orig_h = texture.get_height()
 
-    # Load each digit file, indexed by its number
-        for i, filename in enumerate(digit_files):
-            digit_key = os.path.splitext(filename)[0]  # "0", "1", etc.
-            digit_file = os.path.join(base_path, filename)
-            img = self.load_texture(digit_file, [self.digit_size] * 2)
-            digits[digit_key] = img
+        scale = target_height / orig_h
+        new_w = int(orig_w * scale)
+        new_h = int(target_height)
 
-        return digits
-        """
-        level_digit_path = f'resources/teksture/level{self.current_level}/brojevi'
-        fallback_digit_path = 'resources/teksture/level1/brojevi'
-        level_digit_path_abs = resource_path(level_digit_path)
+        return pg.transform.smoothscale(texture, (new_w, new_h))
 
-        if os.path.exists(level_digit_path_abs) and os.path.isdir(level_digit_path_abs):
-            for i in range(12):
-                digit_file = f'{level_digit_path}/{i}.png'
-                digit_file_abs = resource_path(digit_file)
+    def update_screen_reference(self):
+        self.screen = self.game.screen
+        self.metallic_renderer.screen = self.screen
+        if self.wave_manager is not self.game.wave_manager:
+            self.bind_wave_manager()
 
-                if os.path.exists(digit_file_abs) and os.path.isfile(digit_file_abs):
-                    img = self.load_texture(digit_file, [self.digit_size] * 2)
-                    digits[str(i)] = img
-                else:
-                    fallback_digit = f'{fallback_digit_path}/{i}.png'
-                    img = self.load_texture(fallback_digit, [self.digit_size] * 2)
-                    digits[str(i)] = img
-        else:
-            for i in range(12):
-                img = self.load_texture(f'{fallback_digit_path}/{i}.png', [self.digit_size] * 2)
-                digits[str(i)] = img
+    def update_level(self, level_number):
+        self.current_level = level_number
+        self.bind_wave_manager()
 
-        return digits
-        """
+    def get_level_tint_color(self):
+        return self.tint_color_map.get(self.current_level, self.tint_color_map['default'])
 
-    def get_tinted_digit(self, digit_key, color):
-        """Get cached tinted version of digit"""
-        cache_key = f"{digit_key}_{color}"
-        if cache_key not in self.tinted_digits:
-            base_img = self.digit_images[digit_key]
-            tinted = self.tint_surface(base_img, color)
-            self.tinted_digits[cache_key] = tinted
-        return self.tinted_digits[cache_key]
-
-    def tint_surface(self, surf, color):
-        """Tint a surface with an RGB color."""
-        result = surf.copy()
-        result.fill(color, special_flags=pg.BLEND_RGB_ADD)
-        return result
-
-    def draw(self):
-        self.draw_player_health()
-        self.draw_health_icon(self.game.player.heal_item_count > 0)
-        self.draw_weapon_icons()
-        self.draw_dash_indicator()
-        self.draw_enemy_counter()
-        self.draw_pickup_item_counter()
-        self.draw_invulnerability_indicator()
-        self.draw_crosshair()
-        self.draw_weapon_ammo()
-        self.draw_fps()
-
-    def draw_fps(self):
-        fps = str(int(self.game.clock.get_fps()))
-        fps_surface = self.enemy_counter_font.render(f"FPS: {fps}", True, (0, 255, 0))
-        self.screen.blit(fps_surface, (10, 10))
-
-    def draw_crosshair(self):
-        """Draw the crosshair in the center of the screen"""
-        if not hasattr(self.game, 'interaction') or not self.game.interaction.is_showing_indicator:
-            self.screen.blit(self.crosshair, self.crosshair_pos)
-            
-            if pg.time.get_ticks() - self.hit_marker_time < self.hit_marker_duration:
-                cx = HALF_WIDTH
-                cy = HALF_HEIGHT + self.crosshair_y_offset
-                color = (255, 255, 255)
-                length = 12
-                offset = 8
-                thickness = 2
-                
-                pg.draw.line(self.screen, color, (cx - offset, cy - offset), (cx - offset - length, cy - offset - length), thickness)
-                pg.draw.line(self.screen, color, (cx + offset, cy - offset), (cx + offset + length, cy - offset - length), thickness)
-                pg.draw.line(self.screen, color, (cx - offset, cy + offset), (cx - offset - length, cy + offset + length), thickness)
-                pg.draw.line(self.screen, color, (cx + offset, cy + offset), (cx + offset + length, cy + offset + length), thickness)
+    def make_gray_icon(self, surface):
+        return pg.transform.grayscale(surface.convert_alpha())
 
     def show_hit_marker(self):
         self.hit_marker_time = pg.time.get_ticks()
 
-    def draw_dash_indicator(self):
+    def get_enemies_left(self):
+        return self.wave_manager.get_enemies_left()
+
+    def get_score(self):
+        return self.wave_manager.get_score()
+
+    def get_survival_seconds(self):
+        return self.wave_manager.get_survival_seconds()
+
+    def draw(self):
+        self.update_screen_reference()
+        self.draw_top_stats()
+        self.draw_bottom_hud()
+        self.draw_crosshair()
+        self.draw_invulnerability_indicator()
+        self.draw_fps()
+
+    def draw_top_stats(self):
+        score_rect = pg.Rect(18, 18, 180, 64)
+        time_rect = pg.Rect(210, 18, 180, 64)
+
+        self._draw_panel(score_rect)
+        self._draw_panel(time_rect)
+
+        self._draw_label_value(score_rect, 'SCORE', self.get_score(), self.yellow_color)
+        self._draw_label_value(time_rect, 'TIME', f'{self.get_survival_seconds()}s', self.get_level_tint_color())
+
+    def draw_fps(self):
+        fps = str(int(self.game.clock.get_fps()))
+        fps_surface = self.fps_font.render(f'FPS: {fps}', True, (0, 255, 0))
+        self.screen.blit(fps_surface, (10, 92))
+
+    def draw_crosshair(self):
+        cx = HALF_WIDTH
+        cy = HALF_HEIGHT
+        crosshair_pos = (cx - self.crosshair_size // 2, cy - self.crosshair_size // 2)
+        self.screen.blit(self.crosshair, crosshair_pos)
+
+        if pg.time.get_ticks() - self.hit_marker_time < self.hit_marker_duration:
+            color = (255, 255, 255)
+            length = 12
+            offset = 8
+            thickness = 2
+            pg.draw.line(self.screen, color, (cx - offset, cy - offset), (cx - offset - length, cy - offset - length), thickness)
+            pg.draw.line(self.screen, color, (cx + offset, cy - offset), (cx + offset + length, cy - offset - length), thickness)
+            pg.draw.line(self.screen, color, (cx - offset, cy + offset), (cx - offset - length, cy + offset + length), thickness)
+            pg.draw.line(self.screen, color, (cx + offset, cy + offset), (cx + offset + length, cy + offset + length), thickness)
+
+    def _draw_panel(self, rect):
+        pg.draw.rect(self.screen, self.hud_panel, rect)
+        inner = rect.inflate(-4, -4)
+        pg.draw.rect(self.screen, self.hud_inner, inner)
+        pg.draw.rect(self.screen, self.hud_border, rect, 2)
+        pg.draw.line(self.screen, (180, 220, 255), (rect.x + 2, rect.y + 2), (rect.right - 3, rect.y + 2), 1)
+        pg.draw.line(self.screen, (0, 0, 60), (rect.x + 2, rect.bottom - 3), (rect.right - 3, rect.bottom - 3), 1)
+
+    def _draw_label_value(self, rect, label, value, value_color=None):
+        label_surf = self.label_font.render(label, True, self.white)
+        label_rect = label_surf.get_rect(midtop=(rect.centerx, rect.y + 6))
+        self.screen.blit(label_surf, label_rect)
+
+        color = value_color or self.white
+        value_surf = self.value_font.render(str(value), True, color)
+        value_rect = value_surf.get_rect(center=(rect.centerx, rect.centery + 14))
+        self.screen.blit(value_surf, value_rect)
+
+    def _get_health_fill_color(self, ratio):
+        if ratio <= 0.25:
+            return self.health_low
+        if ratio <= 0.5:
+            return self.health_mid
+        return self.get_level_tint_color()
+
+    def draw_bottom_hud(self):
+        gap = self.hud_gap
+        panel_y = HEIGHT - self.hud_height + self.hud_padding
+        panel_h = self.hud_height - self.hud_padding * 2 - 8
+
+        level_w = 90
+        dash_w = 100
+        enemy_w = 110
+        health_w = 300
+
+        pickup_w = 110
+        ammo_w = 150
+        weapon_w = 110
+
+        left_total_w = level_w + dash_w + enemy_w + health_w + gap * 3
+        right_total_w = pickup_w + ammo_w + weapon_w + gap * 2
+
+        left_outer = pg.Rect(
+            8,
+            HEIGHT - self.hud_height,
+            left_total_w + self.hud_padding * 2,
+            self.hud_height - 8
+        )
+
+        right_outer = pg.Rect(
+            WIDTH - 8 - (right_total_w + self.hud_padding * 2),
+            HEIGHT - self.hud_height,
+            right_total_w + self.hud_padding * 2,
+            self.hud_height - 8
+        )
+
+        for outer in (left_outer, right_outer):
+            border = outer.inflate(8, 8)
+            pg.draw.rect(self.screen, self.hud_bg_outer, border)
+            pg.draw.rect(self.screen, self.hud_bg_main, outer)
+            pg.draw.rect(self.screen, self.hud_border, border, 3)
+            pg.draw.rect(self.screen, (4, 10, 20), outer, 2)
+
+        left_x = left_outer.x + self.hud_padding
+        right_x = right_outer.x + self.hud_padding
+
+        level_rect = pg.Rect(left_x, panel_y, level_w, panel_h)
+        dash_rect = pg.Rect(level_rect.right + gap, panel_y, dash_w, panel_h)
+        enemy_rect = pg.Rect(dash_rect.right + gap, panel_y, enemy_w, panel_h)
+        health_rect = pg.Rect(enemy_rect.right + gap, panel_y, health_w, panel_h)
+
+        pickup_rect = pg.Rect(right_x, panel_y, pickup_w, panel_h)
+        ammo_rect = pg.Rect(pickup_rect.right + gap, panel_y, ammo_w, panel_h)
+        weapon_rect = pg.Rect(ammo_rect.right + gap, panel_y, weapon_w, panel_h)
+
+        self._draw_panel(level_rect)
+        self._draw_panel(dash_rect)
+        self._draw_panel(enemy_rect)
+        self._draw_panel(health_rect)
+
+        self._draw_panel(pickup_rect)
+        self._draw_panel(ammo_rect)
+        self._draw_panel(weapon_rect)
+
+        self._draw_side_left(level_rect, dash_rect, enemy_rect, health_rect)
+        self._draw_side_right(pickup_rect, ammo_rect, weapon_rect)
+
+    def _draw_side_left(self, level_rect, dash_rect, enemy_rect, health_rect):
+        current_level = getattr(self.game.level_manager, 'current_level', self.current_level)
+        self._draw_label_value(level_rect, 'LEVEL', current_level)
+
+        player = self.game.player
+        dash_ready = True
+        dash_value = 'READY'
         current_time = pg.time.get_ticks()
-        dash_cooldown_remaining = 0
-        is_dashing = self.game.player.is_dashing
-
-        if not is_dashing:
-            time_since_last_dash = current_time - self.game.player.last_dash_time
+        if not player.is_dashing:
+            time_since_last_dash = current_time - player.last_dash_time
             if time_since_last_dash < PLAYER_DASH_COOLDOWN:
-                dash_cooldown_remaining = 1 - (time_since_last_dash / PLAYER_DASH_COOLDOWN)
+                dash_ready = False
+                dash_left = max(0.0, (PLAYER_DASH_COOLDOWN - time_since_last_dash) / 1000)
+                dash_value = f'{dash_left:.1f}s'
 
-        indicator_x = WIDTH - self.dash_indicator_width - self.margin_x
-        indicator_y = self.margin_y + 30
-        indicator_rect = pg.Rect(indicator_x, indicator_y, self.dash_indicator_width, self.dash_indicator_height)
+        dash_color = self.green_color if dash_ready else self.orange_color
+        label_surf = self.label_font.render('DASH', True, self.white)
+        self.screen.blit(label_surf, label_surf.get_rect(midtop=(dash_rect.centerx, dash_rect.y + 6)))
+        dash_surf = self.dash_font.render(str(dash_value), True, dash_color)
+        self.screen.blit(dash_surf, dash_surf.get_rect(center=(dash_rect.centerx, dash_rect.centery + 12)))
 
-        if is_dashing or dash_cooldown_remaining == 0:
-            dash_color = self.green_color
-            dash_text = "DASH READY"
-            self.metallic_renderer.draw_chamfered_rect(dash_color, indicator_rect, self.dash_chamfer_size)
+        enemies_left = self.get_enemies_left()
+        enemy_color = self.green_color if enemies_left == 0 else self.red_color
+        self._draw_label_value(enemy_rect, 'ENEMIES', enemies_left, enemy_color)
+
+        current_health = max(0, getattr(player, 'health', 100))
+        max_health = max(1, getattr(player, 'max_health', 100))
+        ratio = max(0.0, min(1.0, current_health / max_health))
+        fill_color = self._get_health_fill_color(ratio)
+
+        label = self.label_font.render('HEALTH', True, self.white)
+        self.screen.blit(label, label.get_rect(midtop=(health_rect.centerx, health_rect.y + 6)))
+
+        bar_rect = pg.Rect(health_rect.x + 14, health_rect.y + 36, health_rect.width - 28, 30)
+        pg.draw.rect(self.screen, self.health_bg, bar_rect)
+
+        fill_w = int(bar_rect.width * ratio)
+        if fill_w > 0:
+            pg.draw.rect(self.screen, fill_color, (bar_rect.x, bar_rect.y, fill_w, bar_rect.height))
+
+        pg.draw.rect(self.screen, self.white, bar_rect, 2)
+
+        health_text = self.value_font.render(f'{current_health}/{max_health}', True, self.white)
+        self.screen.blit(health_text, health_text.get_rect(center=bar_rect.center))
+
+    def _draw_side_right(self, pickup_rect, ammo_rect, weapon_rect):
+        player = self.game.player
+        weapon_index = getattr(player, 'current_weapon_index', 0)
+
+        weapon_label = self.label_font.render('WEAPON', True, self.white)
+        self.screen.blit(weapon_label, weapon_label.get_rect(midtop=(weapon_rect.centerx, weapon_rect.y + 6)))
+
+        if 0 <= weapon_index < len(self.weapon_icons):
+            weapon_icon = self.weapon_icons[weapon_index]
+            icon_rect = weapon_icon.get_rect(center=(weapon_rect.centerx, weapon_rect.centery + 12))
+            self.screen.blit(weapon_icon, icon_rect)
+
+        weapon = getattr(self.game, 'weapon', None)
+
+        if weapon and weapon.name == 'bat':
+            uses = getattr(weapon, 'uses_left', 0)
+            self._draw_label_value(ammo_rect, 'USES', str(uses), self.get_level_tint_color())
         else:
-            dash_color = self.orange_color
-            self.metallic_renderer.draw_chamfered_rect(self.dark_gray, indicator_rect, self.dash_chamfer_size)
+            ammo_value = '--/--'
+            if weapon:
+                ammo_value = f'{weapon.currentMagAmmount}/{weapon.bagAmount}'
+            self._draw_label_value(ammo_rect, 'AMMO', ammo_value, self.get_level_tint_color())
 
-            fill_width = int(self.dash_indicator_width * (1 - dash_cooldown_remaining))
-            if fill_width > 0:
-                fill_rect = pg.Rect(indicator_x, indicator_y, fill_width, self.dash_indicator_height)
-                self.metallic_renderer.draw_chamfered_rect(dash_color, fill_rect, self.dash_chamfer_size)
+        pickup_label = self.label_font.render('PICKUP', True, self.white)
+        self.screen.blit(pickup_label, pickup_label.get_rect(midtop=(pickup_rect.centerx, pickup_rect.y + 6)))
 
-            cooldown_sec = max(0.1, round(dash_cooldown_remaining * (PLAYER_DASH_COOLDOWN / 1000), 1))
-            dash_text = f"DASH ({cooldown_sec}s)"
+        has_item = getattr(player, 'heal_item_count', 0) > 0
+        current_time = pg.time.get_ticks()
+        heal_cooldown = getattr(player, 'heal_cooldown', 5000)
+        last_heal = getattr(player, 'last_heal_time', 0)
+        time_since_heal = current_time - getattr(player, 'last_heal_time', 0)
+        on_cooldown = last_heal > 0 and time_since_heal < heal_cooldown
 
-        text_surface = self.dash_font.render(dash_text, True, dash_color)
-        text_rect = text_surface.get_rect(center=(indicator_x + self.dash_indicator_width // 2, indicator_y - 15))
-        self.screen.blit(text_surface, text_rect)
+        if on_cooldown:
+            progress = min(1.0, time_since_heal / heal_cooldown)
+            time_left = max(0.0, (heal_cooldown - time_since_heal) / 1000)
+            time_surf = self.dash_font.render(f'{time_left:.1f}s', True, self.orange_color)
+            self.screen.blit(time_surf, time_surf.get_rect(center=(pickup_rect.centerx, pickup_rect.centery - 4)))
 
-    def draw_player_health(self):
-        health = str(max(0, self.game.player.health))
-        tint_color = self.get_level_tint_color()
-
-        for i, char in enumerate(health):
-            digit = self.get_tinted_digit(char, tint_color)
-            self.screen.blit(digit, (self.margin_x + i * self.digit_size, self.margin_y))
-
-        slash = self.get_tinted_digit('10', tint_color)
-        self.screen.blit(slash, (self.margin_x + len(health) * self.digit_size, self.margin_y))
-
-    def draw_weapon_ammo(self):
-        if not self.game.weapon:
-            return
+            bar_w = pickup_rect.width - 28
+            bar_h = 10
+            bar_x = pickup_rect.x + 14
+            bar_y = pickup_rect.bottom - 24
+            bar_bg = pg.Rect(bar_x, bar_y, bar_w, bar_h)
+            pg.draw.rect(self.screen, self.health_bg, bar_bg)
+            fill_w = int(bar_w * progress)
+            if fill_w > 0:
+                pg.draw.rect(self.screen, self.orange_color, (bar_x, bar_y, fill_w, bar_h))
+            pg.draw.rect(self.screen, self.white, bar_bg, 1)
+        else:
+            icon = self.item_icon if has_item else self.item_icon_gray
+            icon_rect = icon.get_rect(center=(pickup_rect.centerx, pickup_rect.y + 54))
+            self.screen.blit(icon, icon_rect)
         
-        weapon = self.game.weapon
-        current = str(weapon.currentMagAmmount)
-        bag = str(weapon.bagAmount)
-        ammo_text = list(current) + ['11'] + list(bag)  # e.g. "12 10 45" but '10' is slash!
-
-        total_width = len(ammo_text) * self.digit_size
-        x = self.screen.get_width() - self.margin_x - total_width
-        y = self.screen.get_height() - self.margin_y - self.digit_size
-    
-        tint_color = self.get_level_tint_color()
-
-        for i, char in enumerate(ammo_text):
-            digit = self.get_tinted_digit(char, tint_color)
-            self.screen.blit(digit, (x + i * self.digit_size, y))
-
 
     def draw_invulnerability_indicator(self):
         if not self.game.player.is_invulnerable:
             return
 
         seconds_left = max(1, int(self.game.player.invulnerability_time_left / 1000) + 1)
-        indicator_x = HALF_WIDTH - 100
-        indicator_y = self.margin_y
-        center_x = indicator_x + 100
+        indicator_x = HALF_WIDTH - 110
+        indicator_y = 18
+        panel = pg.Rect(indicator_x, indicator_y, 220, 170)
 
-        title_surface = self.invulnerability_title_font.render("INVINCIBILITY", True, (255, 255, 255))
-        title_rect = title_surface.get_rect(center=(center_x, indicator_y + 20))
+        self.metallic_renderer.draw_panel(panel, 10)
+
+        title_surface = self.invulnerability_title_font.render('INVINCIBILITY', True, self.white)
+        title_rect = title_surface.get_rect(center=(panel.centerx, panel.y + 22))
         self.screen.blit(title_surface, title_rect)
 
-        icon_rect = self.powerup_icon.get_rect(center=(center_x, indicator_y + 80))
+        icon_rect = self.powerup_icon.get_rect(center=(panel.centerx, panel.y + 74))
         self.screen.blit(self.powerup_icon, icon_rect)
 
-        # Draw timer with tinted digits instead of text
-        number_text = str(seconds_left)
-        total_width = len(number_text) * self.digit_size
-        x = center_x - total_width // 2
-        y = indicator_y + 120  # visually centered, adjust as needed
-
         tint_color = self.get_level_tint_color()
+        timer_surface = self.value_font.render(str(seconds_left), True, tint_color)
+        timer_rect = timer_surface.get_rect(center=(panel.centerx - 8, panel.y + 138))
+        self.screen.blit(timer_surface, timer_rect)
 
-        for i, digit_char in enumerate(number_text):
-            digit = self.get_tinted_digit(digit_char, tint_color)
-            self.screen.blit(digit, (x + i * self.digit_size, y))
-
-        # Optional: small "s" text below or next to the digits
-        sec_text = self.invulnerability_timer_font.render("s", True, self.blue_color)
-        sec_rect = sec_text.get_rect(center=(center_x, indicator_y + 160))
+        sec_text = self.invulnerability_timer_font.render('s', True, self.blue_color)
+        sec_rect = sec_text.get_rect(midleft=(timer_rect.right + 4, timer_rect.centery))
         self.screen.blit(sec_text, sec_rect)
-
-    def draw_enemy_counter(self):
-        npc_list = self.game.object_handler.npc_list
-        total_enemies = 0
-        alive_enemies = 0
-
-        for npc in npc_list:
-            if not getattr(npc, 'is_friendly', False):
-                total_enemies += 1
-                if npc.alive:
-                    alive_enemies += 1
-
-        if total_enemies == 0:
-            counter_color = (150, 150, 150)
-        elif alive_enemies == 0:
-            counter_color = self.green_color
-        elif alive_enemies <= total_enemies * 0.25:
-            counter_color = (180, 180, 0)
-        elif alive_enemies <= total_enemies * 0.5:
-            counter_color = (220, 180, 0)
-        else:
-            counter_color = self.orange_color
-
-        counter_text = f"ENEMIES: {alive_enemies}/{total_enemies}"
-        text_surface = self.enemy_counter_font.render(counter_text, True, self.get_level_tint_color())
-        text_rect = text_surface.get_rect(bottomleft=(self.margin_x, HEIGHT - self.margin_y))
-        self.screen.blit(text_surface, text_rect)
-
-    def draw_pickup_item_counter(self):
-        count = self.game.player.pickup_item_count
-        icon_x = self.margin_x
-        icon_y = HEIGHT - self.margin_y - 40
-        self.screen.blit(self.pickup_item_icon, (icon_x, icon_y))
-
-        text = f"x{count}"
-        text_surface = self.enemy_counter_font.render(text, True, self.get_level_tint_color())
-        text_rect = text_surface.get_rect(midleft=(icon_x + 52, icon_y + 24))
-        self.screen.blit(text_surface, text_rect)
-
-    def update_level(self, level_number):
-        """Update UI elements when the level changes"""
-        if self.current_level != level_number:
-            self.current_level = level_number
-            self.digit_images = self.load_digit_images()
-    
-    def get_level_tint_color(self):
-        return self.tint_color_map.get(self.current_level, self.tint_color_map["default"])
-    
-    def draw_health_icon(self, has_item):
-        icon = self.item_icon if has_item else self.item_icon_gray
-        dash_x = WIDTH - self.dash_indicator_width - self.margin_x
-        dash_y = self.margin_y + 30
-
-        spacing = 20  # gap below dash bar
-        rect = icon.get_rect()
-        rect.topright = (dash_x + self.dash_indicator_width, dash_y + self.dash_indicator_height + spacing)
-        self.screen.blit(icon, rect)
-
-    def make_gray_icon(self, surface):
-        return pg.transform.grayscale(surface.convert_alpha())
-    
-    def draw_weapon_icons(self):
-        start_x = self.margin_x
-        start_y = HEIGHT - self.margin_y - 140
-        spacing = 20
-
-        for i, weapon_class in enumerate(self.game.weapon_classes):
-            unlocked = self.game.player.weapon_unlocked[i]
-
-            icon = self.weapon_icons[i] if unlocked else self.weapon_icons_gray[i]
-
-            x = start_x + i * (self.weapon_icon_size[0] + spacing)
-            y = start_y
-            self.screen.blit(icon, (x, y))
-
-            if i == self.game.player.current_weapon_index:
-                rect = pg.Rect(x, y, self.weapon_icon_size[0], self.weapon_icon_size[1])
-                pg.draw.rect(self.screen, (255, 255, 255), rect, 3)

@@ -33,6 +33,15 @@ class DialogueManager:
 
         self.load_dialogues()
 
+        self.portrait_size=64
+        self.portraits= {}
+        self.portrait_map = {
+        'E.D.D.I.E': 'resources/sprites/dialogue_portraits/eddie.png',
+        'Player': 'resources/sprites/dialogue_portraits/player.png',
+        }
+        self.default_portrait = 'resources/sprites/dialogue_portraits/default.png'
+        self._load_portraits()
+
     def load_dialogues(self):
         dialogue_dir = resource_path('resources/dialogues')
         try:
@@ -105,8 +114,6 @@ class DialogueManager:
                self.end_dialogue()
            else:
                 self.next_line()
-
-
 
     def get_current_dialogue_id(self):
         for dialogue_id, dialogue in self.dialogues.items():
@@ -193,6 +200,31 @@ class DialogueManager:
             return True
         return False
 
+    def _load_portraits(self):
+        from Assets.scripts.Util.font_manager import resource_path
+    
+        for speaker, path in self.portrait_map.items():
+            try:
+                img = pg.image.load(resource_path(path)).convert_alpha()
+                img = pg.transform.smoothscale(img, (self.portrait_size, self.portrait_size))
+                self.portraits[speaker] = img
+            except Exception:
+                self.portraits[speaker] = None
+    
+            # učitaj default
+        try:
+            img = pg.image.load(resource_path(self.default_portrait)).convert_alpha()
+            self.portraits['default'] = pg.transform.smoothscale(
+                img, (self.portrait_size, self.portrait_size)
+                )
+        except Exception:
+            self.portraits['default'] = None
+
+    def _get_portrait(self, speaker):
+        if speaker in self.portraits and self.portraits[speaker] is not None:
+            return self.portraits[speaker]
+        return self.portraits.get('default', None)
+
     def draw(self):
         if (hasattr(self.game, 'intro_sequence') and self.game.intro_sequence.active or
             not self.dialogue_active or not self.current_dialogue):
@@ -207,11 +239,21 @@ class DialogueManager:
         box_x = (WIDTH - box_width) // 2
         box_y = HEIGHT - box_height - margin_y - 30
 
+        # portrait dimenzije
+        portrait_size = self.portrait_size
+        portrait_padding = 10
+        portrait_border = 2
+        # portrait ide lijevo od teksta, unutar boxa
+        portrait_x = box_x + self.dialogue_box_padding
+        portrait_y = box_y + (box_height - portrait_size) // 2
+
+        # pozadina dijalog boxa
         dialogue_surface = pg.Surface((box_width, box_height), pg.SRCALPHA)
         dialogue_surface.fill((0, 0, 0, 200))
         screen.blit(dialogue_surface, (box_x, box_y))
         pg.draw.rect(screen, (255, 255, 255), (box_x, box_y, box_width, box_height), 2)
 
+        # speaker i boja
         current_speaker = None
         speaker_color = self.default_speaker_color
 
@@ -219,26 +261,52 @@ class DialogueManager:
             current_speaker = self.current_dialogue["speakers"][self.current_line_index]
             speaker_color = self.speaker_colors.get(current_speaker, self.default_speaker_color)
 
+        # portrait crtanje
+        portrait = self._get_portrait(current_speaker) if current_speaker else None
+        text_offset_x = 0 #pomak teksta ako ima portrait
+
+        if portrait:
+            text_offset_x = portrait_size + portrait_padding * 2
+
+            # okvir oko portraita u boji speakera
+            border_rect = (
+                portrait_x - portrait_border,
+                portrait_y - portrait_border,
+                portrait_size + portrait_border * 2,
+                portrait_size + portrait_border * 2
+            )
+            pg.draw.rect(screen, speaker_color, border_rect, portrait_border)
+            screen.blit(portrait, (portrait_x, portrait_y))
+
+        #speaker name tag (iznad boxa)
         if current_speaker:
             speaker_text = self.speaker_font.render(current_speaker, True, (0, 0, 0))
             speaker_bg_width = speaker_text.get_width() + 30
             speaker_bg_height = speaker_text.get_height() + 12
-            speaker_bg_x = box_x + self.dialogue_box_padding
-            speaker_bg_y = box_y - speaker_bg_height + 2
+
+            # poravnaj name tag s lijevim rubom teksta (uz portrait ako postoji)
+            tag_x = box_x + self.dialogue_box_padding + text_offset_x
+            tag_y = box_y - speaker_bg_height + 2
 
             speaker_bg = pg.Surface((speaker_bg_width, speaker_bg_height))
             speaker_bg.fill(speaker_color)
 
-            pg.draw.rect(screen, (0, 0, 0), (speaker_bg_x-2, speaker_bg_y-2, speaker_bg_width+4, speaker_bg_height+4))
-            screen.blit(speaker_bg, (speaker_bg_x, speaker_bg_y))
+            pg.draw.rect(screen, (0, 0, 0),
+                         (tag_x - 2, tag_y - 2,
+                          speaker_bg_width + 4, speaker_bg_height + 4))
+            screen.blit(speaker_bg, (tag_x, tag_y))
 
-            text_x = speaker_bg_x + (speaker_bg_width - speaker_text.get_width()) // 2
-            text_y = speaker_bg_y + (speaker_bg_height - speaker_text.get_height()) // 2
+            text_x = tag_x + (speaker_bg_width - speaker_text.get_width()) // 2
+            text_y = tag_y + (speaker_bg_height - speaker_text.get_height()) // 2
             screen.blit(speaker_text, (text_x, text_y))
 
+        #  tekst dijaloga 
         if self.current_line_index < len(self.current_dialogue["lines"]):
             line = self.current_dialogue["lines"][self.current_line_index]
-            max_width = box_width - 2 * self.dialogue_box_padding
+
+            # tekst počinje desno od portraita
+            text_start_x = box_x + self.dialogue_box_padding + text_offset_x
+            max_width = box_width - 2 * self.dialogue_box_padding - text_offset_x
 
             words = line.split(' ')
             lines = []
@@ -251,15 +319,15 @@ class DialogueManager:
                     current_line = word + " "
                 else:
                     current_line = test_line
-
             if current_line:
                 lines.append(current_line)
 
             for i, line in enumerate(lines):
                 text_surface = self.font.render(line, True, (255, 255, 255))
                 y_pos = box_y + self.dialogue_box_padding + 40 + i * self.line_spacing
-                screen.blit(text_surface, (box_x + self.dialogue_box_padding, y_pos))
+                screen.blit(text_surface, (text_start_x, y_pos))
 
+        # --- prompt i skip ---
         is_last_line = self.current_line_index == len(self.current_dialogue["lines"]) - 1
         prompt_text = self.font.render(
             "Press E to exit dialogue..." if is_last_line else "Press E to continue...",
@@ -268,3 +336,9 @@ class DialogueManager:
         prompt_x = box_x + box_width - prompt_text.get_width() - self.dialogue_box_padding
         prompt_y = box_y + box_height - prompt_text.get_height() - self.dialogue_box_padding
         screen.blit(prompt_text, (prompt_x, prompt_y))
+
+        skip_text = self.font.render("Press TAB to skip", True, (150, 150, 150))
+        screen.blit(skip_text, (box_x + self.dialogue_box_padding, prompt_y))
+    
+    
+        
