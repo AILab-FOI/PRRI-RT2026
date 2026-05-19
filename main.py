@@ -3,6 +3,8 @@ import gc
 import time
 import math
 import random
+import threading
+import traceback
 
 
 gc.set_threshold(25000, 50, 50)
@@ -55,6 +57,8 @@ class Game:
         self.global_trigger = False
         self.global_event = pg.USEREVENT + 0
         pg.time.set_timer(self.global_event, 40)
+        self.level_load_done_event = pg.USEREVENT + 20
+        self.level_load_failed_event = pg.USEREVENT + 21
         self.sound = Sound(self)
         self.menu = Menu(self)
         self.intro_sequence = IntroSequence(self)
@@ -69,10 +73,14 @@ class Game:
 
         self.level_manager = LevelManager(self)
         self.wave_manager = None
+        self._start_intro_after_loading = False
+        self.loading_thread = None
+        self.loading_exception = None
+        self.loading_target_level = None
 
         self.game_initialized = False
         self.show_menu(play_menu_music=True)
-        self.bat_consumed_time=0;
+        self.bat_consumed_time = 0
 
     def update_display_mode(self):
         if self.is_fullscreen:
@@ -83,7 +91,10 @@ class Game:
         if hasattr(self, 'menu'):
             self.menu.screen = self.screen
 
-    def new_game(self):
+    def _finish_level1_loading(self):
+        self._start_intro_after_loading = True
+
+    def _build_level_runtime(self):
         self.sound.stop_all_sfx()
 
         if not hasattr(self, 'map'):
@@ -92,8 +103,6 @@ class Game:
 
         if not hasattr(self, 'player'):
             self.player = Player(self)
-        #else:
-        #   self.player.reset()
 
         if not hasattr(self, 'weapon'):
             self.weapon = None
@@ -155,8 +164,40 @@ class Game:
         self.object_renderer.update_sky_image()
         self.sound.change_music_for_level(self.level_manager.current_level)
 
-        if self.level_manager.current_level == 1:
-            self.intro_sequence.start()
+    def _background_load_worker(self, level_number):
+        try:
+            self.level_manager.current_level = level_number
+            self._build_level_runtime()
+            pg.event.post(pg.event.Event(self.level_load_done_event, {"level_number": level_number}))
+        except Exception:
+            self.loading_exception = traceback.format_exc()
+            pg.event.post(pg.event.Event(self.level_load_failed_event, {"level_number": level_number}))
+
+    def begin_new_game_load(self, level_number):
+        self.loading_target_level = level_number
+        self.loading_exception = None
+        self._start_intro_after_loading = False
+
+        self.loading_screen.start(
+            level_number=level_number,
+            auto_continue=True,
+            use_custom_level1_image=(level_number == 1),
+            message="Loading...",
+            on_complete_callback=self._finish_level1_loading if level_number == 1 else None
+        )
+
+        self.loading_screen.draw()
+        pg.display.flip()
+
+        self.loading_thread = threading.Thread(
+            target=self._background_load_worker,
+            args=(level_number,),
+            daemon=True
+        )
+        self.loading_thread.start()
+
+    def new_game(self):
+        self.begin_new_game_load(self.level_manager.current_level)
 
     def update(self):
         if self.death_screen.active:
@@ -167,21 +208,38 @@ class Game:
             self.victory_screen.update()
             return
 
-        self.sound.update()
-        self.player.update()
-        self.pathfinding.update()
-        self.raycasting.update()
-        self.object_handler.update()
-
-        if self.weapon:
-            self.weapon.update()
-
-        self.interaction.update()
-        self.dialogue_manager.update()
-        self.intro_sequence.update()
-        self.disorienting_effects.update()
         self.loading_screen.update()
         self.level_transition.update()
+
+        if self.loading_screen.active:
+            self.sound.update()
+            return
+
+        if self._start_intro_after_loading:
+            self.intro_sequence.start()
+            self._start_intro_after_loading = False
+
+        self.sound.update()
+
+        if hasattr(self, 'player'):
+            self.player.update()
+        if hasattr(self, 'pathfinding'):
+            self.pathfinding.update()
+        if hasattr(self, 'raycasting'):
+            self.raycasting.update()
+        if hasattr(self, 'object_handler'):
+            self.object_handler.update()
+
+        if hasattr(self, 'weapon') and self.weapon:
+            self.weapon.update()
+
+        if hasattr(self, 'interaction'):
+            self.interaction.update()
+        if hasattr(self, 'dialogue_manager'):
+            self.dialogue_manager.update()
+
+        self.intro_sequence.update()
+        self.disorienting_effects.update()
 
     def draw(self):
         if self.death_screen.active:
@@ -192,17 +250,27 @@ class Game:
             self.victory_screen.draw()
             return
 
-        self.object_renderer.draw()
+        if self.loading_screen.active:
+            self.loading_screen.draw()
+            self.level_transition.draw()
+            pg.display.flip()
+            return
 
-        if self.weapon:
+        if hasattr(self, 'object_renderer'):
+            self.object_renderer.draw()
+
+        if hasattr(self, 'weapon') and self.weapon:
             self.weapon.draw()
 
-        self.game_ui.draw()
-        self.interaction.draw()
-        self.dialogue_manager.draw()
+        if hasattr(self, 'game_ui'):
+            self.game_ui.draw()
+        if hasattr(self, 'interaction'):
+            self.interaction.draw()
+        if hasattr(self, 'dialogue_manager'):
+            self.dialogue_manager.draw()
+
         self.disorienting_effects.draw()
         self.intro_sequence.draw()
-        self.loading_screen.draw()
         self.level_transition.draw()
 
         pg.display.flip()
@@ -214,6 +282,34 @@ class Game:
         if self.victory_screen.active:
             return self.victory_screen.handle_events()
 
+        buffered_events = []
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                return True
+
+            if event.type == self.level_load_done_event:
+                if self.loading_target_level == 1:
+                    self.loading_screen.mark_loading_complete()
+                    self.loading_screen.auto_continue = False
+                    self.loading_screen.waiting_for_input = True
+                else:
+                    self.loading_screen.mark_loading_complete("Loading complete")
+                    self.loading_screen.start_time = time.time() - max(0, self.loading_screen.duration - 0.15)
+                continue
+
+            if event.type == self.level_load_failed_event:
+                self.loading_screen.mark_loading_complete("Loading failed")
+                print(self.loading_exception)
+                continue
+
+            if self.loading_screen.active and self.loading_screen.handle_continue_key(event):
+                continue
+
+            buffered_events.append(event)
+
+        for event in buffered_events:
+            pg.event.post(event)
+
         return self.game_events.process_events()
 
     def next_level(self):
@@ -222,14 +318,13 @@ class Game:
     def reset_current_level(self):
         current_level = self.level_manager.current_level
         self.sound.current_music_level = -1
-        self.map.load_level(current_level)
-        self.new_game()
-        self.respawn_player()
+        self.begin_new_game_load(current_level)
         pg.mouse.set_visible(False)
 
     def respawn_player(self):
-        self.player.reset()
-    
+        if hasattr(self, 'player'):
+            self.player.reset()
+
     def show_menu(self, play_menu_music=False):
         pg.mouse.set_pos([HALF_WIDTH, HALF_HEIGHT])
         pg.event.set_grab(False)
@@ -245,7 +340,7 @@ class Game:
             if self.menu.start_mode == 'gauntlet':
                 self.transition_to_runtime_level()
             else:
-                self.new_game()
+                self.begin_new_game_load(self.level_manager.current_level)
             self.game_initialized = True
 
         pg.event.set_grab(True)
@@ -265,7 +360,7 @@ class Game:
         for row in level_data['map']:
             print(row)
 
-        self.new_game()
+        self.begin_new_game_load(runtime_level_number)
 
     def spawn_npc_drop(self, pos):
         if not NPC_DROP_SETTINGS.get('enabled', False):
