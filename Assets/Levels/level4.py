@@ -37,6 +37,15 @@ def get_level_data():
         {'position': (3, 16), 'door_id': 14, 'requires_code': False, 'code': None, 'requires_door_id': None},
     ]
 
+    # Pickup items (collectible counters)
+    level_data['pickup_item'] = [
+        {'position': (1.5, 2.5)},
+        {'position': (3.5, 3.5)},
+        {'position': (9.5, 4.5)},
+        {'position': (14.5, 3.5)},
+        {'position': (1.5, 12.5)},
+    ]
+
     # Decorative sprites
     level_data['sprites'] = [
 

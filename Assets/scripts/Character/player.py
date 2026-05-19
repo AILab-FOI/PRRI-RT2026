@@ -64,6 +64,7 @@ class Player:
         self.auto_fire = False
 
         self.heal_item_count = 1
+        self.pickup_item_count = 0
         for weapon in self.weapon_inventory:
             if weapon is not None:
                 weapon.bagAmount = 999

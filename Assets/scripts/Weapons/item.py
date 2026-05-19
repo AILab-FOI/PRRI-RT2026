@@ -2,10 +2,9 @@ import math
 from Assets.scripts.Util.sprite_object import SpriteObject
 
 
-#TODO promijeni zvuk, spusti sprajt, smanji ga i dodaj brojac na menu
 class Pickup_item(SpriteObject):
     def __init__(self, game, pos=(1.5, 1.5), path='resources/teksture/pickup_item1.png',
-                 scale=0.4, shift=0.1, pickup_distance=0.5):
+                 scale=0.35, shift=0.27, pickup_distance=0.5):
         super().__init__(game, path=path, pos=pos, scale=scale, shift=shift)
         self.pickup_distance = pickup_distance
         self.picked = False
@@ -19,6 +18,7 @@ class Pickup_item(SpriteObject):
         distance = math.hypot(dx, dy)
 
         if distance <= self.pickup_distance:
+            self.player.pickup_item_count += 1
             self.picked = True
 
             if hasattr(self.game.sound, 'powerup_pickup') and self.game.sound.powerup_pickup:

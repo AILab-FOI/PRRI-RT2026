@@ -39,6 +39,7 @@ class GameUI:
         self.powerup_icon = self.load_texture('resources/teksture/level1/powerup.png', (100, 100))
         self.item_icon = self.load_texture('resources/teksture/heal_item.png',(128,128))
         self.item_icon_gray = self.make_gray_icon(self.item_icon)
+        self.pickup_item_icon = self.load_texture('resources/teksture/pickup_item1.png', (48, 48))
 
         self.weapon_icon_size = (96, 96)
 
@@ -140,6 +141,7 @@ class GameUI:
         self.draw_weapon_icons()
         self.draw_dash_indicator()
         self.draw_enemy_counter()
+        self.draw_pickup_item_counter()
         self.draw_invulnerability_indicator()
         self.draw_crosshair()
         self.draw_weapon_ammo()
@@ -294,6 +296,17 @@ class GameUI:
         counter_text = f"ENEMIES: {alive_enemies}/{total_enemies}"
         text_surface = self.enemy_counter_font.render(counter_text, True, self.get_level_tint_color())
         text_rect = text_surface.get_rect(bottomleft=(self.margin_x, HEIGHT - self.margin_y))
+        self.screen.blit(text_surface, text_rect)
+
+    def draw_pickup_item_counter(self):
+        count = self.game.player.pickup_item_count
+        icon_x = self.margin_x
+        icon_y = HEIGHT - self.margin_y - 40
+        self.screen.blit(self.pickup_item_icon, (icon_x, icon_y))
+
+        text = f"x{count}"
+        text_surface = self.enemy_counter_font.render(text, True, self.get_level_tint_color())
+        text_rect = text_surface.get_rect(midleft=(icon_x + 52, icon_y + 24))
         self.screen.blit(text_surface, text_rect)
 
     def update_level(self, level_number):
