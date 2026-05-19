@@ -200,7 +200,7 @@ class Sound:
             3: 'track4.ogg',
             4: 'track6.ogg',
             5: 'track8.ogg',
-            6: 'track6.ogg',
+            6: 'track8.ogg',
             50: 'death.wav',
             51: 'end.wav',
             99: 'track7.ogg'
