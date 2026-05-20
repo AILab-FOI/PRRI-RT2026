@@ -27,7 +27,7 @@ class ObjectRenderer:
         self.wall_textures = self.load_wall_textures()
 
         self.sky_images = {
-            1: self.get_sky_texture('resources/teksture/level2/sky2.png'),
+            1: self.get_sky_texture('resources/teksture/level1/sky1.png'),
             2: self.get_sky_texture('resources/teksture/level1/sky1.png'),
             3: self.get_sky_texture('resources/teksture/level1/sky1.png'),
             4: self.get_sky_texture('resources/teksture/level4/sky_level4.png'),
