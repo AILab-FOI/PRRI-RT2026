@@ -42,11 +42,13 @@ def build_runtime_level(seed, level_id=99):
     room_size_multiplier=room_settings.get('size_multiplier', 1.0),
     room_count=room_settings.get('room_count', 7),
     corridor_thickness=room_settings.get('corridor_thickness', 1),
-    force_spawn_room=room_settings.get('force_spawn_room', True)
+    force_spawn_room=room_settings.get('force_spawn_room', True),
+    record_history=True,
 )
     level_data['map'] = generated['map']
     level_data['player_spawn'] = generated['player_spawn']
     level_data['rooms'] = generated['rooms']
+    level_data['map_history'] = generated.get('history', [])
 
     px, py = level_data['player_spawn']
     safe_radius = wave_data.get('safe_spawn_radius', 12)
