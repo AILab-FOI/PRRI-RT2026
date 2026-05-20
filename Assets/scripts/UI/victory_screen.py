@@ -9,7 +9,7 @@ class VictoryScreen:
         self.game = game
         self.screen = game.screen
         self.active = False
-        bg_image_path = resource_path('resources/teksture/win.png')
+        bg_image_path = resource_path('resources/teksture/victory.png')
         self.bg_image = pg.image.load(bg_image_path)
         self.bg_image = pg.transform.scale(self.bg_image, RES)
         self.title_font = load_custom_font(72)

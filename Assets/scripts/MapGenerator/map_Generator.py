@@ -15,11 +15,22 @@ class MapGenerator:
         room_size_multiplier=1.0,
         room_count=7,
         corridor_thickness=1,
-        force_spawn_room=True
+        force_spawn_room=True,
+        record_history=False
     ):
         EMPTY = 0
         grid = [[self.WALL for _ in range(width)] for _ in range(height)]
         rooms = []
+
+        history = []
+
+        def snapshot():
+            if record_history:
+                # shallow copy rows so later mutations do not affect old snapshots
+                history.append([row[:] for row in grid])
+
+        # initial full-wall state
+        snapshot()
 
         def carve_room(x, y, w, h):
             y2 = min(y + h, height - 1)
@@ -27,6 +38,7 @@ class MapGenerator:
             for iy in range(y, y2):
                 for ix in range(x, x2):
                     grid[iy][ix] = EMPTY
+            snapshot()
 
         def carve_corridor(x1, y1, x2, y2, avoid_rect=None):
             def dig(cx, cy):
@@ -51,6 +63,7 @@ class MapGenerator:
                     dig(x1, y)
                 for x in range(min(x1, x2), max(x1, x2) + 1):
                     dig(x, y2)
+            snapshot()
 
         def room_center(room):
             rx, ry, rw, rh = room
@@ -95,6 +108,7 @@ class MapGenerator:
             exit_room = rooms[-1]
             ex, ey = room_center(exit_room)
             grid[ey][ex] = self.EXIT
+            snapshot()
 
         player_spawn = (1.5, 1.5)
         spawn_room_rect = None
@@ -116,6 +130,7 @@ class MapGenerator:
             for iy in range(chamber_y, chamber_y + chamber_total_h):
                 for ix in range(chamber_x, chamber_x + chamber_total_w):
                     grid[iy][ix] = self.WALL
+            snapshot()
 
             # Carve 5×5 interior
             interior_x = chamber_x + 1
@@ -123,6 +138,7 @@ class MapGenerator:
             for iy in range(interior_y, interior_y + interior_h):
                 for ix in range(interior_x, interior_x + interior_w):
                     grid[iy][ix] = EMPTY
+            snapshot()
 
             # Player in center of 5×5 (at 3,3 from top-left of interior)
             player_spawn = (chamber_x + 3 + 0.5, chamber_y + 3 + 0.5)
@@ -152,10 +168,12 @@ class MapGenerator:
 
             # Carve doorway tile (1 tile in the wall)
             grid[door_y][door_x] = EMPTY
+            snapshot()
 
             # Carve just outside if in bounds
             if 0 < out_x < width - 1 and 0 < out_y < height - 1:
                 grid[out_y][out_x] = EMPTY
+                snapshot()
 
             spawn_room_rect = (chamber_x, chamber_y, chamber_total_w, chamber_total_h)
 
@@ -178,6 +196,8 @@ class MapGenerator:
             grid[y][0] = self.WALL
             grid[y][width - 1] = self.WALL
 
+        snapshot()
+
         spawn_room = None
         if force_spawn_room and spawn_room_rect is not None:
             # 5×5 interior room info
@@ -187,7 +207,8 @@ class MapGenerator:
         return {
             'map': grid,
             'player_spawn': player_spawn,
-            'rooms': rooms
+            'rooms': rooms,
+            'history': history if record_history else None
         }
 
     def pick_random_locations(self, grid, count, exclude_positions):
