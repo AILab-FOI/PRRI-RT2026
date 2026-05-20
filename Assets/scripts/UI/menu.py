@@ -428,6 +428,7 @@ class Menu:
                             self.game.level_manager.current_level = level_num
                             self.start_mode = 'normal'
                             self.state = 'game'
+                            self.game.game_initialized = False
                             pg.mouse.set_visible(False)
                             return True
 
