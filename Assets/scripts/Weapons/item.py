@@ -25,8 +25,16 @@ class Pickup_item(SpriteObject):
             if hasattr(self.game.sound, 'powerup_pickup') and self.game.sound.powerup_pickup:
                 self.game.sound.powerup_pickup.play()
 
-            if self.message:
-                self.game.lore_popup.show_message(self.message)
+            if self.player.pickup_item_count == 1:
+                # prvi pickup -- trigerira dijalog, poruka se prikaze nakon dijaloga
+                if self.message:
+                    self.game._pending_item_message = self.message
+                if hasattr(self.game, 'dialogue_manager'):
+                    self.game.dialogue_manager.start_auto_dialogue('part_discovered')
+            else:
+                # ostali pickupi -- odmah prikazi lore poruku
+                if self.message and hasattr(self.game, 'lore_popup'):
+                    self.game.lore_popup.show_message(self.message)
 
             if self in self.game.object_handler.sprite_list:
                 self.game.object_handler.sprite_list.remove(self)

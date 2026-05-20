@@ -84,6 +84,7 @@ class Game:
         self.show_menu(play_menu_music=True)
         self.bat_consumed_time = 0
 
+        self._pending_item_message = None
     def update_display_mode(self):
         if self.is_fullscreen:
             self.screen = pg.display.set_mode(RES, pg.FULLSCREEN)

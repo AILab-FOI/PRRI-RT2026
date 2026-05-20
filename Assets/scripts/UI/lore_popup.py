@@ -11,7 +11,7 @@ class LorePopup:
         self.message_queue = []
         self.font = load_custom_font(20)
         self.start_time = 0
-        self.show_duration = 8000
+        self.show_duration = 99999999
 
         self.box_width = int(WIDTH * 0.6)
         self.box_height = 150
@@ -43,8 +43,7 @@ class LorePopup:
     def update(self):
         if not self.active:
             return
-        if pg.time.get_ticks() - self.start_time > self.show_duration:
-            self.dismiss()
+        
 
     def draw(self):
         if not self.active:

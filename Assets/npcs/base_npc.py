@@ -25,6 +25,9 @@ class StaticNPC(AnimatedSprite):
         self.run_logic()
 
     def run_logic(self):
+        if hasattr(self.game, 'dialogue_manager') and \
+            self.game.dialogue_manager.dialogue_active:
+          return
         if self.alive:
             self.image = self.static_image
 
@@ -178,6 +181,12 @@ class NPC(AnimatedSprite):
             self.check_wall_collision(dx, dy)
 
     def attack(self):
+        if hasattr(self.game, 'dialogue_manager') and \
+            self.game.dialogue_manager.dialogue_active:
+           return
+        if hasattr(self.game, 'lore_popup') and self.game.lore_popup.active:
+           return
+
         if self.animation_trigger:
             sound_name = self.config['sounds']['attack']
             if hasattr(self.game.sound, sound_name):
