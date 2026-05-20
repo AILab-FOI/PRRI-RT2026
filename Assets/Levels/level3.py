@@ -1,6 +1,7 @@
 """
 Level 3 configuration
 """
+from Assets.npcs.enemy_npcs import StakorNPC
 from Assets.npcs.enemy_npcs import KlonoviNPC, JazavacNPC
 from Assets.Levels.base_level import create_base_level_structure
 
@@ -19,15 +20,15 @@ def get_level_data():
                 'max_enemies_on_map': 5
             },
             {
-                'count': 13,
-                'types': [KlonoviNPC, JazavacNPC],
+                'count': 10,
+                'types': [KlonoviNPC, StakorNPC],
                 'weights': [70, 30],
                 'fixed_positions': [],
                 'max_enemies_on_map': 10
             },
             {
-                'count': 15,
-                'types': [JazavacNPC],
+                'count': 10,
+                'types': [StakorNPC],
                 'weights': [100],
                 'fixed_positions': [],
                 'max_enemies_on_map': 10
