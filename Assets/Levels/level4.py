@@ -44,6 +44,52 @@ def get_level_data():
         {'position': (9.5, 15.5)},
     ]
 
+    level_data['pickup_item'] = [
+        {
+            'position': (1.5, 2.5),
+            'message': (
+                "A data pad left by the previous captain: 'Note to self —"
+                " the answer may be 42, but the question is clearly \"How many"
+                " rats can fit in one air duct?\" The answer: all of them.'"
+            )
+        },
+        {
+            'position': (3.5, 3.5),
+            'message': (
+                "E.D.D.I.E's latest system report: 'I have identified the"
+                " intruders. They are rats. Big ones. Some are wearing"
+                " improvised armor. Recommendation: don't panic. Actually,"
+                " panic. It'll make the footage more entertaining.'"
+            )
+        },
+        {
+            'position': (9.5, 4.5),
+            'message': (
+                "Ship log — Day 12: The rats have unionized. Their demands"
+                " include a dedicated cheese wing and a daily five-minute"
+                " break from being vermin. Negotiations have broken down."
+            )
+        },
+        {
+            'position': (14.5, 3.5),
+            'message': (
+                "A page from the onboard survival guide: 'Rule #1: Always"
+                " carry a towel. Rule #2: Never trust a rat in a waistcoat."
+                " Rule #3: If you hear strange noises in the vents, pretend"
+                " you didn't. It's easier that way.'"
+            )
+        },
+        {
+            'position': (1.5, 12.5),
+            'message': (
+                "A hastily scribbled note on the wall: 'If you're reading"
+                " this, grab a towel, a weapon, and a sense of humor. The"
+                " first two will keep you alive. The third will make you"
+                " wish they hadn't. — The last guy'"
+            )
+        },
+    ]
+
     level_data['sprites'] = []
 
     level_data['enemies'] = {

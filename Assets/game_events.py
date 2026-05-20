@@ -67,7 +67,9 @@ class GameEvents:
         return False
 
     def _handle_e_key_press(self):
-        if self.game.dialogue_manager.dialogue_active:
+        if self.game.lore_popup.active:
+            self.game.lore_popup.dismiss()
+        elif self.game.dialogue_manager.dialogue_active:
             self.game.dialogue_manager.handle_key_press()
         else:
             for npc in self.game.object_handler.npc_list:
@@ -82,6 +84,8 @@ class GameEvents:
 
         match key:
             case pg.K_TAB:
+                if self.game.lore_popup.active:
+                    self.game.lore_popup.dismiss()
                 if self.game.dialogue_manager.dialogue_active:
                     self.game.dialogue_manager.end_dialogue()
             case pg.K_r:

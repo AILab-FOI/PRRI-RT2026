@@ -46,6 +46,7 @@ class GameUI:
         self.powerup_icon = self.load_texture('resources/teksture/level1/powerup.png', (100, 100))
         self.item_icon = self.load_texture('resources/teksture/heal_item.png', (72, 72))
         self.item_icon_gray = self.make_gray_icon(self.item_icon)
+        self.pickup_item_icon = self.load_texture('resources/teksture/pickup_item1.png', (48, 48))
 
         self.weapon_icon_height = 72
         self.weapon_icons = [

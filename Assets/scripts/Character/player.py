@@ -39,6 +39,8 @@ class Player:
         self.heal_cooldown = 5000
         self.heal_item_count = 0
 
+        self.pickup_item_count = 0
+
         self.last_step_time = 0
         self.step_delay = 350
 
@@ -63,6 +65,7 @@ class Player:
         self.auto_fire = False
 
         self.heal_item_count = 1
+        self.pickup_item_count = 0
         for weapon in self.weapon_inventory:
             if weapon is not None:
                 weapon.bagAmount = weapon.bagAmount

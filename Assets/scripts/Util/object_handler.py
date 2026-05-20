@@ -3,6 +3,7 @@ from Assets.scripts.Weapons.powerup import PowerUp
 from Assets.scripts.Weapons.heal_item import Heal_item
 from Assets.scripts.Weapons.ammo import Ammo_item
 from Assets.scripts.WaveManager.waveManager import WaveManager
+from Assets.scripts.Weapons.item import Pickup_item
 
 
 class ObjectHandler:
@@ -103,3 +104,8 @@ class ObjectHandler:
         ammo_item = Ammo_item(self.game, pos=pos)
         self.add_sprite(ammo_item)
         return ammo_item
+    
+    def add_pickup_item(self, pos, message=None):
+        pickup_item = Pickup_item(self.game, pos=pos, message=message)
+        self.add_sprite(pickup_item)
+        return pickup_item

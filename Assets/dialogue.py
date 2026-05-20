@@ -150,6 +150,11 @@ class DialogueManager:
         pg.mouse.get_rel()
         self.game.player.dialogue_mode = False
 
+        if getattr(self.game, '_pending_item_message', None):
+            if hasattr(self.game, 'lore_popup'):
+                self.game.lore_popup.show_message(self.game._pending_item_message)
+            self.game._pending_item_message = None
+
     def handle_key_press(self):
         if not self.dialogue_active:
             return

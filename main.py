@@ -32,6 +32,7 @@ from Assets.game_events import GameEvents
 from Assets.scripts.UI.death_screen import DeathScreen
 from Assets.scripts.UI.victory_screen import VictoryScreen
 from Assets.scripts.UI.ui import GameUI
+from Assets.scripts.UI.lore_popup import LorePopup
 from Assets.scripts.Effects.visual_effects import DisorientingEffects
 from Assets.scripts.Util.font_manager import resource_path
 from Assets.scripts.MapGenerator.runtime_level import build_runtime_level
@@ -68,6 +69,7 @@ class Game:
         self.victory_screen = VictoryScreen(self)
         self.game_events = GameEvents(self)
         self.disorienting_effects = DisorientingEffects(self)
+        self.lore_popup = LorePopup(self)
         self.weapon_classes = [Pistol, SMG, PlasmaGun, Bat]
         self.weapon_slot_count = len(self.weapon_classes)
 
@@ -89,6 +91,7 @@ class Game:
         self.show_menu(play_menu_music=True)
         
 
+        self._pending_item_message = None
     def update_display_mode(self):
         if self.is_fullscreen:
             self.screen = pg.display.set_mode(RES, pg.FULLSCREEN)
@@ -277,6 +280,7 @@ class Game:
         if hasattr(self, 'dialogue_manager'):
             self.dialogue_manager.update()
 
+        self.lore_popup.update()
         self.intro_sequence.update()
         self.disorienting_effects.update()
 
@@ -308,6 +312,7 @@ class Game:
         if hasattr(self, 'dialogue_manager'):
             self.dialogue_manager.draw()
 
+        self.lore_popup.draw()
         self.disorienting_effects.draw()
         self.intro_sequence.draw()
         self.level_transition.draw()

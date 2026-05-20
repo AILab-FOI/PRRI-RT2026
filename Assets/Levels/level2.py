@@ -44,8 +44,6 @@ def get_level_data():
         'wave_delay': 3000
     }
 
-    
-
     level_data['heal_item'] = [
         {'position': (5.5, 5.5)},
         {'position': (5.5, 1.5)},

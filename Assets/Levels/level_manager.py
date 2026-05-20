@@ -168,6 +168,13 @@ class LevelManager:
                     pos=ammo_item['position']
                 )
 
+        if 'pickup_item' in level_data:
+            for pickup_item_data in level_data['pickup_item']:
+                self.game.object_handler.add_pickup_item(
+                    pos=pickup_item_data['position'],
+                    message=pickup_item_data.get('message')
+                )
+
         exit_positions = {
             1: (14.5, 3.5),
             2: (18.5, 17.5),
