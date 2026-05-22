@@ -131,6 +131,13 @@ class Player:
 
 
         if self.game.weapon.currentMagAmmount <= 0:
+            empty_sounds = {
+                'pistol': 'empty_click_pistol',
+                'smg':    'empty_click_smg',
+            }
+            sfx = empty_sounds.get(self.game.weapon.name)
+            if sfx:
+                self.game.sound.play_sfx(sfx)
             return
 
         if weapon_config and 'sound' in weapon_config:
@@ -372,6 +379,10 @@ class Player:
         if self.auto_fire and hasattr(self.game.weapon, 'auto_fire') and self.game.weapon.auto_fire:
             current_time = pg.time.get_ticks()
             if not self.game.weapon.is_reloading and current_time - self.last_auto_fire_time >= self.auto_fire_delay:
+                if self.game.weapon.currentMagAmmount <= 0:
+                    self.fire_weapon()
+                    self.auto_fire = False
+                    return
                 self.fire_weapon()
 
     def give_weapon(self, index, auto_equip=True):

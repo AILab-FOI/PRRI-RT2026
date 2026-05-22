@@ -186,6 +186,19 @@ class Game:
         if self._last_snapshot_level != self.level_manager.current_level:
             self._last_snapshot_level = self.level_manager.current_level
 
+            if self.level_manager.current_level == 5:
+                bat_slot = 3
+                if hasattr(self, 'player') and self.player is not None:
+                    self.player.weapon_inventory[bat_slot] = None
+                    self.player.weapon_unlocked[bat_slot] = False
+                    if self.player.current_weapon_index == bat_slot:
+                        self.player.current_weapon_index = -1
+                        self.weapon = None
+                        # switcha na prvi dostupni weapon
+                        for i, w in enumerate(self.player.weapon_inventory):
+                            if w is not None and self.player.weapon_unlocked[i]:
+                                self.player.equip_weapon_by_index(i)
+                                break
             
             LEVEL_ENTRY_AMMO_BONUS = {
                 'pistol': 15,
@@ -423,6 +436,8 @@ class Game:
             self.object_handler.add_powerup(pos=pos)
         elif chosen == 'bat':
             import pygame as pg
+            if self.level_manager.current_level == 5:
+                return
             BAT_LOCKOUT_MS = 5000
             bat_slot = 3
             player = self.player

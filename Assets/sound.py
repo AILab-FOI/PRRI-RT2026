@@ -22,12 +22,13 @@ class Sound:
         self.path = 'resources/sound'
 
         # Slider state: keep UI-friendly percentages here.
-        self.sfx_slider_percent = 20
+        self.sfx_slider_percent = 35
         self.music_slider_percent = 20
 
         # Master caps so 100% is still sane.
-        self.sfx_master_max = 0.22
+        self.sfx_master_max = 0.40
         self.music_master_max = 0.70
+        self.dialogue_boost=4.0
 
         # Curves so low slider values are more usable.
         self.sfx_curve_power = 1.5
@@ -51,6 +52,12 @@ class Sound:
             'bat_swing': 0.40,
             'bat_pickup': 0.35,
             'bat_break': 0.45,
+            'empty_click_pistol': 0.40,
+            'empty_click_smg':    0.40,
+
+
+
+
 
             # Player sounds
             'igrac_damage': 0.35,
@@ -129,6 +136,8 @@ class Sound:
             'reload_smg': 'reload_smg.mp3',
             'bat_swing': 'bat_swing.wav',
             'bat_break': 'bat_break.wav',
+            'empty_click_pistol': 'empty_click_pistol.wav',
+            'empty_click_smg':    'empty_click_smg.wav',
 
             # Player sounds
             'igrac_damage': 'Igrac_damage.wav',
@@ -206,6 +215,67 @@ class Sound:
             99: 'track7.ogg'
         }
 
+        self.sfx_category_boost = {
+            'weapon':   1.1,
+            'npc':      1.2,
+            'player':   1.3,
+            'ui':       1.0,
+            'ambient':  1.0,
+            'interaction': 1.0,
+            }
+
+        self.sfx_categories = {
+            'pistolj':       'weapon',
+            'reload_pistolj':'weapon',
+            'smg':           'weapon',
+            'reload_smg':    'weapon',
+            'bat_swing':     'weapon',
+            'bat_break':     'weapon',
+            'weapon_pickup': 'weapon',
+            'plasmagun':     'weapon',
+
+            'igrac_damage':  'player',
+            'player_dash':   'player',
+            'heal':          'player',
+            'footstep':      'player',
+
+            'npc_pain':      'npc',
+            'npc_death':     'npc',
+            'npc_attack':    'npc',
+            'napad_stakor':  'npc',
+            'stakor_smrt':   'npc',
+            'toster_attack': 'npc',
+            'toster_death':  'npc',
+            'toster_damage': 'npc',
+            'boss_attack':   'npc',
+            'boss_death':    'npc',
+            'boss_damage':   'npc',
+            'parazit_attack': 'npc',
+            'parazit_death':  'npc',
+            'parazit_damage': 'npc',
+            'jazavac_attack': 'npc',
+            'jazavac_death':  'npc',
+            'jazavac_damage': 'npc',
+            'madrac_attack': 'npc',
+            'madrac_death':  'npc',
+            'madrac_damage': 'npc',
+
+            'menu_hover':    'ui',
+            'menu_click':    'ui',
+
+            'terminal_beep': 'interaction',
+            'door_open':    'interaction',
+            'ammo_pickup':  'interaction',
+            'powerup_pickup': 'interaction',
+            'powerup_active': 'interaction',
+            'powerup_end':    'interaction',
+
+            'victory':      'ambient',
+            'defeat':       'ambient',
+
+            
+        }
+
         self.sounds = {}
         self.dialogue_sounds = {}
         self.current_music_level = None
@@ -263,11 +333,15 @@ class Sound:
         for sound_name, sound in self.sounds.items():
             if sound is not None:
                 base_factor = self.volume_factors.get(sound_name, 1.0)
-                sound.set_volume(base_factor * self.sfx_volume)
+                category = self.sfx_categories.get(sound_name, 'ambient')
+                boost = self.sfx_category_boost.get(category, 1.0)
+                sound.set_volume(base_factor * self.sfx_volume * boost)
 
         for _, sound in self.dialogue_sounds.items():
             if sound is not None:
-                sound.set_volume(self.volume_factors['dialogue_line'] * self.sfx_volume)
+                sound.set_volume(
+                    self.volume_factors['dialogue_line'] * self.sfx_volume * self.dialogue_boost
+                )
 
     def _get_current_music_volume(self):
         if self.is_ducking:
@@ -473,7 +547,9 @@ class Sound:
             relative_path = os.path.join('dialogues', dialogue_id, f'{line_index}.{ext}')
             sound = self._load_sound_file(relative_path)
             if sound is not None:
-                sound.set_volume(self.volume_factors['dialogue_line'] * self.sfx_volume)
+                sound.set_volume(
+                self.volume_factors['dialogue_line'] * self.sfx_volume * self.dialogue_boost
+                )
                 self.dialogue_sounds[sound_key] = sound
                 return sound
 

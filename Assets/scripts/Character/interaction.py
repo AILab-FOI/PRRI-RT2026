@@ -120,7 +120,7 @@ class Interaction:
                 if event.key == pg.K_ESCAPE:
                     self.input_active = False
                     self.input_code = ""
-                elif event.key == pg.K_RETURN:
+                elif event.key in (pg.K_RETURN, pg.K_KP_ENTER):
                     self.check_code()
                 elif event.key == pg.K_BACKSPACE:
                     self.input_code = self.input_code[:-1]
