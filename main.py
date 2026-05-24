@@ -75,6 +75,7 @@ class Game:
 
         self.level_manager = LevelManager(self)
         self.wave_manager = None
+        self.boss_defeated = False
         self._start_intro_after_loading = False
         self.loading_thread = None
         self.loading_exception = None
@@ -82,16 +83,16 @@ class Game:
 
         self.bat_consumed_time = 0
 
-        self._loading_in_progress=False
+        self._loading_in_progress = False
 
         self.player_level_start_ammo = {}
         self._last_snapshot_level = -1
 
         self.game_initialized = False
         self.show_menu(play_menu_music=True)
-        
 
         self._pending_item_message = None
+
     def update_display_mode(self):
         if self.is_fullscreen:
             self.screen = pg.display.set_mode(RES, pg.FULLSCREEN)
@@ -110,6 +111,8 @@ class Game:
         if not hasattr(self, 'map'):
             self.map = Map(self)
         self.map.load_level(self.level_manager.current_level)
+
+        self.boss_defeated = False
 
         if not hasattr(self, 'player') or self.player is None:
             self.player = Player(self)
@@ -156,7 +159,7 @@ class Game:
             self.game_ui.bind_wave_manager()
 
         self.level_manager.setup_dialogue_npcs()
-        self.level_manager.setup_interactive_objects()  
+        self.level_manager.setup_interactive_objects()
         self.pathfinding.update_graph()
 
         current_level_data = self.level_manager.get_current_level_data()
@@ -182,7 +185,6 @@ class Game:
         self.object_renderer.update_sky_image()
         self.sound.change_music_for_level(self.level_manager.current_level)
 
-    
         if self._last_snapshot_level != self.level_manager.current_level:
             self._last_snapshot_level = self.level_manager.current_level
 
@@ -194,15 +196,14 @@ class Game:
                     if self.player.current_weapon_index == bat_slot:
                         self.player.current_weapon_index = -1
                         self.weapon = None
-                        # switcha na prvi dostupni weapon
                         for i, w in enumerate(self.player.weapon_inventory):
                             if w is not None and self.player.weapon_unlocked[i]:
                                 self.player.equip_weapon_by_index(i)
                                 break
-            
+
             LEVEL_ENTRY_AMMO_BONUS = {
                 'pistol': 15,
-                'smg':    35,
+                'smg': 35,
             }
             for i, weapon in enumerate(self.player.weapon_inventory):
                 if weapon is None or not self.player.weapon_unlocked[i]:
@@ -352,24 +353,27 @@ class Game:
                     self.loading_screen.mark_loading_complete("Loading complete")
                     self.loading_screen.start_time = time.time() - max(0, self.loading_screen.duration - 0.15)
                 continue
-            
+
             if event.type == self.level_load_failed_event:
                 self.loading_screen.mark_loading_complete("Loading failed")
                 print(self.loading_exception)
                 continue
- 
+
             if self.loading_screen.active and self.loading_screen.handle_continue_key(event):
                 continue
- 
+
             buffered_events.append(event)
- 
+
         for event in buffered_events:
             pg.event.post(event)
- 
+
         return self.game_events.process_events()
 
     def next_level(self):
         return self.level_transition.transition_to_next_level()
+
+    def win_game(self):
+        self.victory_screen.active = True
 
     def reset_current_level(self):
         current_level = self.level_manager.current_level
@@ -435,7 +439,6 @@ class Game:
         elif chosen == 'powerups':
             self.object_handler.add_powerup(pos=pos)
         elif chosen == 'bat':
-            import pygame as pg
             if self.level_manager.current_level == 5:
                 return
             BAT_LOCKOUT_MS = 5000
@@ -470,8 +473,6 @@ class Game:
             self.draw()
             self.delta_time = self.clock.tick(FPS)
 
-    
-    
 
 if __name__ == '__main__':
     game = Game()

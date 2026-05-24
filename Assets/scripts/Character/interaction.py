@@ -52,10 +52,17 @@ class Interaction:
             self.is_showing_indicator = True
 
             if self.active_object.interaction_type == "level_door":
-                if hasattr(self.game, 'level_manager') and self.game.level_manager.current_level == 6:
+                current_level = getattr(self.game.level_manager, 'current_level', 0)
+
+                if current_level == 4 and self.game.player.pickup_item_count < 5:
+                    prompt_text = f"Need pickups: {self.game.player.pickup_item_count}/5"
+                elif current_level == 5 and not getattr(self.game, 'boss_defeated', False):
+                    prompt_text = "Defeat the boss to finish the game"
+                elif current_level == 5:
                     prompt_text = "Press 'E' to finish the game"
                 else:
                     prompt_text = "Press 'E' to go to the next level"
+
             elif self.active_object.interaction_type == "door":
                 prompt_text = "Press 'E' to open the door"
             elif self.active_object.interaction_type == "terminal":
@@ -147,6 +154,7 @@ class Interaction:
         if self.active_object:
             if self.active_object.interaction_type == "terminal":
                 self.show_terminal_code()
+
             elif self.active_object.interaction_type == "door":
                 if self.active_object.requires_door_id and self.active_object.requires_door_id not in self.unlocked_doors:
                     self.message = f"You need to open door {self.active_object.requires_door_id} first!"
@@ -160,20 +168,43 @@ class Interaction:
                         self.input_active = True
                 else:
                     self.open_door()
+
             elif self.active_object.interaction_type == "level_door":
                 if self.active_object.is_level_exit:
+                    current_level = getattr(self.game.level_manager, 'current_level', 0)
+
+                    if current_level == 4 and self.game.player.pickup_item_count < 5:
+                        self.message = f"You need all 5 pickups! ({self.game.player.pickup_item_count}/5)"
+                        self.message_time = pg.time.get_ticks()
+                        return
+
+                    if current_level == 5 and not getattr(self.game, 'boss_defeated', False):
+                        self.message = "You must defeat the boss first!"
+                        self.message_time = pg.time.get_ticks()
+                        return
+
                     if self.are_all_wave_enemies_cleared():
                         if self.active_object.is_enabled:
                             if self.active_object.requires_code and not self.active_object.is_unlocked:
                                 self.input_active = True
                             else:
-                                self.game.next_level()
+                                if current_level == 5:
+                                    if hasattr(self.game, 'win_game'):
+                                        self.game.win_game()
+                                    elif hasattr(self.game, 'finish_game'):
+                                        self.game.finish_game()
+                                    else:
+                                        self.message = "Game finished!"
+                                        self.message_time = pg.time.get_ticks()
+                                else:
+                                    self.game.next_level()
                         else:
                             self.message = "This door is locked."
                             self.message_time = pg.time.get_ticks()
                     else:
                         self.message = "You must defeat all enemies first!"
                         self.message_time = pg.time.get_ticks()
+
             elif self.active_object.interaction_type == "weapon":
                 self.pickup_weapon()
 
@@ -192,7 +223,22 @@ class Interaction:
                 self.open_door()
             elif self.active_object.interaction_type == "level_door":
                 self.input_active = False
-                self.game.next_level()
+                current_level = getattr(self.game.level_manager, 'current_level', 0)
+
+                if current_level == 5:
+                    if getattr(self.game, 'boss_defeated', False):
+                        if hasattr(self.game, 'win_game'):
+                            self.game.win_game()
+                        elif hasattr(self.game, 'finish_game'):
+                            self.game.finish_game()
+                        else:
+                            self.message = "Game finished!"
+                            self.message_time = pg.time.get_ticks()
+                    else:
+                        self.message = "You must defeat the boss first!"
+                        self.message_time = pg.time.get_ticks()
+                else:
+                    self.game.next_level()
         else:
             self.game.player.get_damage(10)
             self.message = "Incorrect code! Security system activated!"

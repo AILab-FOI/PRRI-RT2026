@@ -27,7 +27,7 @@ class StaticNPC(AnimatedSprite):
     def run_logic(self):
         if hasattr(self.game, 'dialogue_manager') and \
             self.game.dialogue_manager.dialogue_active:
-          return
+            return
         if self.alive:
             self.image = self.static_image
 
@@ -52,6 +52,7 @@ class NPC(AnimatedSprite):
             'accuracy': 0.15,
             'death_height_shift': 0.5,
             'behavior': 'basic',
+            'is_boss': False,
             'sounds': {
                 'attack': 'npc_attack',
                 'pain': 'npc_pain',
@@ -70,6 +71,7 @@ class NPC(AnimatedSprite):
         self.accuracy = self.config['accuracy']
         self.death_height_shift = self.config['death_height_shift']
         self.behavior = self.config['behavior']
+        self.is_boss = self.config.get('is_boss', False)
         self.alive = True
         self.pain = False
         self.ray_cast_value = False
@@ -183,9 +185,9 @@ class NPC(AnimatedSprite):
     def attack(self):
         if hasattr(self.game, 'dialogue_manager') and \
             self.game.dialogue_manager.dialogue_active:
-           return
+            return
         if hasattr(self.game, 'lore_popup') and self.game.lore_popup.active:
-           return
+            return
 
         if self.animation_trigger:
             sound_name = self.config['sounds']['attack']
@@ -225,10 +227,10 @@ class NPC(AnimatedSprite):
     def check_hit_in_npc(self):
         if self.ray_cast_value and self.game.player.shot:
             if HALF_WIDTH - self.sprite_half_width < self.screen_x < HALF_WIDTH + self.sprite_half_width:
-                if self.game.weapon: #provjera za in range enemie
+                if self.game.weapon:
                     cfg = get_weapon_config(self.game.weapon.name)
                     max_range = cfg.get('max_range') if cfg else None
-                    if max_range is not None and self.dist > max_range:    
+                    if max_range is not None and self.dist > max_range:
                         return
                 sound_name = self.config['sounds']['pain']
                 if hasattr(self.game.sound, sound_name):
@@ -243,12 +245,15 @@ class NPC(AnimatedSprite):
                 self.check_health()
 
     def check_health(self):
-        if self.health < 1 and self.alive:
+        if self.health <= 0 and self.alive:
             self.alive = False
             self.play_death_sound = True
             self.death_sound_delay = 5
             self.death_frame = 0
             self.SPRITE_HEIGHT_SHIFT = self.death_height_shift
+
+            if self.is_boss:
+                self.game.boss_defeated = True
 
             self.image = self.death_images[0]
             if hasattr(self, '_current_image_id'):

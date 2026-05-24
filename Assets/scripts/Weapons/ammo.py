@@ -27,7 +27,7 @@ class Ammo_item(SpriteObject):
                 ammo_type = AMMO_SMG_DROP_COUNT
             elif isinstance(weapon, Pistol):
                 ammo_type = AMMO_PISTOL_DROP_COUNT
-            print(ammo_type)
+                
             if ammo_type and self.game.player.try_addAmmo(ammo_type):
                 self.picked = True
         

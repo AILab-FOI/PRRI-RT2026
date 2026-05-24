@@ -130,13 +130,14 @@ class BossNPC(NPC):
     def __init__(self, game, path='resources/sprites/npc/boss/0.png', pos=(10.5, 5.5),
                  scale=1.5, shift=0, animation_time=220):
         config = {
-            'attack_dist': 3.5,
+            'attack_dist': 2,
             'health': 400,
-            'attack_damage': 20,
+            'attack_damage': 15,
             'speed': 0.03,
             'accuracy': 0.45,
             'death_height_shift': 0.3,
             'behavior': 'melee',
+            'is_boss': True,
             'sounds': {
                 'attack': 'boss_attack',
                 'pain': 'boss_damage',
