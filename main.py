@@ -373,14 +373,22 @@ class Game:
         return self.level_transition.transition_to_next_level()
 
     def win_game(self):
-        self.victory_screen.start()
+        self.victory_screen.active = True
+        pg.event.set_grab(False)
+        pg.mouse.set_visible(True)
 
     def reset_current_level(self):
         current_level = self.level_manager.current_level
         self.sound.current_music_level = -1
         self.begin_new_game_load(current_level)
-        pg.event.set_grab(True)
         pg.mouse.set_visible(False)
+
+    def reset_game_state(self):
+        self.player = None
+        self.player_level_start_ammo = {}
+        self._last_snapshot_level = -1
+        self.level_manager.current_level = 1
+        self.boss_defeated = False
 
     def respawn_player(self):
         if hasattr(self, 'player'):

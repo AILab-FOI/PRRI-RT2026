@@ -383,6 +383,9 @@ class Menu:
                     button.update(mouse_pos, self.game)
                     if button.is_clicked(event, self.game):
                         if button.text in ("Start Game", "Continue Game"):
+                            if button.text == "Start Game":
+                                if hasattr(self.game, 'reset_game_state'):
+                                    self.game.reset_game_state()
                             self.start_mode = 'normal'
                             self.state = 'game'
                             pg.mouse.set_visible(False)

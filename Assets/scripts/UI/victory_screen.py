@@ -28,7 +28,6 @@ class VictoryScreen:
 
     def start(self):
         self.active = True
-        pg.event.set_grab(False)
         pg.mouse.set_visible(True)
 
         self.game.sound.stop_all_sfx()
@@ -52,6 +51,7 @@ class VictoryScreen:
                 if button.is_clicked(event, self.game):
                     if i == 0:
                         self.active = False
+                        self.game.game_initialized = False
                         self.game.show_menu()
                         return True
                     elif i == 1:
