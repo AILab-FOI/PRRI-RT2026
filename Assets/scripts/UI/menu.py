@@ -257,7 +257,7 @@ class Menu:
         self.utility_panel = pg.Rect(0, self.action_panel.bottom + panel_gap, panel_width, utility_h)
         self.utility_panel.centerx = HALF_WIDTH
 
-        self.settings_panel = pg.Rect(HALF_WIDTH -260, HALF_HEIGHT -200, 520, 430)
+        self.settings_panel = pg.Rect(HALF_WIDTH -260, HALF_HEIGHT -200, 520, 500)
         self.settings_panel.center = (HALF_WIDTH, HALF_HEIGHT)
 
     def _setup_settings_ui(self):

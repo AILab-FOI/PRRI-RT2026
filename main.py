@@ -373,12 +373,13 @@ class Game:
         return self.level_transition.transition_to_next_level()
 
     def win_game(self):
-        self.victory_screen.active = True
+        self.victory_screen.start()
 
     def reset_current_level(self):
         current_level = self.level_manager.current_level
         self.sound.current_music_level = -1
         self.begin_new_game_load(current_level)
+        pg.event.set_grab(True)
         pg.mouse.set_visible(False)
 
     def respawn_player(self):

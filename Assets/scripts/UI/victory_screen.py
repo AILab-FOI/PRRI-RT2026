@@ -28,6 +28,7 @@ class VictoryScreen:
 
     def start(self):
         self.active = True
+        pg.event.set_grab(False)
         pg.mouse.set_visible(True)
 
         self.game.sound.stop_all_sfx()
